@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import auth from '@auth/astro';
 import node from '@astrojs/node';
 
 export default defineConfig({
@@ -7,5 +6,5 @@ export default defineConfig({
   adapter: node({
     mode: 'standalone'
   }),
-  integrations: [auth()]
+  integrations: []
 });
