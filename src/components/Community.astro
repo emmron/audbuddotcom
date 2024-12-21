@@ -136,36 +136,38 @@ function getTimeAgo(date: Date): string {
 
             <div class="discussions__list">
                 {discussions.map((discussion) => (
-                    <article class="discussion-card">
-                        <div class="discussion-card__main">
-                            <div class="discussion-card__meta">
-                                <span class="category-tag">{discussion.category}</span>
-                                <span class="time">{getTimeAgo(discussion.created_at)}</span>
+                    <a href={`/discussion/${discussion.id}`} class="discussion-link">
+                        <article class="discussion-card">
+                            <div class="discussion-card__main">
+                                <div class="discussion-card__meta">
+                                    <span class="category-tag">{discussion.category}</span>
+                                    <span class="time">{getTimeAgo(discussion.created_at)}</span>
+                                </div>
+                                
+                                <h3 class="discussion-card__title">
+                                    {discussion.title}
+                                </h3>
+                                
+                                <p class="discussion-card__preview">{discussion.content}</p>
+                                
+                                <div class="discussion-card__author">
+                                    <span class="avatar">👤</span>
+                                    <span class="name">{discussion.author}</span>
+                                </div>
                             </div>
-                            
-                            <h3 class="discussion-card__title">
-                                <a href={`/discussion/${discussion.id}`}>{discussion.title}</a>
-                            </h3>
-                            
-                            <p class="discussion-card__preview">{discussion.content}</p>
-                            
-                            <div class="discussion-card__author">
-                                <span class="avatar">👤</span>
-                                <span class="name">{discussion.author}</span>
-                            </div>
-                        </div>
 
-                        <div class="discussion-card__stats">
-                            <div class="stat">
-                                <span class="icon">❤️</span>
-                                <span class="count">{discussion.likes}</span>
+                            <div class="discussion-card__stats">
+                                <div class="stat">
+                                    <span class="icon">❤️</span>
+                                    <span class="count">{discussion.likes}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="icon">💬</span>
+                                    <span class="count">{discussion.comments.length}</span>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <span class="icon">💬</span>
-                                <span class="count">{discussion.comments.length}</span>
-                            </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 ))}
             </div>
         </section>
@@ -462,6 +464,16 @@ function getTimeAgo(date: Date): string {
         // New post button functionality
         newPostBtn?.addEventListener('click', () => {
             window.location.href = '/new-discussion';
+        });
+
+        // Click into a thread
+        discussionCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const discussionId = card.querySelector('.discussion-card__title a')?.getAttribute('href');
+                if (discussionId) {
+                    window.location.href = discussionId;
+                }
+            });
         });
     });
 </script>
