@@ -1,225 +1,352 @@
 ---
 import Header from './Header.astro';
+import { supabase } from '../lib/supabase';
 ---
 
 <Header />
 <main class="community">
     <section class="community__hero">
-        <h1 class="community__title">Cannabis Community</h1>
-        <p class="community__subtitle">Connect with other medicinal cannabis patients and share experiences</p>
+        <h1 class="community__title">Cannabis Community Forums</h1>
+        <p class="community__subtitle">Connect, share experiences, and learn from other medicinal cannabis patients</p>
         <div class="community__search">
-            <input 
-                type="search" 
-                id="search-input"
-                class="community__search-input" 
-                placeholder="Search discussions..."
-                aria-label="Search discussions"
-            />
-            <button 
-                id="search-button"
-                class="community__search-button"
-                aria-label="Submit search"
-            >
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-            </button>
+            <div class="search-wrapper">
+                <input 
+                    type="search" 
+                    id="search-input"
+                    class="community__search-input" 
+                    placeholder="Search discussions..."
+                    aria-label="Search discussions"
+                />
+                <button 
+                    id="search-button"
+                    class="community__search-button"
+                    aria-label="Submit search"
+                >
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="search-results" class="search-results" hidden></div>
         </div>
     </section>
 
-    <div class="community__content">
-        <section class="community__discussions">
+    <div class="community__layout">
+        <aside class="community__sidebar">
+            <nav class="categories" aria-label="Discussion categories">
+                <h2 class="categories__title">Categories</h2>
+                <ul class="categories__list" role="list">
+                    <li>
+                        <button class="category-btn active" data-category="all">
+                            <span class="category-icon">📋</span>
+                            All Discussions
+                            <span class="category-count" aria-label="post count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="category-btn" data-category="treatment">
+                            <span class="category-icon">💊</span>
+                            Treatment & Methods
+                            <span class="category-count" aria-label="post count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="category-btn" data-category="reviews">
+                            <span class="category-icon">⭐</span>
+                            Strain Reviews
+                            <span class="category-count" aria-label="post count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="category-btn" data-category="questions">
+                            <span class="category-icon">❓</span>
+                            Questions & Support
+                            <span class="category-count" aria-label="post count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="category-btn" data-category="research">
+                            <span class="category-icon">🔬</span>
+                            Research & Studies
+                            <span class="category-count" aria-label="post count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="category-btn" data-category="general">
+                            <span class="category-icon">💭</span>
+                            General Discussion
+                            <span class="category-count" aria-label="post count">0</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <section class="trending-tags">
+                <h2 class="trending-tags__title">Trending Tags</h2>
+                <div class="tag-cloud" id="tag-cloud">
+                    <!-- Tags will be dynamically inserted here -->
+                </div>
+            </section>
+        </aside>
+
+        <section class="community__main">
             <div class="community__header">
-                <h2 class="community__section-title">Popular Discussions</h2>
+                <div class="community__controls">
+                    <div class="community__view-options">
+                        <button class="view-btn active" data-view="grid" aria-label="Grid view">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zM3 14h7v7H3z"/></svg>
+                        </button>
+                        <button class="view-btn" data-view="list" aria-label="List view">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M3 13h18v-2H3zm0 5h18v-2H3zm0-10h18V6H3z"/></svg>
+                        </button>
+                    </div>
+                    <div class="community__sort">
+                        <select id="sort-select" class="sort-select" aria-label="Sort discussions">
+                            <option value="recent">Most Recent</option>
+                            <option value="popular">Most Popular</option>
+                            <option value="trending">Trending</option>
+                            <option value="commented">Most Discussed</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <button 
                     id="new-discussion-btn" 
                     class="btn btn--primary"
                     aria-label="Create new discussion"
                 >
+                    <svg class="btn-icon" viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
                     New Discussion
                 </button>
             </div>
             
-            <div id="discussion-feed" class="discussion-feed"></div>
-        </section>
-
-        <dialog id="discussion-modal" class="modal">
-            <div class="modal__content">
-                <header class="modal__header">
-                    <h2 class="modal__title">Start a New Discussion</h2>
-                    <button class="modal__close" aria-label="Close modal">×</button>
-                </header>
-
-                <form id="discussion-form" class="discussion-form">
-                    <div class="form__field">
-                        <label for="author" class="form__label">Display Name</label>
-                        <input 
-                            type="text" 
-                            id="author"
-                            class="form__input"
-                            placeholder="Anonymous"
-                            maxlength="30"
-                            autocomplete="nickname"
-                        >
+            <div id="discussion-feed" class="discussion-feed">
+                <div class="discussion-feed__loading" aria-live="polite">
+                    <div class="spinner" role="status">
+                        <span class="sr-only">Loading discussions...</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="form__field">
-                        <label for="title" class="form__label">Title</label>
+            <div class="pagination" role="navigation" aria-label="Pagination">
+                <button class="pagination__btn" data-action="prev" disabled>
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    Previous
+                </button>
+                <div class="pagination__info">
+                    Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+                </div>
+                <button class="pagination__btn" data-action="next" disabled>
+                    Next
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <dialog id="discussion-modal" class="modal" aria-labelledby="modal-title">
+        <div class="modal__content">
+            <header class="modal__header">
+                <h2 id="modal-title" class="modal__title">Start a New Discussion</h2>
+                <button class="modal__close" aria-label="Close modal">×</button>
+            </header>
+
+            <form id="discussion-form" class="discussion-form">
+                <div class="form__field">
+                    <label for="author" class="form__label">Display Name</label>
+                    <input 
+                        type="text" 
+                        id="author"
+                        name="author"
+                        class="form__input"
+                        placeholder="Anonymous"
+                        maxlength="30"
+                        autocomplete="nickname"
+                    >
+                    <div class="form__hint">This name will be visible to other users</div>
+                </div>
+
+                <div class="form__field">
+                    <label for="title" class="form__label">Title</label>
+                    <input 
+                        type="text"
+                        id="title"
+                        name="title" 
+                        class="form__input"
+                        required
+                        minlength="5"
+                        maxlength="100"
+                        autocomplete="off"
+                        aria-describedby="title-hint"
+                    >
+                    <div id="title-hint" class="form__hint">
+                        <span id="title-count">0</span>/100 characters
+                    </div>
+                </div>
+
+                <div class="form__field">
+                    <label for="category" class="form__label">Category</label>
+                    <select 
+                        id="category" 
+                        name="category" 
+                        class="form__select" 
+                        required
+                        aria-describedby="category-hint"
+                    >
+                        <option value="">Select a category</option>
+                        <option value="treatment">Treatment & Methods</option>
+                        <option value="reviews">Strain Reviews</option>
+                        <option value="questions">Questions & Support</option>
+                        <option value="research">Research & Studies</option>
+                        <option value="general">General Discussion</option>
+                    </select>
+                    <div id="category-hint" class="form__hint">Choose the most relevant category</div>
+                </div>
+
+                <div class="form__field">
+                    <label for="tags" class="form__label">Tags</label>
+                    <div class="tag-input-wrapper">
                         <input 
                             type="text"
-                            id="title" 
-                            class="form__input"
-                            required
-                            minlength="5"
-                            maxlength="100"
-                            autocomplete="off"
+                            id="tags"
+                            name="tags"
+                            class="form__input tag-input"
+                            placeholder="Add up to 5 tags..."
+                            aria-describedby="tags-hint"
                         >
+                        <div id="tags-container" class="tags-container"></div>
                     </div>
+                    <div id="tags-hint" class="form__hint">Separate tags with commas</div>
+                </div>
 
-                    <div class="form__field">
-                        <label for="category" class="form__label">Category</label>
-                        <select id="category" class="form__select" required>
-                            <option value="treatment">Treatment & Methods</option>
-                            <option value="reviews">Strain Reviews</option>
-                            <option value="questions">Questions & Support</option>
-                            <option value="research">Research & Studies</option>
-                            <option value="general">General Discussion</option>
-                        </select>
-                    </div>
-
-                    <div class="form__field">
-                        <label for="content" class="form__label">Content</label>
+                <div class="form__field">
+                    <label for="content" class="form__label">Content</label>
+                    <div class="rich-editor">
+                        <div class="rich-editor__toolbar" role="toolbar" aria-label="Formatting options">
+                            <button type="button" class="editor-btn" data-format="bold" aria-label="Bold">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
+                            </button>
+                            <button type="button" class="editor-btn" data-format="italic" aria-label="Italic">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
+                            </button>
+                            <button type="button" class="editor-btn" data-format="link" aria-label="Add link">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                            </button>
+                            <button type="button" class="editor-btn" data-format="quote" aria-label="Quote">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                            </button>
+                        </div>
                         <textarea 
                             id="content"
-                            class="form__textarea"
+                            name="content"
+                            class="form__textarea rich-editor__content"
                             required
                             minlength="20"
                             maxlength="2000"
                             rows="5"
+                            aria-describedby="content-hint"
                         ></textarea>
+                        <div id="content-hint" class="form__hint">
+                            <span id="content-count">0</span>/2000 characters
+                        </div>
                     </div>
+                </div>
 
-                    <footer class="form__actions">
-                        <button type="button" class="btn btn--text" data-action="cancel">Cancel</button>
-                        <button type="submit" class="btn btn--primary">Post Discussion</button>
-                    </footer>
-                </form>
-            </div>
-        </dialog>
-    </div>
+                <footer class="form__actions">
+                    <button type="button" class="btn btn--text" data-action="cancel">Cancel</button>
+                    <button type="submit" class="btn btn--primary">
+                        <span class="btn__text">Post Discussion</span>
+                        <span class="btn__loading" hidden>
+                            <span class="spinner spinner--small" aria-hidden="true"></span>
+                            Posting...
+                        </span>
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </dialog>
 </main>
 
 <style>
-    /* CSS Custom Properties */
-    :root {
-        /* Colors */
-        --color-primary-50: #ecfdf5;
-        --color-primary-100: #d1fae5;
-        --color-primary-200: #a7f3d0;
-        --color-primary-300: #6ee7b7;
-        --color-primary-400: #34d399;
-        --color-primary-500: #10b981;
-        --color-primary-600: #059669;
-        --color-primary-700: #047857;
-        --color-primary-800: #065f46;
-        --color-primary-900: #064e3b;
-        
-        --color-gray-50: #f9fafb;
-        --color-gray-100: #f3f4f6;
-        --color-gray-200: #e5e7eb;
-        --color-gray-300: #d1d5db;
-        --color-gray-400: #9ca3af;
-        --color-gray-500: #6b7280;
-        --color-gray-600: #4b5563;
-        --color-gray-700: #374151;
-        --color-gray-800: #1f2937;
-        --color-gray-900: #111827;
-
-        /* Spacing */
-        --space-1: 0.25rem;
-        --space-2: 0.5rem;
-        --space-3: 0.75rem;
-        --space-4: 1rem;
-        --space-6: 1.5rem;
-        --space-8: 2rem;
-        --space-12: 3rem;
-        --space-16: 4rem;
-
-        /* Typography */
-        --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        --line-height-normal: 1.5;
-        --line-height-tight: 1.25;
-
-        /* Borders */
-        --radius-sm: 0.25rem;
-        --radius-md: 0.375rem;
-        --radius-lg: 0.5rem;
-        --radius-xl: 0.75rem;
-
-        /* Shadows */
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-        /* Transitions */
-        --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
     /* Base Styles */
     .community {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
         padding: var(--space-4);
     }
 
+    /* Layout */
+    .community__layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: var(--space-8);
+        margin-top: var(--space-8);
+    }
+
+    /* Hero Section */
     .community__hero {
         text-align: center;
         margin-bottom: var(--space-12);
+        padding: var(--space-12) 0;
+        background: linear-gradient(to bottom, var(--color-primary-50), transparent);
+        border-radius: var(--radius-xl);
     }
 
     .community__title {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
         color: var(--color-gray-900);
         margin-bottom: var(--space-4);
+        line-height: 1.2;
     }
 
     .community__subtitle {
-        font-size: 1.125rem;
+        font-size: clamp(1rem, 2vw, 1.25rem);
         color: var(--color-gray-600);
         margin-bottom: var(--space-8);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    .community__search {
-        display: flex;
-        gap: var(--space-2);
+    /* Search */
+    .search-wrapper {
+        position: relative;
         max-width: 600px;
         margin: 0 auto;
     }
 
     .community__search-input {
-        flex: 1;
-        padding: var(--space-3) var(--space-4);
+        width: 100%;
+        padding: var(--space-4) var(--space-12) var(--space-4) var(--space-6);
         border: 2px solid var(--color-gray-200);
-        border-radius: var(--radius-lg);
-        font-size: 1rem;
+        border-radius: var(--radius-full);
+        font-size: 1.125rem;
         transition: var(--transition-base);
+        background: white;
     }
 
     .community__search-input:focus {
         outline: none;
         border-color: var(--color-primary-500);
-        box-shadow: 0 0 0 3px var(--color-primary-100);
+        box-shadow: 0 0 0 4px var(--color-primary-100);
     }
 
     .community__search-button {
+        position: absolute;
+        right: var(--space-2);
+        top: 50%;
+        transform: translateY(-50%);
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 2.75rem;
+        width: 2.5rem;
+        height: 2.5rem;
         background: var(--color-primary-500);
         border: none;
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-full);
         color: white;
         cursor: pointer;
         transition: var(--transition-base);
@@ -227,16 +354,93 @@ import Header from './Header.astro';
 
     .community__search-button:hover {
         background: var(--color-primary-600);
+        transform: translateY(-50%) scale(1.05);
     }
 
-    .community__search-button .icon {
-        width: 1.5rem;
-        height: 1.5rem;
-        fill: currentColor;
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        margin-top: var(--space-2);
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 10;
     }
 
-    .community__content {
-        margin-top: var(--space-8);
+    /* Sidebar */
+    .community__sidebar {
+        position: sticky;
+        top: var(--space-4);
+        height: fit-content;
+    }
+
+    .categories {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--space-6);
+    }
+
+    .categories__title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-gray-900);
+        margin-bottom: var(--space-4);
+        padding-bottom: var(--space-3);
+        border-bottom: 2px solid var(--color-gray-100);
+    }
+
+    .category-btn {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        border: none;
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--color-gray-700);
+        font-size: 1rem;
+        text-align: left;
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .category-btn:hover {
+        background: var(--color-gray-50);
+        color: var(--color-gray-900);
+    }
+
+    .category-btn.active {
+        background: var(--color-primary-50);
+        color: var(--color-primary-700);
+        font-weight: 500;
+    }
+
+    .category-icon {
+        margin-right: var(--space-3);
+        font-size: 1.25rem;
+    }
+
+    .category-count {
+        margin-left: auto;
+        background: var(--color-gray-100);
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        color: var(--color-gray-600);
+    }
+
+    /* Main Content */
+    .community__main {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        box-shadow: var(--shadow-sm);
     }
 
     .community__header {
@@ -244,18 +448,67 @@ import Header from './Header.astro';
         justify-content: space-between;
         align-items: center;
         margin-bottom: var(--space-6);
+        gap: var(--space-4);
     }
 
-    .community__section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
+    .community__controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+    }
+
+    .view-btn {
+        padding: var(--space-2);
+        border: none;
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--color-gray-500);
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .view-btn:hover {
+        background: var(--color-gray-100);
         color: var(--color-gray-900);
+    }
+
+    .view-btn.active {
+        background: var(--color-primary-50);
+        color: var(--color-primary-600);
+    }
+
+    .sort-select {
+        padding: var(--space-2) var(--space-4);
+        border: 2px solid var(--color-gray-200);
+        border-radius: var(--radius-md);
+        background: white;
+        color: var(--color-gray-700);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .sort-select:hover {
+        border-color: var(--color-gray-300);
+    }
+
+    .sort-select:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 3px var(--color-primary-100);
     }
 
     /* Discussion Feed */
     .discussion-feed {
         display: grid;
         gap: var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+
+    .discussion-feed__loading {
+        display: flex;
+        justify-content: center;
+        padding: var(--space-8);
     }
 
     .discussion-card {
@@ -269,46 +522,127 @@ import Header from './Header.astro';
     .discussion-card:hover {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
+        border-color: var(--color-primary-200);
     }
 
-    /* Buttons */
-    .btn {
-        display: inline-flex;
+    .discussion-card__header {
+        margin-bottom: var(--space-4);
+    }
+
+    .discussion-card__meta {
+        display: flex;
         align-items: center;
-        justify-content: center;
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-md);
+        gap: var(--space-3);
+        margin-bottom: var(--space-2);
+        font-size: 0.875rem;
+    }
+
+    .discussion-card__category {
+        color: var(--color-primary-600);
         font-weight: 500;
-        transition: var(--transition-base);
-        cursor: pointer;
     }
 
-    .btn--primary {
-        background: var(--color-primary-500);
-        color: white;
-        border: none;
+    .discussion-card__time {
+        color: var(--color-gray-500);
     }
 
-    .btn--primary:hover {
-        background: var(--color-primary-600);
+    .discussion-card__title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-gray-900);
+        margin-bottom: var(--space-2);
     }
 
-    .btn--text {
-        background: transparent;
+    .discussion-card__content {
+        color: var(--color-gray-600);
+        margin-bottom: var(--space-4);
+        line-height: var(--line-height-normal);
+    }
+
+    .discussion-card__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--color-gray-100);
+    }
+
+    .discussion-card__author {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
         color: var(--color-gray-700);
+        font-size: 0.875rem;
+    }
+
+    .discussion-card__actions {
+        display: flex;
+        gap: var(--space-3);
+    }
+
+    .discussion-card__action {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        padding: var(--space-1) var(--space-2);
         border: none;
+        border-radius: var(--radius-md);
+        background: var(--color-gray-50);
+        color: var(--color-gray-600);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: var(--transition-base);
     }
 
-    .btn--text:hover {
+    .discussion-card__action:hover {
         background: var(--color-gray-100);
+        color: var(--color-gray-900);
     }
 
-    /* Modal */
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--space-4);
+        margin-top: var(--space-6);
+    }
+
+    .pagination__btn {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        border: 2px solid var(--color-gray-200);
+        border-radius: var(--radius-md);
+        background: white;
+        color: var(--color-gray-700);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .pagination__btn:not(:disabled):hover {
+        background: var(--color-gray-50);
+        border-color: var(--color-gray-300);
+    }
+
+    .pagination__btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination__info {
+        color: var(--color-gray-600);
+        font-size: 0.875rem;
+    }
+
+    /* Modal & Form */
     .modal {
         border: none;
         border-radius: var(--radius-lg);
         padding: 0;
-        max-width: 600px;
+        max-width: 700px;
         width: 90%;
         background: white;
         box-shadow: var(--shadow-lg);
@@ -328,34 +662,18 @@ import Header from './Header.astro';
         justify-content: space-between;
         align-items: center;
         margin-bottom: var(--space-6);
+        padding-bottom: var(--space-4);
+        border-bottom: 2px solid var(--color-gray-100);
     }
 
     .modal__title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: var(--color-gray-900);
     }
 
-    .modal__close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: var(--color-gray-500);
-        cursor: pointer;
-        padding: var(--space-2);
-        margin: calc(var(--space-2) * -1);
-        border-radius: var(--radius-md);
-        transition: var(--transition-base);
-    }
-
-    .modal__close:hover {
-        background: var(--color-gray-100);
-        color: var(--color-gray-900);
-    }
-
-    /* Form */
     .form__field {
-        margin-bottom: var(--space-4);
+        margin-bottom: var(--space-6);
     }
 
     .form__label {
@@ -369,11 +687,12 @@ import Header from './Header.astro';
     .form__select,
     .form__textarea {
         width: 100%;
-        padding: var(--space-3);
+        padding: var(--space-3) var(--space-4);
         border: 2px solid var(--color-gray-200);
         border-radius: var(--radius-md);
         font-size: 1rem;
         transition: var(--transition-base);
+        background: white;
     }
 
     .form__input:focus,
@@ -384,33 +703,115 @@ import Header from './Header.astro';
         box-shadow: 0 0 0 3px var(--color-primary-100);
     }
 
-    .form__textarea {
-        resize: vertical;
-        min-height: 100px;
+    .form__hint {
+        margin-top: var(--space-2);
+        font-size: 0.875rem;
+        color: var(--color-gray-500);
+    }
+
+    .rich-editor {
+        border: 2px solid var(--color-gray-200);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    .rich-editor__toolbar {
+        display: flex;
+        gap: var(--space-1);
+        padding: var(--space-2);
+        background: var(--color-gray-50);
+        border-bottom: 1px solid var(--color-gray-200);
+    }
+
+    .editor-btn {
+        padding: var(--space-1);
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--color-gray-600);
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .editor-btn:hover {
+        background: var(--color-gray-200);
+        color: var(--color-gray-900);
+    }
+
+    .rich-editor__content {
+        border: none;
+        border-radius: 0;
     }
 
     .form__actions {
         display: flex;
         justify-content: flex-end;
         gap: var(--space-3);
-        margin-top: var(--space-6);
+        margin-top: var(--space-8);
+        padding-top: var(--space-6);
+        border-top: 2px solid var(--color-gray-100);
+    }
+
+    /* Utilities */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    .spinner {
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid var(--color-gray-200);
+        border-top-color: var(--color-primary-500);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .spinner--small {
+        width: 1rem;
+        height: 1rem;
+        border-width: 2px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .community__layout {
+            grid-template-columns: 1fr;
+        }
+
+        .community__sidebar {
+            position: static;
+            margin-bottom: var(--space-6);
+        }
+
+        .categories {
+            margin-bottom: 0;
+        }
     }
 
     @media (max-width: 768px) {
-        .community__title {
-            font-size: 2rem;
-        }
-
         .community__header {
             flex-direction: column;
-            gap: var(--space-4);
-            align-items: flex-start;
+            align-items: stretch;
+        }
+
+        .community__controls {
+            flex-wrap: wrap;
         }
 
         .form__actions {
-            flex-direction: column-reverse;
-        }
-
         .btn {
             width: 100%;
         }
