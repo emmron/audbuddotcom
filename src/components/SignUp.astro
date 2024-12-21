@@ -72,6 +72,8 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
+		width: 100%;
+		margin-bottom: 10px;
 	}
 
 	button:hover {
@@ -108,6 +110,25 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 		opacity: 0.7;
 		pointer-events: none;
 	}
+
+	.auth-footer {
+		margin-top: 20px;
+	}
+
+	.auth-footer a {
+		color: #4caf50;
+		text-decoration: none;
+	}
+
+	.auth-footer a:hover {
+		text-decoration: underline;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			transition: none !important;
+		}
+	}
 </style>
 
 <script>
@@ -138,27 +159,66 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 		if (!element) return;
 		element.textContent = message;
 		element.classList.remove('hidden');
+		element.style.opacity = '1';
 		setTimeout(() => {
-			element.classList.add('hidden');
+			element.style.opacity = '0';
+			setTimeout(() => {
+				element.classList.add('hidden');
+			}, 300); // Wait for fade out animation
 		}, 5000);
 	}
 
 	function setLoading(isLoading: boolean) {
 		const buttons = document.querySelectorAll('button');
+		const inputs = document.querySelectorAll('input');
+		
 		buttons.forEach(button => {
 			button.disabled = isLoading;
 			button.classList.toggle('loading', isLoading);
 		});
+
+		inputs.forEach(input => {
+			input.disabled = isLoading;
+		});
+	}
+
+	function validateEmail(email: string): boolean {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+
+	function validatePassword(password: string): boolean {
+		return password.length >= 8;
 	}
 
 	// Email/Password Sign Up
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
-		setLoading(true);
+		
+		const emailInput = document.getElementById('email') as HTMLInputElement;
+		const passwordInput = document.getElementById('password') as HTMLInputElement;
+		const usernameInput = document.getElementById('username') as HTMLInputElement;
 
-		const email = (document.getElementById('email') as HTMLInputElement)?.value;
-		const password = (document.getElementById('password') as HTMLInputElement)?.value;
-		const username = (document.getElementById('username') as HTMLInputElement)?.value;
+		const email = emailInput?.value.trim();
+		const password = passwordInput?.value;
+		const username = usernameInput?.value.trim();
+
+		if (!email || !password || !username) {
+			showMessage(errorMessage, 'Please fill in all fields');
+			return;
+		}
+
+		if (!validateEmail(email)) {
+			showMessage(errorMessage, 'Please enter a valid email address');
+			return;
+		}
+
+		if (!validatePassword(password)) {
+			showMessage(errorMessage, 'Password must be at least 8 characters long');
+			return;
+		}
+
+		setLoading(true);
 
 		try {
 			const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -166,34 +226,63 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 				displayName: username
 			});
 			showMessage(successMessage, 'Account created successfully!');
+			
+			// Clear form
+			emailInput.value = '';
+			passwordInput.value = '';
+			usernameInput.value = '';
 		} catch (error: any) {
-			showMessage(errorMessage, error.message || 'Failed to create account');
+			console.error('Email/Password sign up error:', error);
+			let message = 'Failed to create account';
+			
+			if (error.code === 'auth/email-already-in-use') {
+				message = 'This email is already registered';
+			} else if (error.code === 'auth/invalid-email') {
+				message = 'Invalid email address';
+			} else if (error.code === 'auth/weak-password') {
+				message = 'Password is too weak';
+			}
+			
+			showMessage(errorMessage, message);
 		} finally {
 			setLoading(false);
 		}
 	});
+
 	// Google Sign Up
 	document.getElementById('google-sign-up')?.addEventListener('click', async () => {
 		setLoading(true);
 		try {
 			const provider = new GoogleAuthProvider();
-			// Add scopes for additional Google account info
 			provider.addScope('email');
 			provider.addScope('profile');
 			
 			const result = await signInWithPopup(auth, provider);
-			// Get Google access token
-			const credential = GoogleAuthProvider.credentialFromResult(result);
+			if (!result.user) {
+				throw new Error('No user data returned');
+			}
 			
 			showMessage(successMessage, 'Successfully signed up with Google!');
+			
+			// Optional: Redirect user after successful signup
+			setTimeout(() => {
+				window.location.href = '/dashboard';
+			}, 1500);
+			
 		} catch (error: any) {
 			console.error('Google sign up error:', error);
 			let message = 'Failed to sign up with Google';
+			
 			if (error.code === 'auth/popup-closed-by-user') {
 				message = 'Sign up cancelled';
 			} else if (error.code === 'auth/popup-blocked') {
 				message = 'Please enable popups to sign up with Google';
+			} else if (error.code === 'auth/account-exists-with-different-credential') {
+				message = 'An account already exists with this email';
+			} else if (error.code === 'auth/network-request-failed') {
+				message = 'Network error. Please check your connection';
 			}
+			
 			showMessage(errorMessage, message);
 		} finally {
 			setLoading(false);
@@ -205,23 +294,37 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 		setLoading(true);
 		try {
 			const provider = new OAuthProvider('apple.com');
-			// Add scopes for Apple sign in
 			provider.addScope('email');
 			provider.addScope('name');
 			
 			const result = await signInWithPopup(auth, provider);
-			// Get Apple credentials
-			const credential = OAuthProvider.credentialFromResult(result);
+			if (!result.user) {
+				throw new Error('No user data returned');
+			}
 			
 			showMessage(successMessage, 'Successfully signed up with Apple!');
+			
+			// Optional: Redirect user after successful signup
+			setTimeout(() => {
+				window.location.href = '/dashboard';
+			}, 1500);
+			
 		} catch (error: any) {
 			console.error('Apple sign up error:', error);
 			let message = 'Failed to sign up with Apple';
+			
 			if (error.code === 'auth/popup-closed-by-user') {
 				message = 'Sign up cancelled';
 			} else if (error.code === 'auth/popup-blocked') {
 				message = 'Please enable popups to sign up with Apple';
+			} else if (error.code === 'auth/account-exists-with-different-credential') {
+				message = 'An account already exists with this email';
+			} else if (error.code === 'auth/network-request-failed') {
+				message = 'Network error. Please check your connection';
+			} else if (error.code === 'auth/invalid-oauth-provider') {
+				message = 'Apple sign in is not configured correctly';
 			}
+			
 			showMessage(errorMessage, message);
 		} finally {
 			setLoading(false);

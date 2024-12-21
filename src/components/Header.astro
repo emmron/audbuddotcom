@@ -26,7 +26,7 @@ const currentPath = Astro.url.pathname;
 				<a href="/signin" class="auth-button">Sign In</a>
 				<a href="/signup" class="auth-button highlight">Sign Up</a>
 			</div>
-			<button class="mobile-menu-button" aria-label="Toggle menu">
+			<button class="mobile-menu-button" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
 				<span class="bar"></span>
 				<span class="bar"></span>
 				<span class="bar"></span>
@@ -36,14 +36,19 @@ const currentPath = Astro.url.pathname;
 </header>
 
 <style>
+	/* Header Container */
 	header {
 		background: rgba(255, 255, 255, 0.95);
-		padding: 15px 30px;
-			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-			position: sticky;
-			top: 0;
-			z-index: 1000;
-			backdrop-filter: blur(10px);
+		padding: 1rem;
+		box-shadow: 
+			0 8px 16px -4px rgba(0, 0, 0, 0.1),
+			0 4px 8px -2px rgba(0, 0, 0, 0.06);
+		position: sticky;
+		top: 0;
+		z-index: 1000;
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-bottom: 1px solid rgba(229, 231, 235, 0.8);
 	}
 
 	.header-content {
@@ -51,97 +56,130 @@ const currentPath = Astro.url.pathname;
 		margin: 0 auto;
 		display: flex;
 		justify-content: space-between;
-			align-items: center;
+		align-items: center;
+		gap: 1rem;
+		height: 3.5rem;
 	}
 
+	/* Logo Styles */
 	.logo-link {
 		text-decoration: none;
-		transition: transform 0.2s ease;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		padding: 0.5rem;
+		border-radius: 0.75rem;
 	}
 
 	.logo-link:hover {
-		transform: translateY(-2px);
+		transform: translateY(-2px) scale(1.02);
+		background: rgba(76, 175, 80, 0.08);
 	}
 
 	.site-title {
 		margin: 0;
-		font-size: 1.8em;
-		color: #2c3e50;
-		font-weight: 700;
-		background: linear-gradient(90deg, #2c3e50, #4caf50);
+		font-size: clamp(1.2rem, 4vw, 1.8rem);
+		font-weight: 800;
+		background: linear-gradient(135deg, #2196F3, #4CAF50);
 		-webkit-background-clip: text;
+		background-clip: text;
 		-webkit-text-fill-color: transparent;
+		letter-spacing: -0.03em;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
+	/* Navigation */
 	nav {
 		display: flex;
 		align-items: center;
-		gap: 30px;
+		gap: 1rem;
 	}
 
 	.nav-links {
 		display: flex;
 		align-items: center;
-		gap: 30px;
+		gap: 1rem;
 	}
 
 	nav a {
-		color: #34495e;
+		color: #1f2937;
 		text-decoration: none;
-		font-size: 1.1em;
+		font-size: 1rem;
 		font-weight: 500;
-		transition: all 0.2s ease;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		padding: 8px 12px;
-		border-radius: 8px;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		border-radius: 1rem;
+		position: relative;
+		letter-spacing: -0.01em;
+		white-space: nowrap;
+		backdrop-filter: blur(4px);
 	}
 
 	nav a:not(.auth-button):hover {
-		color: #4caf50;
-		background: rgba(76, 175, 80, 0.1);
+		color: #2196F3;
+		background: rgba(33, 150, 243, 0.08);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
 	}
 
 	.icon {
-		font-size: 1.2em;
+		font-size: 1.25em;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	nav a:hover .icon {
+		transform: scale(1.2) rotate(-5deg);
 	}
 
 	.active {
-		color: #4caf50 !important;
-		background: rgba(76, 175, 80, 0.1);
+		color: #2196F3 !important;
+		background: rgba(33, 150, 243, 0.08);
+		font-weight: 600;
+		box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
 	}
 
+	/* Auth Buttons */
 	.auth-buttons {
 		display: flex;
-		gap: 15px;
-		margin-left: 20px;
-		padding-left: 20px;
-		border-left: 2px solid #eee;
+		gap: 0.75rem;
+		margin-left: 1.5rem;
+		padding-left: 1.5rem;
+		border-left: 2px solid rgba(229, 231, 235, 0.8);
 	}
 
 	.auth-button {
-		padding: 8px 16px;
-		border-radius: 8px;
-		transition: all 0.3s ease;
+		padding: 0.75rem 1.5rem;
+		border-radius: 1rem;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		font-weight: 600;
+		letter-spacing: 0.02em;
 	}
 
-	.auth-button:hover {
+	.auth-button:not(.highlight):hover {
+		background: rgba(33, 150, 243, 0.08);
+		color: #2196F3;
 		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
 	}
 
 	.auth-button.highlight {
-		background: linear-gradient(135deg, #4caf50, #45a049);
+		background: linear-gradient(135deg, #2196F3, #4CAF50);
 		color: white;
-		box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+		box-shadow: 
+			0 4px 12px rgba(33, 150, 243, 0.2),
+			0 8px 16px -4px rgba(76, 175, 80, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.auth-button.highlight:hover {
-		background: linear-gradient(135deg, #45a049, #388e3c);
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+		transform: translateY(-2px) scale(1.05);
+		box-shadow: 
+			0 8px 20px rgba(33, 150, 243, 0.25),
+			0 12px 24px -8px rgba(76, 175, 80, 0.25);
 	}
 
+	/* Mobile Menu Button */
 	.mobile-menu-button {
 		display: none;
 		flex-direction: column;
@@ -149,68 +187,196 @@ const currentPath = Astro.url.pathname;
 		background: none;
 		border: none;
 		cursor: pointer;
-		padding: 8px;
+		padding: 0.75rem;
+		margin-left: auto;
+		border-radius: 0.75rem;
+		transition: all 0.3s ease;
 	}
 
 	.bar {
 		width: 24px;
 		height: 2px;
-		background: #34495e;
-		transition: 0.3s;
+		background: #1f2937;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		border-radius: 4px;
+	}
+
+	/* Responsive Design */
+	@media (max-width: 1024px) {
+		nav a {
+			padding: 0.625rem 0.875rem;
+			font-size: 0.95rem;
+		}
+		
+		.auth-buttons {
+			margin-left: 1rem;
+			padding-left: 1rem;
+		}
 	}
 
 	@media (max-width: 768px) {
-		header {
-			padding: 10px 15px;
-		}
-
-		.site-title {
-			font-size: 1.5em;
-		}
-
-		.nav-links {
+		.nav-links,
+		.auth-buttons {
 			display: none;
 			position: absolute;
 			top: 100%;
 			left: 0;
 			right: 0;
-			background: white;
+			background: rgba(255, 255, 255, 0.98);
 			flex-direction: column;
-			padding: 20px;
-			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+			padding: 1rem;
+			gap: 0.5rem;
+			border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
+			animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 
-		.nav-links.show {
+		@keyframes slideDown {
+			from {
+				opacity: 0;
+				transform: translateY(-1rem);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.nav-links.show,
+		.auth-buttons.show {
 			display: flex;
 		}
 
 		.auth-buttons {
-			margin-left: 0;
-			padding-left: 0;
 			border-left: none;
+			border-top: 1px solid rgba(229, 231, 235, 0.8);
+			padding-top: 1rem;
+			margin: 0;
 		}
 
 		.mobile-menu-button {
 			display: flex;
 		}
+
+		nav a {
+			width: 100%;
+			justify-content: center;
+			padding: 1rem;
+		}
+
+		.auth-button {
+			width: 100%;
+			text-align: center;
+		}
+	}
+
+	@media (max-width: 480px) {
+		header {
+			padding: 0.75rem;
+		}
+
+		.header-content {
+			height: 3rem;
+		}
+	}
+
+	/* Reduced Motion */
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			animation: none !important;
+			transition: none !important;
+		}
 	}
 </style>
-
 <script>
-	const mobileMenuButton = document.querySelector('.mobile-menu-button');
-	const navLinks = document.querySelector('.nav-links');
-	const bars = mobileMenuButton?.querySelectorAll('.bar');
+	// Get DOM elements with type safety
+	const mobileMenuButton = document.querySelector('.mobile-menu-button') as HTMLButtonElement;
+	const navLinks = document.querySelector('.nav-links') as HTMLElement;
+	const authButtons = document.querySelector('.auth-buttons') as HTMLElement; 
+	const bars = document.querySelectorAll('.bar') as NodeListOf<HTMLElement>;
 
-	mobileMenuButton?.addEventListener('click', () => {
-		navLinks?.classList.toggle('show');
-		if (bars) {
-			(bars[0] as HTMLElement).style.transform = navLinks?.classList.contains('show') 
-				? 'rotate(45deg) translate(5px, 5px)' 
-				: 'none';
-			(bars[1] as HTMLElement).style.opacity = navLinks?.classList.contains('show') ? '0' : '1';
-			(bars[2] as HTMLElement).style.transform = navLinks?.classList.contains('show') 
-				? 'rotate(-45deg) translate(7px, -7px)' 
-				: 'none';
+	// Constants for animation
+	const ANIMATION_TRANSFORMS = {
+		open: [
+			'rotate(45deg) translate(5px, 5px)',
+			'none', 
+			'rotate(-45deg) translate(5px, -5px)'
+		],
+		closed: ['none', 'none', 'none']
+	} as const;
+
+	// Helper function to animate hamburger icon with proper typing
+	function animateHamburger(isOpen: boolean): void {
+		const transforms = isOpen ? ANIMATION_TRANSFORMS.open : ANIMATION_TRANSFORMS.closed;
+		bars.forEach((bar, index) => {
+			bar.style.transform = transforms[index];
+			if (index === 1) {
+				bar.style.opacity = isOpen ? '0' : '1';
+				// Add transition for smoother opacity change
+				bar.style.transition = 'opacity 0.2s ease-in-out';
+			}
+		});
+	}
+
+	// Main function to handle menu state changes
+	function handleMenuState(isOpen: boolean): void {
+		if (!mobileMenuButton || !navLinks || !authButtons) return;
+
+		// Update ARIA state
+		mobileMenuButton.setAttribute('aria-expanded', isOpen.toString());
+		
+		// Toggle classes with force parameter for reliability
+		navLinks.classList.toggle('show', isOpen);
+		authButtons.classList.toggle('show', isOpen);
+
+		// Animate hamburger
+		animateHamburger(isOpen);
+
+		// Add overlay effect when menu is open
+		document.body.style.overflow = isOpen ? 'hidden' : '';
+		
+		// Announce menu state to screen readers
+		const announcement = isOpen ? 'Menu opened' : 'Menu closed';
+		const ariaLive = document.createElement('div');
+		ariaLive.setAttribute('aria-live', 'polite');
+		ariaLive.setAttribute('class', 'sr-only');
+		ariaLive.textContent = announcement;
+		document.body.appendChild(ariaLive);
+		setTimeout(() => ariaLive.remove(), 1000);
+	}
+
+	// Event handler for menu button
+	mobileMenuButton?.addEventListener('click', (e: MouseEvent) => {
+		e.stopPropagation(); // Prevent event bubbling
+		const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+		handleMenuState(!isExpanded);
+	});
+
+	// Event handler for clicks outside menu
+	document.addEventListener('click', (e: MouseEvent) => {
+		const target = e.target as Node;
+		const isMenuOpen = navLinks?.classList.contains('show');
+		const isOutsideClick = mobileMenuButton && 
+			!mobileMenuButton.contains(target) && 
+			!navLinks?.contains(target);
+
+		if (isMenuOpen && isOutsideClick) {
+			handleMenuState(false);
 		}
 	});
-</script> 
+
+	// Handle escape key to close menu
+	document.addEventListener('keydown', (e: KeyboardEvent) => {
+		if (e.key === 'Escape' && navLinks?.classList.contains('show')) {
+			handleMenuState(false);
+		}
+	});
+
+	// Clean up on page unload
+	window.addEventListener('unload', () => {
+		document.body.style.overflow = '';
+	});
+</script>
+</script>

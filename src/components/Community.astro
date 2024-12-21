@@ -57,263 +57,252 @@ import Header from './Header.astro';
 </main>
 
 <style>
+    /* Base styles with increased accessibility */
+    :root {
+        --primary-color: #4caf50;
+        --primary-dark: #388e3c;
+        --text-primary: #1a1a1a;
+        --text-secondary: #4a4a4a;
+        --background-light: #ffffff;
+        --focus-outline: 3px solid #4caf50;
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        :root {
+            --primary-color: #006400;
+            --primary-dark: #004d00;
+            --text-primary: #000000;
+            --text-secondary: #1a1a1a;
+        }
+    }
+
     .community-container {
         padding: 2rem;
         max-width: 1200px;
         margin: 0 auto;
+        min-height: calc(100vh - 4rem);
+    }
+
+    /* Enhanced focus states for keyboard navigation */
+    *:focus {
+        outline: var(--focus-outline);
+        outline-offset: 2px;
+    }
+
+    /* Reduced motion preference support */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation: none !important;
+            transition: none !important;
+        }
     }
 
     .hero {
         text-align: center;
-        padding: 3rem 1rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
-        border-radius: 15px;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-bar {
-        margin-top: 2rem;
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-    }
-
-    .search-bar input {
-        padding: 0.8rem 1.5rem;
-        width: 100%;
-        max-width: 500px;
-        border: 2px solid #e0e0e0;
-        border-radius: 25px;
-        font-size: 1rem;
-    }
-
-    .search-bar button {
-        padding: 0.8rem 2rem;
-        background: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-
-    .search-bar button:hover {
-        background: #388e3c;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.92));
+        border-radius: 20px;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     .hero h1 {
-        font-size: 3em;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        font-weight: 700;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 800;
+        line-height: 1.2;
     }
 
     .hero p {
-        font-size: 1.3em;
-        color: #34495e;
+        font-size: clamp(1.1rem, 2vw, 1.4rem);
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
     }
 
-    .content-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 2rem;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-
-    .new-discussion {
-        padding: 0.8rem 1.5rem;
-        background: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .new-discussion:hover {
-        background: #388e3c;
-        transform: translateY(-2px);
-    }
-
-    .discussions, .sidebar section {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-    }
-
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .tag {
-        background: #e8f5e9;
-        color: #4caf50;
-        padding: 0.3rem 0.8rem;
-        border-radius: 15px;
-        font-size: 0.9em;
-    }
-
-    .date {
-        color: #666;
-        font-size: 0.9em;
-    }
-
-    .topic-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-    }
-
-    .topic {
-        background: #f5f5f5;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        color: #2c3e50;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .topic:hover {
-        background: #4caf50;
-        color: white;
-    }
-
-    .guidelines ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .guidelines li {
-        padding: 1rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        color: #34495e;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .guidelines .icon {
-        font-size: 1.2em;
-    }
-
-    @media (max-width: 768px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .community-container {
-            padding: 1rem;
-        }
-
-        .hero {
-            padding: 2rem 1rem;
-        }
-
-        .hero h1 {
-            font-size: 2em;
-        }
-
-        .section-header {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
-    }
-
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+    .search-bar {
+        margin: 2.5rem auto 0;
         display: flex;
         justify-content: center;
-        align-items: center;
-        z-index: 1000;
+        gap: 1rem;
+        max-width: 700px;
+        padding: 0 1rem;
     }
 
-    .modal-content {
-        background: white;
+    .search-bar input {
+        padding: 1rem 1.5rem;
+        width: 100%;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-radius: 30px;
+        font-size: 1.1rem;
+        transition: var(--transition-smooth);
+        background-color: var(--background-light);
+    }
+
+    .search-bar input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    /* ARIA-friendly button styles */
+    button {
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 30px;
+        background: var(--primary-color);
+        color: white;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+
+    button:hover {
+        background: var(--primary-dark);
+    }
+
+    button:focus-visible {
+        outline: var(--focus-outline);
+        outline-offset: 2px;
+    }
+
+    /* Improved card accessibility */
+    .card {
+        background: var(--background-light);
         padding: 2rem;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 600px;
-        max-height: 90vh;
-        overflow-y: auto;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+        border: 2px solid transparent;
+        transition: var(--transition-smooth);
     }
 
+    .card:hover,
+    .card:focus-within {
+        border-color: var(--primary-color);
+        transform: translateY(-4px);
+    }
+
+    /* Form accessibility improvements */
     .input-group {
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     .input-group label {
         display: block;
         margin-bottom: 0.5rem;
-        color: #2c3e50;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-primary);
     }
 
     .input-group input,
     .input-group select,
     .input-group textarea {
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
+        padding: 1rem;
+        border: 2px solid rgba(0, 0, 0, 0.1);
         border-radius: 8px;
         font-size: 1rem;
+        line-height: 1.5;
+        transition: var(--transition-smooth);
     }
 
-    .input-group textarea {
-        min-height: 150px;
-        resize: vertical;
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
     }
 
-    .button-group {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        margin-top: 1rem;
+    /* Error states */
+    .error {
+        color: #dc3545;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+        background-color: rgba(220, 53, 69, 0.1);
     }
 
-    .hidden {
-        display: none !important;
-    }
-
+    /* Loading state with better visibility */
     .loading {
         text-align: center;
         padding: 2rem;
-        color: #666;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
     }
 
-    .error {
-        color: #dc3545;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
+    /* Modal accessibility improvements */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: var(--background-light);
+        padding: 2.5rem;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .community-container {
+            padding: 1rem;
+        }
+
+        .content-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .search-bar {
+            flex-direction: column;
+        }
+
+        .modal-content {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+
+        button {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* Screen reader only text */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
     }
 </style>
 
@@ -353,11 +342,17 @@ import Header from './Header.astro';
             return;
         }
         modal?.classList.remove('hidden');
+        // Set focus to first input when modal opens
+        setTimeout(() => {
+            document.getElementById('discussion-title')?.focus();
+        }, 100);
     });
 
     // Hide modal
     cancelBtn?.addEventListener('click', () => {
         modal?.classList.add('hidden');
+        // Return focus to new discussion button
+        newDiscussionBtn?.focus();
     });
 
     // Handle form submission
@@ -387,6 +382,12 @@ import Header from './Header.astro';
 
             modal?.classList.add('hidden');
             form.reset();
+            // Show success message for screen readers
+            const successMsg = document.createElement('div');
+            successMsg.setAttribute('role', 'alert');
+            successMsg.textContent = 'Discussion posted successfully';
+            document.body.appendChild(successMsg);
+            setTimeout(() => successMsg.remove(), 3000);
         } catch (error) {
             console.error('Error posting discussion:', error);
         }
@@ -405,17 +406,17 @@ import Header from './Header.astro';
             const timeAgo = getTimeAgo(date);
 
             discussionCards.innerHTML += `
-                <article class="card" data-id="${doc.id}">
+                <article class="card" data-id="${doc.id}" tabindex="0">
                     <div class="card-header">
-                        <span class="tag">${data.category}</span>
-                        <span class="date">${timeAgo}</span>
+                        <span class="tag" role="status">${data.category}</span>
+                        <span class="date" aria-label="Posted ${timeAgo}">${timeAgo}</span>
                     </div>
                     <h3>${data.title}</h3>
                     <p>${data.content.substring(0, 150)}${data.content.length > 150 ? '...' : ''}</p>
-                    <div class="stats">
-                        <span>👤 ${data.authorName}</span>
-                        <span>❤️ ${data.likes}</span>
-                        <span>💬 ${data.comments}</span>
+                    <div class="stats" role="group" aria-label="Post statistics">
+                        <span aria-label="Author: ${data.authorName}">👤 ${data.authorName}</span>
+                        <span aria-label="${data.likes} likes">❤️ ${data.likes}</span>
+                        <span aria-label="${data.comments} comments">💬 ${data.comments}</span>
                     </div>
                 </article>
             `;
