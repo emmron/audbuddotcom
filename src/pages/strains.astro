@@ -1,17 +1,18 @@
 ---
 import Header from '../components/Header.astro';
-import { supabase } from '../lib/supabase';
-import type { Strain } from '../types/supabase';
 
-// Fetch strains from Supabase with error handling and type safety
-const { data: strains, error } = await supabase
-  .from('strains')
-  .select('*')
-  .order('name');
-
-if (error) {
-  console.error('Error fetching strains:', error);
-}
+// Mock data for now
+const strains = [
+  {
+    id: 1,
+    name: "Blue Dream",
+    type: "Hybrid",
+    thc: 18,
+    cbd: 0.1,
+    description: "A popular strain known for its balanced effects..."
+  },
+  // Add more mock strains as needed
+];
 ---
 
 <Header />
@@ -23,7 +24,7 @@ if (error) {
   </section>
 
   <div class="strains-grid">
-    {strains?.map((strain: Strain) => (
+    {strains?.map((strain: any) => (
       <article class="strain-card">
         <div class="strain-content">
           <header class="strain-header">
