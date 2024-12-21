@@ -1,6 +1,48 @@
 ---
 import background from '../assets/background.svg';
 import Header from './Header.astro';
+
+// Get latest discussions from localStorage
+let latestDiscussions = [];
+try {
+  const savedDiscussions = localStorage.getItem('discussions');
+  if (savedDiscussions) {
+    const parsed = JSON.parse(savedDiscussions);
+    latestDiscussions = parsed
+      .map((d: any) => ({
+        ...d,
+        createdAt: new Date(d.createdAt)
+      }))
+      .sort((a: any, b: any) => b.createdAt - a.createdAt)
+      .slice(0, 3); // Get 3 most recent
+  }
+} catch (error) {
+  console.error('Error loading discussions:', error);
+}
+
+function getTimeAgo(date: Date): string {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  
+  const intervals = [
+    { seconds: 31536000, label: 'year' },
+    { seconds: 2592000, label: 'month' }, 
+    { seconds: 86400, label: 'day' },
+    { seconds: 3600, label: 'hour' },
+    { seconds: 60, label: 'minute' },
+    { seconds: 1, label: 'second' }
+  ];
+
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds);
+    if (count > 1) {
+      return `${count} ${interval.label}s ago`;
+    }
+    if (count === 1) {
+      return `1 ${interval.label} ago`;
+    }
+  }
+  return 'just now';
+}
 ---
 
 <div id="container">
@@ -14,18 +56,52 @@ import Header from './Header.astro';
 			<p>Your guide to the best medicinal cannabis strains available in Australia.</p>
 			<section id="links">
 				<a class="button" href="/strains">View Strains</a>
-				<a class="button" href="https://cannabiscommunity.com">Join our Community</a>
+				<a class="button" href="/community">Join our Community</a>
 			</section>
 		</section>
-	</main>
 
-	<a href="https://cannabisreviews.com/blog" id="news" class="box">
-		<h2>What's New in Medicinal Cannabis?</h2>
-		<p>Explore the latest strains, benefits, and reviews of medicinal cannabis in Australia.</p>
-	</a>
+		<section id="latest-posts" class="box">
+			<h2>Latest Community Posts</h2>
+			{latestDiscussions.length > 0 ? (
+				<div class="posts">
+					{latestDiscussions.map((discussion: any) => (
+						<a href={`/community#${discussion.id}`} class="post">
+							<div class="post-category">{discussion.category}</div>
+							<h3>{discussion.title}</h3>
+							<p class="post-excerpt">{discussion.content.substring(0, 120)}...</p>
+							<div class="meta">
+								<div class="meta-left">
+									<span class="author">👤 {discussion.authorName}</span>
+									<time>{getTimeAgo(discussion.createdAt)}</time>
+								</div>
+								<div class="meta-right">
+									<span class="comments">💬 {discussion.comments.length}</span>
+									<span class="likes">❤️ {discussion.likes}</span>
+								</div>
+							</div>
+						</a>
+					))}
+				</div>
+			) : (
+				<p class="no-posts">No discussions yet. Be the first to start one!</p>
+			)}
+			<a href="/community" class="view-all">View All Posts →</a>
+		</section>
+	</main>
 </div>
 
 <style>
+	:root {
+		--primary-gradient: linear-gradient(135deg, #4caf50, #81c784);
+		--hover-gradient: linear-gradient(135deg, #388e3c, #66bb6a);
+		--card-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+		--hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+		--transition-fast: 0.2s ease;
+		--transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		--content-width: min(1200px, 90vw);
+		--spacing-base: clamp(1rem, 2vw, 2rem);
+	}
+
 	#background {
 		position: fixed;
 		top: 0;
@@ -34,98 +110,251 @@ import Header from './Header.astro';
 		height: 100%;
 		z-index: -1;
 		filter: blur(80px);
+		transform: scale(1.1);
+		object-fit: cover;
 	}
 
 	#container {
-		font-family: 'Arial', sans-serif;
-		height: 100%;
-		color: #333;
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		min-height: 100vh;
+		color: #1a1a1a;
+		display: flex;
+		flex-direction: column;
 	}
 
 	main {
-		height: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-		padding: 20px;
+		flex: 1;
+		width: var(--content-width);
+		margin: 0 auto;
+		padding: var(--spacing-base);
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--spacing-base);
+		align-items: start;
 	}
 
 	#hero {
-		padding: 40px;
-		background: rgba(255, 255, 255, 0.9);
-		border-radius: 15px;
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-		transition: transform 0.3s;
+		padding: clamp(2rem, 5vw, 4rem);
+		background: rgba(255, 255, 255, 0.95);
+		border-radius: 24px;
+		box-shadow: var(--card-shadow);
+		transition: var(--transition-smooth);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		margin-top: clamp(2rem, 10vh, 6rem);
 	}
 
 	#hero:hover {
 		transform: translateY(-5px);
+		box-shadow: var(--hover-shadow);
 	}
 
 	h1 {
-		font-size: 2.5em;
-		margin: 0.5em 0;
-		color: #2c3e50;
+		font-size: clamp(2rem, 5vw, 3rem);
+		font-weight: 800;
+		margin: 0 0 0.5em;
+		background: var(--primary-gradient);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		line-height: 1.2;
 	}
 
 	p {
-		font-size: 1.2em;
-		margin: 0.5em 0 1.5em;
-		color: #34495e;
+		font-size: clamp(1rem, 2vw, 1.25rem);
+		line-height: 1.6;
+		color: #4a4a4a;
+		margin: 0 0 2em;
 	}
 
 	#links {
 		display: flex;
 		justify-content: center;
-		gap: 20px;
+		gap: clamp(1rem, 3vw, 1.5rem);
+		flex-wrap: wrap;
 	}
 
-	#links a {
-		display: inline-block;
-		padding: 14px 28px;
+	.button {
+		flex: 1;
+		min-width: 200px;
+		max-width: 300px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem 2rem;
 		color: white;
-		background: linear-gradient(90deg, #4caf50, #81c784);
-		border-radius: 5px;
+		background: var(--primary-gradient);
+		border-radius: 100px;
 		text-decoration: none;
-		
-		transition: background 0.3s, transform 0.3s;
+		font-weight: 600;
+		letter-spacing: 0.5px;
+		transition: var(--transition-smooth);
+		box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
 	}
 
-	#links a:hover {
-		background: linear-gradient(90deg, #388e3c, #66bb6a);
-		transform: scale(1.05);
+	.button:hover {
+		background: var(--hover-gradient);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
 	}
 
-	.box {
-		padding: 20px;
-		background: rgba(255, 255, 255, 0.95);
-		border-radius: 10px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-		margin-top: 20px;
+	#latest-posts {
+		padding: clamp(1.5rem, 4vw, 2.5rem);
+		background: rgba(255, 255, 255, 0.98);
+		border-radius: 24px;
+		box-shadow: var(--card-shadow);
+		backdrop-filter: blur(10px);
 	}
 
-	h2 {
-		margin: 0 0 0.5em;
-		font-size: 1.8em;
+	#latest-posts h2 {
+		font-size: clamp(1.25rem, 3vw, 1.5rem);
+		font-weight: 700;
+		margin: 0 0 1.5rem;
 		color: #2c3e50;
 	}
 
-	#news {
-		position: absolute;
-		bottom: 16px;
-		right: 16px;
-		max-width: 300px;
+	.posts {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.post {
+		position: relative;
+		padding: clamp(1rem, 3vw, 1.5rem);
+		background: rgba(255, 255, 255, 0.8);
+		border-radius: 16px;
 		text-decoration: none;
-		transition: background 0.2s, transform 0.3s;
+		transition: var(--transition-fast);
+		border: 1px solid rgba(0, 0, 0, 0.05);
 	}
 
-	#news:hover {
-		background: rgba(255, 255, 255, 0.7);
-		transform: translateY(-3px);
+	.post:hover {
+		transform: translateY(-2px);
+		background: white;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 	}
 
-	#news h2, #news p {
-		color: #34495e;
+	.post-category {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		padding: 0.25rem 0.75rem;
+		background: var(--primary-gradient);
+		color: white;
+		border-radius: 100px;
+		font-size: 0.8rem;
+		font-weight: 500;
+	}
+
+	.post h3 {
+		margin: 0 0 0.5rem;
+		font-size: clamp(1rem, 2vw, 1.1rem);
+		font-weight: 600;
+		color: #1a1a1a;
+		padding-right: 5rem;
+	}
+
+	.post-excerpt {
+		font-size: clamp(0.85rem, 1.5vw, 0.9rem);
+		color: #666;
+		margin: 0 0 1rem;
+		line-height: 1.5;
+	}
+
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+		color: #666;
+	}
+
+	.meta-left, .meta-right {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.author {
+		font-weight: 500;
+	}
+
+	time {
+		color: #888;
+	}
+
+	.view-all {
+		display: block;
+		text-align: center;
+		margin-top: 1.5rem;
+		padding: 1rem;
+		color: #4caf50;
+		text-decoration: none;
+		font-weight: 500;
+		transition: var(--transition-fast);
+	}
+
+	.view-all:hover {
+		color: #388e3c;
+		text-decoration: underline;
+	}
+
+	.no-posts {
+		text-align: center;
+		color: #666;
+		font-style: italic;
+		padding: 2rem;
+		background: rgba(0, 0, 0, 0.02);
+		border-radius: 12px;
+	}
+
+	@media (min-width: 768px) {
+		main {
+			grid-template-columns: 1fr 400px;
+			align-items: start;
+		}
+
+		#hero {
+			position: sticky;
+			top: var(--spacing-base);
+		}
+	}
+
+	@media (max-width: 767px) {
+		main {
+			padding: var(--spacing-base) 1rem;
+		}
+
+		#hero {
+			padding: 1.5rem;
+		}
+
+		.button {
+			width: 100%;
+			max-width: none;
+		}
+
+		.meta {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.post-category {
+			position: static;
+			display: inline-block;
+			margin-bottom: 0.5rem;
+		}
+
+		.post h3 {
+			padding-right: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			animation: none !important;
+			transition: none !important;
+		}
 	}
 </style>
