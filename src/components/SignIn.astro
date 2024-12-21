@@ -1,5 +1,5 @@
 ---
-import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase.ts';
+import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase';
 ---
 
 <div class="auth-container">
@@ -40,6 +40,9 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		<p class="auth-footer">
 			Don't have an account? <a href="/signup">Sign up</a>
 		</p>
+
+		<div id="error-message" class="error-message hidden"></div>
+		<div id="success-message" class="success-message hidden"></div>
 	</section>
 </div>
 
@@ -191,6 +194,37 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 			padding: 1.5rem;
 		}
 	}
+
+	.error-message, .success-message {
+		padding: 10px;
+		border-radius: 8px;
+		margin: 10px 0;
+		text-align: center;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.error-message {
+		background: #ffebee;
+		color: #c62828;
+		border: 1px solid #ffcdd2;
+	}
+
+	.success-message {
+		background: #e8f5e9;
+		color: #2e7d32;
+		border: 1px solid #c8e6c9;
+	}
+
+	.hidden {
+		display: none;
+		opacity: 0;
+	}
+
+	.loading {
+		opacity: 0.7;
+		pointer-events: none;
+	}
 </style>
 
 <script>
@@ -199,28 +233,77 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		GoogleAuthProvider, 
 		signInWithPopup, 
 		OAuthProvider,
+		signInWithEmailAndPassword,
 		type User 
-	} from '../firebase.ts';
+	} from '../firebase';
 
-	document.getElementById('google-sign-in')?.addEventListener('click', async () => {
+	const form = document.querySelector('form');
+	const errorMessage = document.getElementById('error-message');
+	const successMessage = document.getElementById('success-message');
+
+	function showMessage(element: HTMLElement | null, message: string) {
+		if (!element) return;
+		element.textContent = message;
+		element.classList.remove('hidden');
+		setTimeout(() => {
+			element.classList.add('hidden');
+		}, 5000);
+	}
+
+	function setLoading(isLoading: boolean) {
+		const buttons = document.querySelectorAll('button');
+		buttons.forEach(button => {
+			button.disabled = isLoading;
+			button.classList.toggle('loading', isLoading);
+		});
+	}
+
+	// Email/Password Sign In
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		setLoading(true);
+
+		const email = (document.getElementById('email') as HTMLInputElement)?.value;
+		const password = (document.getElementById('password') as HTMLInputElement)?.value;
+
 		try {
-			const provider = new GoogleAuthProvider();
-			const result = await signInWithPopup(auth, provider);
-			const user = result.user as User;
-			console.log('User signed in with Google:', user);
-		} catch (error) {
-			console.error('Error during Google sign-in:', error);
+			const userCredential = await signInWithEmailAndPassword(auth, email, password);
+			showMessage(successMessage, 'Successfully signed in!');
+			window.location.href = '/dashboard'; // Redirect to dashboard
+		} catch (error: any) {
+			showMessage(errorMessage, error.message || 'Failed to sign in');
+		} finally {
+			setLoading(false);
 		}
 	});
 
+	// Google Sign In
+	document.getElementById('google-sign-in')?.addEventListener('click', async () => {
+		setLoading(true);
+		try {
+			const provider = new GoogleAuthProvider();
+			const result = await signInWithPopup(auth, provider);
+			showMessage(successMessage, 'Successfully signed in with Google!');
+			window.location.href = '/dashboard';
+		} catch (error: any) {
+			showMessage(errorMessage, error.message || 'Failed to sign in with Google');
+		} finally {
+			setLoading(false);
+		}
+	});
+
+	// Apple Sign In
 	document.getElementById('apple-sign-in')?.addEventListener('click', async () => {
+		setLoading(true);
 		try {
 			const provider = new OAuthProvider('apple.com');
 			const result = await signInWithPopup(auth, provider);
-			const user = result.user as User;
-			console.log('User signed in with Apple:', user);
-		} catch (error) {
-			console.error('Error during Apple sign-in:', error);
+			showMessage(successMessage, 'Successfully signed in with Apple!');
+			window.location.href = '/dashboard';
+		} catch (error: any) {
+			showMessage(errorMessage, error.message || 'Failed to sign in with Apple');
+		} finally {
+			setLoading(false);
 		}
 	});
 </script> 

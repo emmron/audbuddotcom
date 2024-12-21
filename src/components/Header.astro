@@ -199,16 +199,18 @@ const currentPath = Astro.url.pathname;
 <script>
 	const mobileMenuButton = document.querySelector('.mobile-menu-button');
 	const navLinks = document.querySelector('.nav-links');
+	const bars = mobileMenuButton?.querySelectorAll('.bar');
 
 	mobileMenuButton?.addEventListener('click', () => {
 		navLinks?.classList.toggle('show');
-		const bars = mobileMenuButton.querySelectorAll('.bar');
-		bars[0].style.transform = navLinks?.classList.contains('show') 
-			? 'rotate(45deg) translate(5px, 5px)' 
-			: 'none';
-		bars[1].style.opacity = navLinks?.classList.contains('show') ? '0' : '1';
-		bars[2].style.transform = navLinks?.classList.contains('show') 
-			? 'rotate(-45deg) translate(7px, -7px)' 
-			: 'none';
+		if (bars) {
+			(bars[0] as HTMLElement).style.transform = navLinks?.classList.contains('show') 
+				? 'rotate(45deg) translate(5px, 5px)' 
+				: 'none';
+			(bars[1] as HTMLElement).style.opacity = navLinks?.classList.contains('show') ? '0' : '1';
+			(bars[2] as HTMLElement).style.transform = navLinks?.classList.contains('show') 
+				? 'rotate(-45deg) translate(7px, -7px)' 
+				: 'none';
+		}
 	});
 </script> 

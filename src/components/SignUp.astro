@@ -1,35 +1,40 @@
 ---
-import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase.ts';
+import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase';
 ---
 
-<section id="sign-up">
-	<h2>Create Account</h2>
-	<p class="subtitle">Join our community today</p>
-	<form action="/api/signup" method="POST">
-		<div class="input-group">
-			<label for="username">Username:</label>
-			<input type="text" id="username" name="username" required placeholder="Choose a username" />
-		</div>
-		
-		<label for="email">Email:</label>
-		<input type="email" id="email" name="email" required />
-		
-		<label for="password">Password:</label>
-		<input type="password" id="password" name="password" required />
-		
-		<button type="submit">Sign Up</button>
-	</form>
+<div class="auth-container">
+	<section id="sign-up">
+		<h2>Create Account</h2>
+		<p class="subtitle">Join our community today</p>
+		<form action="/api/signup" method="POST">
+			<div class="input-group">
+				<label for="username">Username:</label>
+				<input type="text" id="username" name="username" required placeholder="Choose a username" />
+			</div>
+			
+			<label for="email">Email:</label>
+			<input type="email" id="email" name="email" required />
+			
+			<label for="password">Password:</label>
+			<input type="password" id="password" name="password" required />
+			
+			<button type="submit">Sign Up</button>
+		</form>
 
-	<!-- Google Sign Up Button -->
-	<button id="google-sign-up">Sign up with Google</button>
+		<!-- Google Sign Up Button -->
+		<button id="google-sign-up">Sign up with Google</button>
 
-	<!-- Apple Sign Up Button -->
-	<button id="apple-sign-up">Sign up with Apple</button>
+		<!-- Apple Sign Up Button -->
+		<button id="apple-sign-up">Sign up with Apple</button>
 
-	<p class="auth-footer">
-		Already have an account? <a href="/signin">Sign in</a>
-	</p>
-</section>
+		<div id="error-message" class="error-message hidden"></div>
+		<div id="success-message" class="success-message hidden"></div>
+
+		<p class="auth-footer">
+			Already have an account? <a href="/signin">Sign in</a>
+		</p>
+	</section>
+</div>
 
 <style>
 	#sign-up {
@@ -73,6 +78,37 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 	button:hover {
 		background: #388e3c;
 	}
+
+	.error-message, .success-message {
+		padding: 10px;
+		border-radius: 8px;
+		margin: 10px 0;
+		text-align: center;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.error-message {
+		background: #ffebee;
+		color: #c62828;
+		border: 1px solid #ffcdd2;
+	}
+
+	.success-message {
+		background: #e8f5e9;
+		color: #2e7d32;
+		border: 1px solid #c8e6c9;
+	}
+
+	.hidden {
+		display: none;
+		opacity: 0;
+	}
+
+	.loading {
+		opacity: 0.7;
+		pointer-events: none;
+	}
 </style>
 
 <script>
@@ -81,28 +117,82 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		GoogleAuthProvider, 
 		signInWithPopup, 
 		OAuthProvider,
+		createUserWithEmailAndPassword,
+		updateProfile,
 		type User 
-	} from '../firebase.ts';
+	} from '../firebase';
 
-	document.getElementById('google-sign-up')?.addEventListener('click', async () => {
+	const form = document.querySelector('form');
+	const errorMessage = document.getElementById('error-message');
+	const successMessage = document.getElementById('success-message');
+
+	function showMessage(element: HTMLElement | null, message: string) {
+		if (!element) return;
+		element.textContent = message;
+		element.classList.remove('hidden');
+		setTimeout(() => {
+			element.classList.add('hidden');
+		}, 5000);
+	}
+
+	function setLoading(isLoading: boolean) {
+		const buttons = document.querySelectorAll('button');
+		buttons.forEach(button => {
+			button.disabled = isLoading;
+			button.classList.toggle('loading', isLoading);
+		});
+	}
+
+	// Email/Password Sign Up
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		setLoading(true);
+
+		const email = (document.getElementById('email') as HTMLInputElement)?.value;
+		const password = (document.getElementById('password') as HTMLInputElement)?.value;
+		const username = (document.getElementById('username') as HTMLInputElement)?.value;
+
 		try {
-			const provider = new GoogleAuthProvider();
-			const result = await signInWithPopup(auth, provider);
-			const user = result.user as User;
-			console.log('User signed up with Google:', user);
-		} catch (error) {
-			console.error('Error during Google sign-up:', error);
+			const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+			await updateProfile(userCredential.user, {
+				displayName: username
+			});
+			showMessage(successMessage, 'Account created successfully!');
+			window.location.href = '/dashboard';
+		} catch (error: any) {
+			showMessage(errorMessage, error.message || 'Failed to create account');
+		} finally {
+			setLoading(false);
 		}
 	});
 
+	// Google Sign Up
+	document.getElementById('google-sign-up')?.addEventListener('click', async () => {
+		setLoading(true);
+		try {
+			const provider = new GoogleAuthProvider();
+			const result = await signInWithPopup(auth, provider);
+			showMessage(successMessage, 'Successfully signed up with Google!');
+			window.location.href = '/dashboard';
+		} catch (error: any) {
+			showMessage(errorMessage, error.message || 'Failed to sign up with Google');
+		} finally {
+			setLoading(false);
+		}
+	});
+
+	// Apple Sign Up
 	document.getElementById('apple-sign-up')?.addEventListener('click', async () => {
+		setLoading(true);
 		try {
 			const provider = new OAuthProvider('apple.com');
 			const result = await signInWithPopup(auth, provider);
-			const user = result.user as User;
-			console.log('User signed up with Apple:', user);
-		} catch (error) {
-			console.error('Error during Apple sign-up:', error);
+			showMessage(successMessage, 'Successfully signed up with Apple!');
+			window.location.href = '/dashboard';
+		} catch (error: any) {
+			showMessage(errorMessage, error.message || 'Failed to sign up with Apple');
+		} finally {
+			setLoading(false);
 		}
 	});
 </script> 

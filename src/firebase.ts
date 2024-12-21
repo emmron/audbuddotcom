@@ -4,6 +4,9 @@ import {
     GoogleAuthProvider, 
     signInWithPopup, 
     OAuthProvider,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    updateProfile,
     type User,
     type Auth,
     type AuthProvider 
@@ -28,6 +31,9 @@ export {
     GoogleAuthProvider, 
     signInWithPopup, 
     OAuthProvider,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    updateProfile,
     type User,
     type Auth,
     type AuthProvider 
