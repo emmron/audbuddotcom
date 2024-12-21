@@ -1,19 +1,12 @@
 ---
 import background from '../assets/background.svg';
+import Header from './Header.astro';
 ---
 
 <div id="container">
 	<img id="background" src={background.src} alt="Background" fetchpriority="high" />
 	
-	<!-- New Header Section -->
-	<header>
-		<h1 class="site-title">Medicinal Cannabis Reviews</h1>
-		<nav>
-			<a href="/strains">Strains</a>
-			<a href="https://cannabiscommunity.com">Community</a>
-			<a href="https://cannabisreviews.com/blog">Blog</a>
-		</nav>
-	</header>
+	<Header />
 
 	<main>
 		<section id="hero">
@@ -49,35 +42,6 @@ import background from '../assets/background.svg';
 		color: #333;
 	}
 
-	/* Header Styles */
-	header {
-		background: rgba(255, 255, 255, 0.9);
-		padding: 20px;
-		text-align: center;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-	}
-
-	.site-title {
-		margin: 0;
-		font-size: 2.5em;
-		color: #2c3e50;
-	}
-
-	nav {
-		margin-top: 10px;
-	}
-
-	nav a {
-		margin: 0 15px;
-		color: #34495e;
-		text-decoration: none;
-		font-size: 1.1em;
-	}
-
-	nav a:hover {
-		text-decoration: underline;
-	}
-
 	main {
 		height: 100%;
 		display: flex;
@@ -88,7 +52,7 @@ import background from '../assets/background.svg';
 	}
 
 	#hero {
-		padding: 30px;
+		padding: 40px;
 		background: rgba(255, 255, 255, 0.9);
 		border-radius: 15px;
 		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
@@ -100,13 +64,13 @@ import background from '../assets/background.svg';
 	}
 
 	h1 {
-		font-size: 2.8em;
+		font-size: 2.5em;
 		margin: 0.5em 0;
 		color: #2c3e50;
 	}
 
 	p {
-		font-size: 1.3em;
+		font-size: 1.2em;
 		margin: 0.5em 0 1.5em;
 		color: #34495e;
 	}
@@ -114,12 +78,12 @@ import background from '../assets/background.svg';
 	#links {
 		display: flex;
 		justify-content: center;
-		gap: 30px;
+		gap: 20px;
 	}
 
 	#links a {
 		display: inline-block;
-		padding: 14px 24px;
+		padding: 14px 28px;
 		color: white;
 		background: linear-gradient(90deg, #4caf50, #81c784);
 		border-radius: 5px;
