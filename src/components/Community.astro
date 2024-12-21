@@ -40,9 +40,27 @@ const discussions: Discussion[] = [
             }
         ]
     },
-    // Add more mock discussions here
+    {
+        id: '2',
+        title: 'Research on pain management',
+        content: 'New study shows promising results for chronic pain treatment.',
+        category: 'research',
+        author: 'User3',
+        created_at: new Date(Date.now() - 86400000), // 1 day ago
+        likes: 15,
+        comments: []
+    },
+    {
+        id: '3',
+        title: 'Strain review: Blue Dream',
+        content: 'Sharing my experience with Blue Dream for sleep issues.',
+        category: 'reviews',
+        author: 'User4',
+        created_at: new Date(Date.now() - 172800000), // 2 days ago
+        likes: 8,
+        comments: []
+    }
 ];
-
 ---
 
 <Header />
@@ -69,7 +87,6 @@ const discussions: Discussion[] = [
                     </svg>
                 </button>
             </div>
-            <div id="search-results" class="search-results" hidden></div>
         </div>
     </section>
 
@@ -185,6 +202,10 @@ const discussions: Discussion[] = [
                                 </span>
                             </div>
                             <h3 class="discussion-card__title">{discussion.title}</h3>
+                            <div class="discussion-card__author">
+                                <span class="avatar">👤</span>
+                                {discussion.author}
+                            </div>
                         </header>
                         
                         <div class="discussion-card__content">
@@ -192,11 +213,6 @@ const discussions: Discussion[] = [
                         </div>
                         
                         <footer class="discussion-card__footer">
-                            <div class="discussion-card__author">
-                                <span class="avatar">👤</span>
-                                {discussion.author}
-                            </div>
-                            
                             <div class="discussion-card__actions">
                                 <button class="discussion-card__action" data-action="like">
                                     ❤️ {discussion.likes}
@@ -206,6 +222,25 @@ const discussions: Discussion[] = [
                                 </button>
                             </div>
                         </footer>
+
+                        {discussion.comments.length > 0 && (
+                            <div class="comments">
+                                {discussion.comments.map((comment) => (
+                                    <div class="comment">
+                                        <div class="comment__meta">
+                                            <span class="comment__author">{comment.author}</span>
+                                            <span class="comment__time">
+                                                {new Date(comment.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p>{comment.content}</p>
+                                        <button class="comment__action" data-action="like">
+                                            ❤️ {comment.likes}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </article>
                 ))}
             </div>
@@ -719,389 +754,31 @@ const discussions: Discussion[] = [
 </style>
 
 <script>
-    declare global {
-        interface Window {
-            supabase: any;
-            discussionManager: DiscussionManager;
-        }
-    }
+    // Simplified client-side functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        const discussionFeed = document.getElementById('discussion-feed');
+        const searchInput = document.getElementById('search-input');
 
-    interface Discussion {
-        id: string;
-        title: string;
-        content: string;
-        category: string;
-        created_at: string;
-        post_number: number;
-        replies: Reply[];
-        likes: number;
-        author_id: string;
-        author_name: string;
-        author_image?: string;
-    }
+        // Handle search
+        searchInput?.addEventListener('input', (e) => {
+            const query = (e.target as HTMLInputElement).value.toLowerCase();
+            const discussions = document.querySelectorAll('.discussion-card');
 
-    interface Reply {
-        id: string;
-        content: string;
-        created_at: string;
-        post_number: number;
-        author_id: string;
-        author_name: string;
-        author_image?: string;
-        likes: number;
-    }
-
-    interface DiscussionView extends Omit<Discussion, 'created_at'> {
-        createdAt: Date;
-    }
-
-    interface ReplyView extends Omit<Reply, 'created_at'> {
-        createdAt: Date;
-    }
-
-    class DiscussionManager {
-        private discussions: Map<string, DiscussionView> = new Map();
-        private discussionFeed: HTMLElement | null;
-        private modal: HTMLDialogElement | null;
-        private form: HTMLFormElement | null;
-        private searchInput: HTMLInputElement | null;
-        private sortSelect: HTMLSelectElement | null;
-        private categoryFilter: HTMLSelectElement | null;
-
-        constructor() {
-            this.discussionFeed = document.getElementById('discussion-feed');
-            this.modal = document.getElementById('discussion-modal') as HTMLDialogElement;
-            this.form = document.getElementById('discussion-form') as HTMLFormElement;
-            this.searchInput = document.getElementById('search-input') as HTMLInputElement;
-            this.sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
-            this.categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
-            
-            this.init();
-        }
-
-        private async init(): Promise<void> {
-            await this.loadDiscussions();
-            this.setupEventListeners();
-            this.renderDiscussions();
-        }
-
-        private setupEventListeners(): void {
-            // Modal controls
-            document.getElementById('new-discussion-btn')?.addEventListener('click', () => {
-                if (!window.supabase.auth.user()) {
-                    alert('Please sign in to create a discussion');
-                    return;
-                }
-                this.modal?.showModal();
+            discussions.forEach(discussion => {
+                const title = discussion.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
+                const content = discussion.querySelector('.discussion-card__content')?.textContent?.toLowerCase() || '';
+                const isMatch = title.includes(query) || content.includes(query);
+                (discussion as HTMLElement).style.display = isMatch ? 'block' : 'none';
             });
+        });
 
-            this.modal?.querySelector('.modal__close')?.addEventListener('click', () => {
-                this.modal?.close();
-                this.form?.reset();
-            });
-
-            // Form submission
-            this.form?.addEventListener('submit', (e) => this.handleSubmit(e));
-
-            // Search with debounce
-            let searchTimeout: ReturnType<typeof setTimeout>;
-            this.searchInput?.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    const query = (e.target as HTMLInputElement).value.toLowerCase();
-                    this.renderDiscussions(query);
-                }, 300);
-            });
-
-            // Sort discussions
-            this.sortSelect?.addEventListener('change', () => this.renderDiscussions());
-
-            // Filter by category
-            this.categoryFilter?.addEventListener('change', () => this.renderDiscussions());
-
-            // Discussion interactions
-            this.discussionFeed?.addEventListener('click', async (e) => {
-                const target = e.target as HTMLElement;
-                const discussionCard = target.closest('[data-discussion-id]');
-                const discussionId = discussionCard?.getAttribute('data-discussion-id');
-
-                if (!discussionId) return;
-
-                if (target.matches('[data-action="reply"]')) {
-                    if (!window.supabase.auth.user()) {
-                        alert('Please sign in to reply');
-                        return;
-                    }
-                    const replyForm = discussionCard?.querySelector('.reply-form');
-                    replyForm?.classList.toggle('hidden');
-                }
-
-                if (target.matches('[data-action="like"]')) {
-                    if (!window.supabase.auth.user()) {
-                        alert('Please sign in to like posts');
-                        return;
-                    }
-                    await this.handleLike(discussionId);
-                }
-            });
-        }
-
-        private async loadDiscussions(): Promise<void> {
-            try {
-                const { data, error } = await window.supabase
-                    .from('discussions')
-                    .select(`
-                        *,
-                        replies (
-                            *,
-                            author:profiles(name, avatar_url)
-                        ),
-                        author:profiles(name, avatar_url)
-                    `)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                data?.forEach((discussion: Discussion) => {
-                    this.discussions.set(discussion.id, {
-                        ...discussion,
-                        createdAt: new Date(discussion.created_at),
-                        replies: discussion.replies.map(reply => ({
-                            ...reply,
-                            createdAt: new Date(reply.created_at)
-                        }))
-                    });
-                });
-
-                this.renderDiscussions();
-            } catch (error) {
-                console.error('Error loading discussions:', error);
+        // Handle likes
+        discussionFeed?.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.matches('[data-action="like"]')) {
+                const currentLikes = parseInt(target.textContent?.split(' ')[1] || '0');
+                target.textContent = `❤️ ${currentLikes + 1}`;
             }
-        }
-
-        private async handleSubmit(e: Event): Promise<void> {
-            e.preventDefault();
-            
-            const form = e.target as HTMLFormElement;
-            const formData = new FormData(form);
-            const user = window.supabase.auth.user();
-            
-            const discussion = {
-                title: formData.get('title'),
-                content: formData.get('content'),
-                category: formData.get('category'),
-                created_at: new Date().toISOString(),
-                post_number: await this.getNextPostNumber(),
-                author_id: user?.id,
-                likes: 0
-            };
-
-            try {
-                const { error } = await window.supabase
-                    .from('discussions')
-                    .insert([discussion]);
-
-                if (error) throw error;
-
-                this.modal?.close();
-                form.reset();
-                await this.loadDiscussions();
-            } catch (error) {
-                console.error('Error creating discussion:', error);
-                alert('Failed to create discussion. Please try again.');
-            }
-        }
-
-        private async handleLike(discussionId: string): Promise<void> {
-            const discussion = this.discussions.get(discussionId);
-            if (!discussion) return;
-
-            try {
-                const { error } = await window.supabase
-                    .from('discussions')
-                    .update({ likes: discussion.likes + 1 })
-                    .match({ id: discussionId });
-
-                if (error) throw error;
-                await this.loadDiscussions();
-            } catch (error) {
-                console.error('Error liking discussion:', error);
-            }
-        }
-
-        private async handleReply(discussionId: string, content: string): Promise<void> {
-            const user = window.supabase.auth.user();
-            if (!user) return;
-
-            try {
-                const reply = {
-                    content,
-                    created_at: new Date().toISOString(),
-                    post_number: await this.getNextPostNumber(),
-                    discussion_id: discussionId,
-                    author_id: user.id,
-                    likes: 0
-                };
-
-                const { error } = await window.supabase
-                    .from('replies')
-                    .insert([reply]);
-
-                if (error) throw error;
-
-                await this.loadDiscussions();
-            } catch (error) {
-                console.error('Error creating reply:', error);
-                alert('Failed to post reply. Please try again.');
-            }
-        }
-
-        private async getNextPostNumber(): Promise<number> {
-            const { data, error } = await window.supabase
-                .rpc('get_next_post_number');
-            
-            if (error) throw error;
-            return data;
-        }
-
-        private renderDiscussions(searchQuery: string = ''): void {
-            if (!this.discussionFeed) return;
-
-            let discussions = Array.from(this.discussions.values());
-
-            // Apply search filter
-            if (searchQuery) {
-                discussions = discussions.filter(d => 
-                    d.title.toLowerCase().includes(searchQuery) || 
-                    d.content.toLowerCase().includes(searchQuery)
-                );
-            }
-
-            // Apply category filter
-            const categoryFilter = this.categoryFilter?.value;
-            if (categoryFilter && categoryFilter !== 'all') {
-                discussions = discussions.filter(d => d.category === categoryFilter);
-            }
-
-            // Apply sort
-            const sortBy = this.sortSelect?.value || 'newest';
-            discussions.sort((a, b) => {
-                switch (sortBy) {
-                    case 'oldest':
-                        return a.createdAt.getTime() - b.createdAt.getTime();
-                    case 'most-liked':
-                        return b.likes - a.likes;
-                    case 'most-replies':
-                        return b.replies.length - a.replies.length;
-                    default: // newest
-                        return b.createdAt.getTime() - a.createdAt.getTime();
-                }
-            });
-
-            this.discussionFeed.innerHTML = discussions.length ? 
-                discussions.map(d => this.createDiscussionCard(d)).join('') : 
-                '<div class="empty-state">No discussions found</div>';
-        }
-
-        private createDiscussionCard(discussion: DiscussionView): string {
-            const timeAgo = this.getTimeAgo(discussion.createdAt);
-            
-            return `
-                <article class="discussion-card" data-discussion-id="${discussion.id}">
-                    <header class="discussion-card__header">
-                        <div class="discussion-card__meta">
-                            <span class="discussion-card__category">${discussion.category}</span>
-                            <span class="discussion-card__time">${timeAgo}</span>
-                            <span class="discussion-card__post-number">No.${discussion.post_number}</span>
-                        </div>
-                        <h3 class="discussion-card__title">${discussion.title}</h3>
-                        <div class="discussion-card__author">
-                            ${discussion.author_image ? 
-                                `<img src="${discussion.author_image}" alt="" class="author-avatar" width="24" height="24">` :
-                                '<div class="author-avatar">👤</div>'
-                            }
-                            <span>${discussion.author_name}</span>
-                        </div>
-                    </header>
-                    
-                    <div class="discussion-card__content">
-                        <p>${discussion.content}</p>
-                    </div>
-                    
-                    <footer class="discussion-card__footer">
-                        <button class="discussion-card__action" data-action="reply">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                            </svg>
-                            Reply
-                        </button>
-                        <button class="discussion-card__action" data-action="like">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                            </svg>
-                            ${discussion.likes}
-                        </button>
-                    </footer>
-
-                    <form class="reply-form hidden" onsubmit="event.preventDefault(); window.discussionManager.handleReply('${discussion.id}', this.reply.value)">
-                        <textarea name="reply" required placeholder="Write your reply..."></textarea>
-                        <button type="submit">Post Reply</button>
-                    </form>
-
-                    <div class="replies">
-                        ${discussion.replies.map(reply => `
-                            <div class="reply">
-                                <div class="reply__meta">
-                                    <span class="reply__author">
-                                        ${reply.author_image ? 
-                                            `<img src="${reply.author_image}" alt="" class="author-avatar" width="20" height="20">` :
-                                            '<div class="author-avatar">👤</div>'
-                                        }
-                                        ${reply.author_name}
-                                    </span>
-                                    <span class="reply__post-number">No.${reply.post_number}</span>
-                                    <span class="reply__time">${this.getTimeAgo(reply.createdAt)}</span>
-                                </div>
-                                <p>${reply.content}</p>
-                                <div class="reply__actions">
-                                    <button class="reply__action" data-action="like">
-                                        <svg viewBox="0 0 24 24" width="14" height="14">
-                                            <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                        </svg>
-                                        ${reply.likes}
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </article>
-            `;
-        }
-
-        private getTimeAgo(date: Date): string {
-            const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-            
-            const intervals = [
-                { seconds: 31536000, label: 'year' },
-                { seconds: 2592000, label: 'month' },
-                { seconds: 86400, label: 'day' },
-                { seconds: 3600, label: 'hour' },
-                { seconds: 60, label: 'minute' },
-                { seconds: 1, label: 'second' }
-            ];
-
-            for (const interval of intervals) {
-                const count = Math.floor(seconds / interval.seconds);
-                if (count > 0) {
-                    return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
-                }
-            }
-
-            return 'just now';
-        }
-    }
-
-    // Initialize and expose to window for reply form access
-    const manager = new DiscussionManager();
-    (window as any).discussionManager = manager;
+        });
+    });
 </script>
