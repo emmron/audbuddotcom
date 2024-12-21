@@ -18,10 +18,10 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 	</form>
 
 	<!-- Google Sign Up Button -->
-	<button id="google-sign-up" onclick="signUpWithGoogle()">Sign up with Google</button>
+	<button id="google-sign-up">Sign up with Google</button>
 
 	<!-- Apple Sign Up Button -->
-	<button id="apple-sign-up" onclick="signUpWithApple()">Sign up with Apple</button>
+	<button id="apple-sign-up">Sign up with Apple</button>
 </section>
 
 <style>
@@ -68,28 +68,33 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 </style>
 
 <script>
-	function signUpWithGoogle() {
-		signInWithPopup(auth, new GoogleAuthProvider())
-			.then((result) => {
-				// Handle successful sign-up
-				const user = result.user;
-				console.log('User signed up with Google:', user);
-			})
-			.catch((error) => {
-				console.error('Error during Google sign-up:', error);
-			});
-	}
+	import { 
+		auth, 
+		GoogleAuthProvider, 
+		signInWithPopup, 
+		OAuthProvider,
+		type User 
+	} from '../firebase.js';
 
-	function signUpWithApple() {
-		const appleProvider = new OAuthProvider('apple.com');
-		signInWithPopup(auth, appleProvider)
-			.then((result) => {
-				// Handle successful sign-up
-				const user = result.user;
-				console.log('User signed up with Apple:', user);
-			})
-			.catch((error) => {
-				console.error('Error during Apple sign-up:', error);
-			});
-	}
+	document.getElementById('google-sign-up')?.addEventListener('click', async () => {
+		try {
+			const provider = new GoogleAuthProvider();
+			const result = await signInWithPopup(auth, provider);
+			const user = result.user as User;
+			console.log('User signed up with Google:', user);
+		} catch (error) {
+			console.error('Error during Google sign-up:', error);
+		}
+	});
+
+	document.getElementById('apple-sign-up')?.addEventListener('click', async () => {
+		try {
+			const provider = new OAuthProvider('apple.com');
+			const result = await signInWithPopup(auth, provider);
+			const user = result.user as User;
+			console.log('User signed up with Apple:', user);
+		} catch (error) {
+			console.error('Error during Apple sign-up:', error);
+		}
+	});
 </script> 
