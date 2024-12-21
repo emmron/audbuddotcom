@@ -5,7 +5,7 @@ export default defineConfig({
   output: 'server',
   adapter: netlify({
     edgeMiddleware: true,
-    functionName: 'astro_ssr'
+    functionName: 'astro_ssr_adapter' // Changed to use only alphanumeric characters and underscores
   }),
   integrations: []
 });
