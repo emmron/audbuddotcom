@@ -519,40 +519,59 @@ function getTimeAgo(date: Date): string {
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const elements = {
-            searchInput: document.querySelector('.search-input') as HTMLInputElement | null,
-            categoryButtons: Array.from(document.querySelectorAll<HTMLElement>('.category-btn')),
-            discussionCards: Array.from(document.querySelectorAll<HTMLElement>('.discussion-card')),
-            newPostBtn: document.getElementById('new-post-btn') as HTMLElement | null,
-            viewButtons: Array.from(document.querySelectorAll<HTMLElement>('.view-btn')),
-            discussionsList: document.querySelector('.discussions__list') as HTMLElement | null
-        };
+        const querySelector = <T extends HTMLElement>(selector: string): T | null => document.querySelector(selector);
+        const querySelectorAll = <T extends HTMLElement>(selector: string): NodeListOf<T> => document.querySelectorAll(selector);
 
-        const toggleDisplay = (element: HTMLElement, condition: boolean) => {
-            element.style.display = condition ? 'flex' : 'none';
-        };
+        const searchInput = querySelector<HTMLInputElement>('.search-input');
+        const categoryButtons = querySelectorAll<HTMLElement>('.category-btn');
+        const discussionCards = querySelectorAll<HTMLElement>('.discussion-card');
+        const newPostButton = querySelector<HTMLElement>('#new-post-btn');
+        const viewButtons = querySelectorAll<HTMLElement>('.view-btn');
+        const discussionsList = querySelector<HTMLElement>('.discussions__list');
 
-        const handleSearch = (e: Event) => {
-            const query = (e.target as HTMLInputElement).value.toLowerCase();
-            elements.discussionCards.forEach((card) => {
+        const filterDiscussions = (searchTerm: string, selectedCategory: string) => {
+            discussionCards.forEach(card => {
                 const title = card.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
                 const content = card.querySelector('.discussion-card__preview')?.textContent?.toLowerCase() || '';
-                toggleDisplay(card, title.includes(query) || content.includes(query));
+                const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase() || '';
+                const matchesSearch = title.includes(searchTerm) || content.includes(searchTerm);
+                const matchesCategory = selectedCategory === 'all' || cardCategory === selectedCategory;
+                card.style.display = matchesSearch && matchesCategory ? 'block' : 'none';
             });
         };
 
-        const handleCategoryClick = (button: HTMLElement) => {
-            const category = button.getAttribute('data-category');
-            elements.categoryButtons.forEach((btn) => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            elements.discussionCards.forEach((card) => {
-                const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase();
-                toggleDisplay(card, category === 'all' || cardCategory === category);
-            });
+        const onSearchInput = (event: Event) => {
+            const inputElement = event.target as HTMLInputElement;
+            const searchTerm = inputElement.value.trim().toLowerCase();
+            const activeCategory = querySelector<HTMLElement>('.category-btn.active')?.dataset.category || 'all';
+            filterDiscussions(searchTerm, activeCategory);
         };
 
-        const createNewPost = async () => {
+        const onCategoryButtonClick = (event: Event) => {
+            const button = event.currentTarget as HTMLElement;
+            const selectedCategory = button.dataset.category || 'all';
+            categoryButtons.forEach(btn => {
+                btn.classList.toggle('active', btn === button);
+            });
+            const searchTerm = searchInput?.value.trim().toLowerCase() || '';
+            filterDiscussions(searchTerm, selectedCategory);
+        };
+
+        // Enhance: Add debounce to search input to improve performance
+        const debounce = (func: Function, wait: number) => {
+            let timeout: number | undefined;
+            return (...args: any[]) => {
+                clearTimeout(timeout);
+                timeout = window.setTimeout(() => func(...args), wait);
+            };
+        };
+
+        const debouncedOnSearchInput = debounce(onSearchInput, 300);
+
+        // Update event listener to use debounced function
+        searchInput?.addEventListener('input', debouncedOnSearchInput);
+
+        const createDiscussion = async () => {
             try {
                 const response = await fetch('/api/discussions', {
                     method: 'POST',
@@ -568,31 +587,32 @@ function getTimeAgo(date: Date): string {
                 if (!response.ok) throw new Error('Failed to create discussion');
                 window.location.href = '/new-discussion';
             } catch (error) {
+                console.error('Error creating discussion:', error);
                 alert('Failed to create discussion. Please try again.');
             }
         };
 
-        const navigateToDiscussion = (card: HTMLElement) => {
+        const goToDiscussion = (event: Event) => {
+            const card = event.currentTarget as HTMLElement;
             const discussionId = card.getAttribute('data-discussion-id');
             if (discussionId) {
                 window.location.href = `/discussion/${discussionId}`;
             }
         };
 
-        const handleViewChange = (button: HTMLElement) => {
-            const view = button.dataset.view;
-            elements.viewButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            elements.discussionsList?.classList.remove('grid-view', 'list-view');
-            elements.discussionsList?.classList.add(`${view}-view`);
+        const changeView = (event: Event) => {
+            const button = event.currentTarget as HTMLElement;
+            const viewMode = button.dataset.view || 'list';
+            viewButtons.forEach(btn => btn.classList.toggle('active', btn === button));
+            if (discussionsList) {
+                discussionsList.className = `discussions__list ${viewMode}-view`;
+            }
         };
 
-        elements.searchInput?.addEventListener('input', handleSearch);
-        elements.categoryButtons.forEach((button) => button.addEventListener('click', () => handleCategoryClick(button)));
-        elements.newPostBtn?.addEventListener('click', createNewPost);
-        elements.discussionCards.forEach((card) => card.addEventListener('click', () => navigateToDiscussion(card)));
-        elements.viewButtons.forEach(button => {
-            button.addEventListener('click', () => handleViewChange(button));
-        });
+        searchInput?.addEventListener('input', onSearchInput);
+        categoryButtons.forEach(button => button.addEventListener('click', onCategoryButtonClick));
+        newPostButton?.addEventListener('click', createDiscussion);
+        discussionCards.forEach(card => card.addEventListener('click', goToDiscussion));
+        viewButtons.forEach(button => button.addEventListener('click', changeView));
     });
 </script>
