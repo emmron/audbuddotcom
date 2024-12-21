@@ -145,9 +145,10 @@ import Header from '../components/Header.astro';
 <script>
     import { auth } from '../firebase';
     import { onAuthStateChanged, signOut } from 'firebase/auth';
+    import type { User } from 'firebase/auth';
 
     // Check authentication state
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user: User | null) => {
         if (!user) {
             // Redirect to sign in if not authenticated
             window.location.href = '/signin';

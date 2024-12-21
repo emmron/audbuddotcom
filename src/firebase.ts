@@ -10,7 +10,13 @@ import {
     onAuthStateChanged,
     signOut
 } from 'firebase/auth';
-import type { User, Auth, AuthProvider } from 'firebase/auth';
+
+// Separate type imports
+import type { 
+    User, 
+    Auth, 
+    AuthProvider 
+} from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCLY3gExeJDCmPfVBD4-8hXHsYQhHgnKv8",
@@ -26,6 +32,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Function exports
 export { 
     auth, 
     GoogleAuthProvider, 
@@ -38,4 +45,5 @@ export {
     signOut
 };
 
+// Type exports
 export type { User, Auth, AuthProvider }; 
