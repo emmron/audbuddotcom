@@ -17,7 +17,8 @@ interface Discussion {
 // Initialize with empty array of Discussion type
 let latestDiscussions: Discussion[] = [];
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
   const secondsElapsed = Math.floor((Date.now() - date.getTime()) / 1000);
   const timeIntervals: [number, string][] = [
     [31536000, 'year'],
@@ -141,7 +142,7 @@ function getTimeAgo(date: Date): string {
                 <div class="post-category" style={{ background: `var(--category-${discussion.category.toLowerCase()})` }}>
                   {discussion.category}
                 </div>
-                <time class="post-time" datetime={discussion.createdAt.toISOString()} title={discussion.createdAt.toLocaleString()}>
+                <time class="post-time" datetime={new Date(discussion.createdAt).toISOString()} title={new Date(discussion.createdAt).toLocaleString()}>
                   {getTimeAgo(discussion.createdAt)}
                 </time>
               </div>
@@ -196,14 +197,26 @@ function getTimeAgo(date: Date): string {
 </main>
 
 <script>
+  interface Discussion {
+    id: string;
+    title: string;
+    content: string;
+    category: string;
+    createdAt: string;
+    authorName: string;
+    authorImage?: string;
+    comments: any[];
+    likes: number;
+  }
+
   function loadDiscussions() {
     try {
       const savedDiscussions = localStorage.getItem('discussions');
       if (savedDiscussions) {
         const discussions = JSON.parse(savedDiscussions)
-          .map((d: Discussion) => ({ 
-            ...d, 
-            createdAt: new Date(d.createdAt) 
+          .map((d: Discussion) => ({
+            ...d,
+            createdAt: d.createdAt // Keep as string, convert to Date when needed
           }))
           .sort((a: Discussion, b: Discussion) => 
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
