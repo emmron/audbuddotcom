@@ -1,5 +1,16 @@
 ---
-import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWithEmailAndPassword, updateProfile } from '../firebase';
+// Import types to fix TypeScript errors
+import type { Auth } from 'firebase/auth';
+import { 
+  auth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  OAuthProvider, 
+  createUserWithEmailAndPassword, 
+  updateProfile,
+  onAuthStateChanged,
+  type User
+} from '../firebase';
 ---
 
 <div class="auth-container">
@@ -151,8 +162,11 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 	const passwordInput = document.getElementById('password') as HTMLInputElement;
 	const usernameInput = document.getElementById('username') as HTMLInputElement;
 
+	// Type assertion for auth
+	const firebaseAuth = auth as Auth;
+
 	// Auth state observer
-	onAuthStateChanged(auth, (user: User | null) => {
+	onAuthStateChanged(firebaseAuth, (user: User | null) => {
 		if (user) {
 			window.location.href = '/dashboard';
 		}
@@ -199,21 +213,26 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 	form?.addEventListener('submit', async (e: Event) => {
 		e.preventDefault();
 		
-		const email = emailInput?.value.trim();
-		const password = passwordInput?.value;
-		const username = usernameInput?.value.trim();
+		// Get and validate form inputs
+		const formData = {
+			email: emailInput?.value.trim(),
+			password: passwordInput?.value,
+			username: usernameInput?.value.trim()
+		};
 
-		if (!email || !password || !username) {
+		// Validate all fields are present
+		if (Object.values(formData).some(value => !value)) {
 			showMessage(errorMessage, 'Please fill in all fields');
 			return;
 		}
 
-		if (!validateEmail(email)) {
+		// Validate email and password format
+		if (!validateEmail(formData.email)) {
 			showMessage(errorMessage, 'Please enter a valid email address');
 			return;
 		}
 
-		if (!validatePassword(password)) {
+		if (!validatePassword(formData.password)) {
 			showMessage(errorMessage, 'Password must be at least 8 characters long');
 			return;
 		}
@@ -221,126 +240,84 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 		setLoading(true);
 
 		try {
-			const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+			// Create user account
+			const userCredential = await createUserWithEmailAndPassword(
+				firebaseAuth, 
+				formData.email, 
+				formData.password
+			);
 			
 			if (userCredential.user) {
+				// Update profile with username
 				await updateProfile(userCredential.user, {
-					displayName: username
+					displayName: formData.username
 				});
 				
 				showMessage(successMessage, 'Account created successfully!');
 				
-				// Clear form
-				emailInput.value = '';
-				passwordInput.value = '';
-				usernameInput.value = '';
+				// Reset form
+				[emailInput, passwordInput, usernameInput].forEach(input => {
+					if (input) input.value = '';
+				});
 
-				// Redirect after short delay
-				setTimeout(() => {
-					window.location.href = '/dashboard';
-				}, 1500);
+				// Redirect after delay
+				setTimeout(() => window.location.href = '/dashboard', 1500);
 			}
 		} catch (error: any) {
 			console.error('Email/Password sign up error:', error);
-			let message = 'Failed to create account';
 			
-			if (error.code === 'auth/email-already-in-use') {
-				message = 'This email is already registered';
-			} else if (error.code === 'auth/invalid-email') {
-				message = 'Invalid email address';
-			} else if (error.code === 'auth/weak-password') {
-				message = 'Password is too weak';
-			} else if (error.code === 'auth/network-request-failed') {
-				message = 'Network error. Please check your connection';
-			}
+			// Map error codes to user-friendly messages
+			const errorMessages = {
+				'auth/email-already-in-use': 'This email is already registered',
+				'auth/invalid-email': 'Invalid email address',
+				'auth/weak-password': 'Password is too weak',
+				'auth/network-request-failed': 'Network error. Please check your connection'
+			};
 			
-			showMessage(errorMessage, message);
+			showMessage(errorMessage, errorMessages[error.code] || 'Failed to create account');
 		} finally {
 			setLoading(false);
 		}
 	});
 
-	// Google Sign Up
-	document.getElementById('google-sign-up')?.addEventListener('click', async () => {
+	// Handle OAuth Sign Up (Google & Apple)
+	const handleOAuthSignUp = async (providerName: 'Google' | 'Apple') => {
 		setLoading(true);
 		try {
-			const provider = new GoogleAuthProvider();
-			provider.addScope('email');
-			provider.addScope('profile');
-			
-			const result = await signInWithPopup(auth, provider);
-			if (!result.user) {
-				throw new Error('No user data returned');
-			}
-			
-			showMessage(successMessage, 'Successfully signed up with Google!');
-			
-			setTimeout(() => {
-				window.location.href = '/dashboard';
-			}, 1500);
-			
-		} catch (error: any) {
-			console.error('Google sign up error:', error);
-			let message = 'Failed to sign up with Google';
-			
-			if (error.code === 'auth/popup-closed-by-user') {
-				message = 'Sign up cancelled';
-			} else if (error.code === 'auth/popup-blocked') {
-				message = 'Please enable popups to sign up with Google';
-			} else if (error.code === 'auth/account-exists-with-different-credential') {
-				message = 'An account already exists with this email';
-			} else if (error.code === 'auth/network-request-failed') {
-				message = 'Network error. Please check your connection';
-			} else if (error.code === 'auth/operation-not-allowed') {
-				message = 'Google sign up is not enabled';
-			}
-			
-			showMessage(errorMessage, message);
-		} finally {
-			setLoading(false);
-		}
-	});
+			const provider = providerName === 'Google' 
+				? new GoogleAuthProvider()
+				: new OAuthProvider('apple.com');
 
-	// Apple Sign Up
-	document.getElementById('apple-sign-up')?.addEventListener('click', async () => {
-		setLoading(true);
-		try {
-			const provider = new OAuthProvider('apple.com');
+			// Add required scopes
 			provider.addScope('email');
-			provider.addScope('name');
+			provider.addScope(providerName === 'Google' ? 'profile' : 'name');
 			
-			const result = await signInWithPopup(auth, provider);
-			if (!result.user) {
-				throw new Error('No user data returned');
-			}
+			const result = await signInWithPopup(firebaseAuth, provider);
+			if (!result.user) throw new Error('No user data returned');
 			
-			showMessage(successMessage, 'Successfully signed up with Apple!');
-			
-			setTimeout(() => {
-				window.location.href = '/dashboard';
-			}, 1500);
+			showMessage(successMessage, `Successfully signed up with ${providerName}!`);
+			setTimeout(() => window.location.href = '/dashboard', 1500);
 			
 		} catch (error: any) {
-			console.error('Apple sign up error:', error);
-			let message = 'Failed to sign up with Apple';
+			console.error(`${providerName} sign up error:`, error);
 			
-			if (error.code === 'auth/popup-closed-by-user') {
-				message = 'Sign up cancelled';
-			} else if (error.code === 'auth/popup-blocked') {
-				message = 'Please enable popups to sign up with Apple';
-			} else if (error.code === 'auth/account-exists-with-different-credential') {
-				message = 'An account already exists with this email';
-			} else if (error.code === 'auth/network-request-failed') {
-				message = 'Network error. Please check your connection';
-			} else if (error.code === 'auth/invalid-oauth-provider') {
-				message = 'Apple sign in is not configured correctly';
-			} else if (error.code === 'auth/operation-not-allowed') {
-				message = 'Apple sign up is not enabled';
-			}
+			// Map common OAuth error codes to user-friendly messages
+			const errorMessages = {
+				'auth/popup-closed-by-user': 'Sign up cancelled',
+				'auth/popup-blocked': `Please enable popups to sign up with ${providerName}`,
+				'auth/account-exists-with-different-credential': 'An account already exists with this email',
+				'auth/network-request-failed': 'Network error. Please check your connection',
+				'auth/operation-not-allowed': `${providerName} sign up is not enabled`,
+				'auth/invalid-oauth-provider': `${providerName} sign in is not configured correctly`
+			};
 			
-			showMessage(errorMessage, message);
+			showMessage(errorMessage, errorMessages[error.code] || `Failed to sign up with ${providerName}`);
 		} finally {
 			setLoading(false);
 		}
-	});
+	};
+
+	// Attach OAuth click handlers
+	document.getElementById('google-sign-up')?.addEventListener('click', () => handleOAuthSignUp('Google'));
+	document.getElementById('apple-sign-up')?.addEventListener('click', () => handleOAuthSignUp('Apple'));
 </script>

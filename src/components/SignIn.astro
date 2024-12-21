@@ -322,116 +322,61 @@
 			await signInWithEmailAndPassword(auth, email, password);
 			showMessage(successMessage, 'Successfully signed in!');
 			
-			// Clear form
-			emailInput.value = '';
-			passwordInput.value = '';
-
-			// Redirect after short delay to show success message
-			setTimeout(() => {
-				window.location.href = '/dashboard';
-			}, 1500);
+			// Clear form and redirect
+			emailInput.value = passwordInput.value = '';
+			setTimeout(() => window.location.href = '/dashboard', 1500);
 
 		} catch (error: any) {
 			console.error('Email sign in error:', error);
-			let message = 'Failed to sign in';
-			
-			if (error.code === 'auth/invalid-credential') {
-				message = 'Invalid email or password';
-			} else if (error.code === 'auth/user-disabled') {
-				message = 'This account has been disabled';
-			} else if (error.code === 'auth/user-not-found') {
-				message = 'No account found with this email';
-			} else if (error.code === 'auth/too-many-requests') {
-				message = 'Too many failed attempts. Please try again later';
-			} else if (error.code === 'auth/network-request-failed') {
-				message = 'Network error. Please check your connection';
-			}
-			
-			showMessage(errorMessage, message);
+			const errorMessages: Record<string, string> = {
+				'auth/invalid-credential': 'Invalid email or password',
+				'auth/user-disabled': 'This account has been disabled',
+				'auth/user-not-found': 'No account found with this email',
+				'auth/too-many-requests': 'Too many failed attempts. Please try again later',
+				'auth/network-request-failed': 'Network error. Please check your connection'
+			};
+			showMessage(errorMessage, errorMessages[error.code] || 'Failed to sign in');
 		} finally {
 			setLoading(false);
 		}
 	});
 
-	// Google Sign In
-	document.getElementById('google-sign-in')?.addEventListener('click', async () => {
+	// Handle OAuth sign in (Google & Apple)
+	async function handleOAuthSignIn(providerId: 'google.com' | 'apple.com') {
 		setLoading(true);
 		try {
-			const provider = new GoogleAuthProvider();
+			const provider = providerId === 'google.com' 
+				? new GoogleAuthProvider()
+				: new OAuthProvider('apple.com');
+
+			// Add appropriate scopes
 			provider.addScope('email');
-			provider.addScope('profile');
+			provider.addScope(providerId === 'google.com' ? 'profile' : 'name');
 			
 			const result = await signInWithPopup(auth, provider);
 			if (!result.user) {
 				throw new Error('No user data returned');
 			}
 			
-			showMessage(successMessage, 'Successfully signed in with Google!');
-			
-			// Delay redirect to show success message
-			setTimeout(() => {
-				window.location.href = '/dashboard';
-			}, 1500);
+			showMessage(successMessage, `Successfully signed in with ${providerId === 'google.com' ? 'Google' : 'Apple'}!`);
+			setTimeout(() => window.location.href = '/dashboard', 1500);
 			
 		} catch (error: any) {
-			console.error('Google sign in error:', error);
-			let message = 'Failed to sign in with Google';
-			
-			if (error.code === 'auth/popup-closed-by-user') {
-				message = 'Sign in cancelled';
-			} else if (error.code === 'auth/popup-blocked') {
-				message = 'Please enable popups to sign in with Google';
-			} else if (error.code === 'auth/account-exists-with-different-credential') {
-				message = 'An account already exists with this email';
-			} else if (error.code === 'auth/network-request-failed') {
-				message = 'Network error. Please check your connection';
-			}
-			
-			showMessage(errorMessage, message);
+			console.error(`${providerId} sign in error:`, error);
+			const errorMessages: Record<string, string> = {
+				'auth/popup-closed-by-user': 'Sign in cancelled',
+				'auth/popup-blocked': `Please enable popups to sign in with ${providerId === 'google.com' ? 'Google' : 'Apple'}`,
+				'auth/account-exists-with-different-credential': 'An account already exists with this email',
+				'auth/network-request-failed': 'Network error. Please check your connection',
+				'auth/invalid-oauth-provider': 'OAuth provider is not configured correctly'
+			};
+			showMessage(errorMessage, errorMessages[error.code] || `Failed to sign in with ${providerId === 'google.com' ? 'Google' : 'Apple'}`);
 		} finally {
 			setLoading(false);
 		}
-	});
+	}
 
-	// Apple Sign In  
-	document.getElementById('apple-sign-in')?.addEventListener('click', async () => {
-		setLoading(true);
-		try {
-			const provider = new OAuthProvider('apple.com');
-			provider.addScope('email');
-			provider.addScope('name');
-			
-			const result = await signInWithPopup(auth, provider);
-			if (!result.user) {
-				throw new Error('No user data returned');
-			}
-			
-			showMessage(successMessage, 'Successfully signed in with Apple!');
-			
-			// Delay redirect to show success message
-			setTimeout(() => {
-				window.location.href = '/dashboard';
-			}, 1500);
-			
-		} catch (error: any) {
-			console.error('Apple sign in error:', error);
-			let message = 'Failed to sign in with Apple';
-			
-			if (error.code === 'auth/popup-closed-by-user') {
-				message = 'Sign in cancelled';
-			} else if (error.code === 'auth/popup-blocked') {
-				message = 'Please enable popups to sign in with Apple';
-			} else if (error.code === 'auth/account-exists-with-different-credential') {
-				message = 'An account already exists with this email';
-			} else if (error.code === 'auth/network-request-failed') {
-				message = 'Network error. Please check your connection';
-			} else if (error.code === 'auth/invalid-oauth-provider') {
-				message = 'Apple sign in is not configured correctly';
-			}
-			
-			showMessage(errorMessage, message);
-		} finally {
-			setLoading(false);
-		}
-	});
+	// Add click handlers for OAuth buttons
+	document.getElementById('google-sign-in')?.addEventListener('click', () => handleOAuthSignIn('google.com'));
+	document.getElementById('apple-sign-in')?.addEventListener('click', () => handleOAuthSignIn('apple.com'));
 </script>

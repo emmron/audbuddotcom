@@ -26,22 +26,32 @@ import {
     type DocumentSnapshot
 } from 'firebase/firestore';
 
-// Firebase configuration
+// Load environment variables
 const firebaseConfig = {
-    apiKey: "AIzaSyCLY3gExeJDCmPfVBD4-8hXHsYQhHgnKv8",
-    authDomain: "ausbuddotcom.firebaseapp.com",
-    projectId: "ausbuddotcom",
-    storageBucket: "ausbuddotcom.appspot.com",
-    messagingSenderId: "33898154226",
-    appId: "1:33898154226:web:3f4c194dc26c5a13da686b",
-    measurementId: "G-PPP9C6D8Y4"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Initialize Firebase with error handling
+let app;
+let auth;
+let db;
 
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} catch (error) {
+    console.error('Error initializing Firebase:', error);
+    throw new Error('Failed to initialize Firebase services');
+}
+
+// Export initialized services and types
 export { 
     auth, 
     db,
@@ -63,4 +73,4 @@ export {
     onSnapshot
 };
 
-export type { User, DocumentData, QuerySnapshot, DocumentSnapshot }; 
+export type { User, DocumentData, QuerySnapshot, DocumentSnapshot };
