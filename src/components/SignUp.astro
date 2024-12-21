@@ -143,16 +143,7 @@ import {
 </style>
 
 <script>
-	import { 
-		auth,
-		GoogleAuthProvider,
-		signInWithPopup,
-		OAuthProvider,
-		createUserWithEmailAndPassword,
-		updateProfile,
-		onAuthStateChanged,
-		type User
-	} from '../firebase';
+	import { auth } from '../firebase';
 
 	// Get DOM elements
 	const form = document.getElementById('signup-form') as HTMLFormElement;
@@ -162,11 +153,8 @@ import {
 	const passwordInput = document.getElementById('password') as HTMLInputElement;
 	const usernameInput = document.getElementById('username') as HTMLInputElement;
 
-	// Type assertion for auth
-	const firebaseAuth = auth as Auth;
-
 	// Auth state observer
-	onAuthStateChanged(firebaseAuth, (user: User | null) => {
+	auth.onAuthStateChanged((user) => {
 		if (user) {
 			window.location.href = '/dashboard';
 		}
@@ -241,15 +229,14 @@ import {
 
 		try {
 			// Create user account
-			const userCredential = await createUserWithEmailAndPassword(
-				firebaseAuth, 
+			const userCredential = await auth.createUserWithEmailAndPassword(
 				formData.email, 
 				formData.password
 			);
 			
 			if (userCredential.user) {
 				// Update profile with username
-				await updateProfile(userCredential.user, {
+				await userCredential.user.updateProfile({
 					displayName: formData.username
 				});
 				
@@ -285,14 +272,14 @@ import {
 		setLoading(true);
 		try {
 			const provider = providerName === 'Google' 
-				? new GoogleAuthProvider()
-				: new OAuthProvider('apple.com');
+				? new auth.GoogleAuthProvider()
+				: new auth.OAuthProvider('apple.com');
 
 			// Add required scopes
 			provider.addScope('email');
 			provider.addScope(providerName === 'Google' ? 'profile' : 'name');
 			
-			const result = await signInWithPopup(firebaseAuth, provider);
+			const result = await auth.signInWithPopup(provider);
 			if (!result.user) throw new Error('No user data returned');
 			
 			showMessage(successMessage, `Successfully signed up with ${providerName}!`);

@@ -13,134 +13,115 @@ const session = await getSession(Astro.request) as Session | null
 		{!session ? (
 			<div class="social-buttons">
 				<a href="/api/auth/signin/github" class="social-button">
-					<img src="/github-icon.svg" alt="GitHub" width="20" height="20" />
-					Sign in with GitHub
+					<img src="/github-icon.svg" alt="GitHub" width="24" height="24" />
+					<span>Continue with GitHub</span>
 				</a>
 				<a href="/api/auth/signin/google" class="social-button">
-					<img src="/google-icon.svg" alt="Google" width="20" height="20" />
-					Sign in with Google
+					<img src="/google-icon.svg" alt="Google" width="24" height="24" />
+					<span>Continue with Google</span>
+				</a>
+				<a href="/api/auth/signin/apple" class="social-button">
+					<img src="/apple-icon.svg" alt="Apple" width="24" height="24" />
+					<span>Continue with Apple</span>
 				</a>
 			</div>
 		) : (
 			<div class="signed-in">
-				<p>Signed in as {session.user?.email}</p>
-				<a href="/api/auth/signout" class="sign-out-button">Sign Out</a>
+				<div class="user-info">
+					{session.user?.image && (
+						<img src={session.user.image} alt="" class="avatar" width="48" height="48" />
+					)}
+					<div class="user-details">
+						<p class="user-name">{session.user?.name}</p>
+						<p class="user-email">{session.user?.email}</p>
+					</div>
+				</div>
+				<a href="/api/auth/signout" class="sign-out-button">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+						<polyline points="16 17 21 12 16 7" />
+						<line x1="21" y1="12" x2="9" y2="12" />
+					</svg>
+					<span>Sign Out</span>
+				</a>
 			</div>
 		)}
+
+		<p class="auth-footer">
+			Don't have an account? <a href="/signup">Sign up</a>
+		</p>
 	</section>
 </div>
 
 <style>
+	/* Modern CSS Reset */
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	/* CSS Custom Properties */
+	:root {
+		--color-primary: #4CAF50;
+		--color-primary-dark: #388E3C;
+		--color-secondary: #2196F3;
+		--color-error: #EF4444;
+		--color-background: #FFFFFF;
+		--color-text: #1F2937;
+		--color-text-light: #6B7280;
+		--color-border: #E5E7EB;
+		
+		--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+		--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+		--shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+		
+		--radius-sm: 0.5rem;
+		--radius-md: 1rem;
+		--radius-lg: 1.5rem;
+		
+		--transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
 	.auth-container {
-		min-height: calc(100vh - 80px);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 2rem;
-		background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(44, 62, 80, 0.08));
+		min-height: 100vh;
+		display: grid;
+		place-items: center;
+		padding: clamp(1rem, 5vw, 2rem);
+		background: linear-gradient(135deg, 
+			color-mix(in srgb, var(--color-primary) 5%, transparent),
+			color-mix(in srgb, var(--color-secondary) 10%, transparent)
+		);
 	}
 
 	#sign-in {
-		width: 100%;
-		max-width: 400px;
-		padding: 3rem;
-		background: white;
-		border-radius: 20px;
-		box-shadow: 
-			0 10px 40px rgba(0, 0, 0, 0.08),
-			0 4px 12px rgba(0, 0, 0, 0.05);
+		width: min(420px, 100%);
+		padding: clamp(2rem, 5vw, 3rem);
+		background: var(--color-background);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
+		transition: transform var(--transition);
+	}
+
+	#sign-in:hover {
+		transform: translateY(-4px);
 	}
 
 	h2 {
-		color: #1a2a3a;
-		font-size: 2.25em;
-		margin-bottom: 0.5rem;
-		text-align: center;
+		font-size: clamp(2rem, 5vw, 2.5rem);
 		font-weight: 800;
-		letter-spacing: -0.02em;
+		text-align: center;
+		background: linear-gradient(135deg, var(--color-text), var(--color-primary-dark));
+		-webkit-background-clip: text;
+		color: transparent;
+		margin-bottom: 0.5rem;
 	}
 
 	.subtitle {
-		color: #64748b;
+		color: var(--color-text-light);
 		text-align: center;
-		margin-bottom: 2.5rem;
-		font-size: 1.1em;
-		line-height: 1.5;
-	}
-
-	.input-group {
-		margin-bottom: 1.75rem;
-	}
-
-	label {
-		display: block;
-		margin-bottom: 0.5rem;
-		color: #334155;
-		font-weight: 600;
-		font-size: 0.95em;
-	}
-
-	input {
-		width: 100%;
-		padding: 1rem;
-		border: 2px solid #e2e8f0;
-		border-radius: 12px;
-		transition: all 0.2s ease;
-		font-size: 1em;
-		background: #f8fafc;
-	}
-
-	input:focus {
-		outline: none;
-		border-color: #4caf50;
-		box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
-		background: white;
-	}
-
-	.primary-button {
-		width: 100%;
-		padding: 1rem;
-		background: linear-gradient(135deg, #4caf50, #2e7d32);
-		color: white;
-		border: none;
-		border-radius: 12px;
-		font-weight: 600;
-		font-size: 1.05em;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.primary-button:hover {
-		background: linear-gradient(135deg, #43a047, #2e7d32);
-		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(76, 175, 80, 0.25);
-	}
-
-	.divider {
-		text-align: center;
-		margin: 2.5rem 0;
-		position: relative;
-	}
-
-	.divider::before,
-	.divider::after {
-		content: "";
-		position: absolute;
-		top: 50%;
-		width: 45%;
-		height: 1px;
-		background: #e2e8f0;
-	}
-
-	.divider::before { left: 0; }
-	.divider::after { right: 0; }
-
-	.divider span {
-		background: white;
-		padding: 0 1.25rem;
-		color: #64748b;
-		font-size: 0.95em;
-		font-weight: 500;
+		margin-bottom: 2rem;
+		font-size: 1.125rem;
 	}
 
 	.social-buttons {
@@ -152,90 +133,114 @@ const session = await getSession(Astro.request) as Session | null
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.875rem;
+		gap: 1rem;
 		padding: 1rem;
-		background: white;
-		border: 2px solid #e2e8f0;
-		border-radius: 12px;
+		background: var(--color-background);
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius-md);
 		font-weight: 600;
-		font-size: 1em;
-		color: #334155;
-		cursor: pointer;
-		transition: all 0.2s ease;
+		color: var(--color-text);
+		text-decoration: none;
+		transition: all var(--transition);
 	}
 
 	.social-button:hover {
-		background: #f8fafc;
+		background: color-mix(in srgb, var(--color-background) 97%, var(--color-text));
 		transform: translateY(-2px);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-		border-color: #cbd5e1;
+		box-shadow: var(--shadow-md);
+	}
+
+	.social-button img {
+		transition: transform var(--transition);
+	}
+
+	.social-button:hover img {
+		transform: scale(1.1);
+	}
+
+	.signed-in {
+		display: grid;
+		gap: 2rem;
+	}
+
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1rem;
+		background: color-mix(in srgb, var(--color-background) 97%, var(--color-text));
+		border-radius: var(--radius-md);
+	}
+
+	.avatar {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 2px solid var(--color-background);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.user-details {
+		flex: 1;
+	}
+
+	.user-name {
+		color: var(--color-text);
+		font-weight: 600;
+		font-size: 1.125rem;
+	}
+
+	.user-email {
+		color: var(--color-text-light);
+		font-size: 0.875rem;
+		margin-top: 0.25rem;
+	}
+
+	.sign-out-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 1rem 2rem;
+		background: color-mix(in srgb, var(--color-error) 15%, transparent);
+		color: var(--color-error);
+		border-radius: var(--radius-md);
+		font-weight: 600;
+		text-decoration: none;
+		transition: all var(--transition);
+	}
+
+	.sign-out-button:hover {
+		background: color-mix(in srgb, var(--color-error) 20%, transparent);
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px color-mix(in srgb, var(--color-error) 16%, transparent);
 	}
 
 	.auth-footer {
-		margin-top: 2.5rem;
+		margin-top: 2rem;
 		text-align: center;
-		color: #64748b;
-		font-size: 1em;
+		color: var(--color-text-light);
+		font-size: 0.875rem;
 	}
 
 	.auth-footer a {
-		color: #4caf50;
+		color: var(--color-primary);
 		text-decoration: none;
 		font-weight: 600;
-		transition: all 0.2s ease;
+		transition: color var(--transition);
 	}
 
 	.auth-footer a:hover {
-		color: #2e7d32;
-		text-decoration: underline;
+		color: var(--color-primary-dark);
 	}
 
-	@media (max-width: 480px) {
-		.auth-container {
-			padding: 1rem;
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--color-background: #1F2937;
+			--color-text: #F9FAFB;
+			--color-text-light: #9CA3AF;
+			--color-border: #374151;
 		}
-
-		#sign-in {
-			padding: 2rem;
-		}
-	}
-
-	.error-message, .success-message {
-		padding: 1rem;
-		border-radius: 12px;
-		margin: 1.25rem 0;
-		text-align: center;
-		opacity: 0;
-		transition: all 0.3s ease;
-		font-weight: 500;
-		line-height: 1.5;
-	}
-
-	.error-message {
-		background: #fef2f2;
-		color: #b91c1c;
-		border: 1px solid #fee2e2;
-	}
-
-	.success-message {
-		background: #f0fdf4;
-		color: #166534;
-		border: 1px solid #dcfce7;
-	}
-
-	.hidden {
-		display: none;
-		opacity: 0;
-	}
-
-	.loading {
-		opacity: 0.7;
-		pointer-events: none;
-		cursor: not-allowed;
-	}
-
-	button:disabled {
-		opacity: 0.7;
-		cursor: not-allowed;
 	}
 </style>

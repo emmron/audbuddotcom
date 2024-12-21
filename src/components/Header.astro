@@ -4,29 +4,35 @@ const currentPath = Astro.url.pathname;
 
 <header>
 	<div class="header-content">
-		<a href="/" class="logo-link">
+		<a href="/" class="logo-link" aria-label="Medicinal Cannabis Reviews - Home">
 			<h1 class="site-title">Medicinal Cannabis Reviews</h1>
 		</a>
-		<nav>
-			<div class="nav-links">
-				<a href="/strains" class={currentPath === '/strains' ? 'active' : ''}>
-					<span class="icon">🌿</span>
-					Strains
+		<nav aria-label="Main navigation">
+			<div class="nav-links" id="nav-links">
+				<a href="/strains" class={currentPath === '/strains' ? 'active' : ''} aria-current={currentPath === '/strains' ? 'page' : undefined}>
+					<span class="icon" aria-hidden="true">🌿</span>
+					<span>Strains</span>
 				</a>
-				<a href="/community" class={currentPath === '/community' ? 'active' : ''}>
-					<span class="icon">👥</span>
-					Community
+				<a href="/community" class={currentPath === '/community' ? 'active' : ''} aria-current={currentPath === '/community' ? 'page' : undefined}>
+					<span class="icon" aria-hidden="true">👥</span>
+					<span>Community</span>
 				</a>
-				<a href="https://cannabisreviews.com/blog">
-					<span class="icon">📝</span>
-					Blog
+				<a href="https://cannabisreviews.com/blog" rel="noopener">
+					<span class="icon" aria-hidden="true">📝</span>
+					<span>Blog</span>
 				</a>
 			</div>
-			<div class="auth-buttons">
+			<div class="auth-buttons" role="navigation" aria-label="User authentication">
 				<a href="/signin" class="auth-button">Sign In</a>
 				<a href="/signup" class="auth-button highlight">Sign Up</a>
 			</div>
-			<button class="mobile-menu-button" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
+			<button 
+				class="mobile-menu-button" 
+				aria-label="Toggle menu" 
+				aria-expanded="false" 
+				aria-controls="nav-links"
+				aria-haspopup="true"
+			>
 				<span class="bar"></span>
 				<span class="bar"></span>
 				<span class="bar"></span>
