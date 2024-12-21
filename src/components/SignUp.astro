@@ -17,7 +17,7 @@ import {
 	<section id="sign-up">
 		<h2>Create Account</h2>
 		<p class="subtitle">Join our community today</p>
-		<form id="signup-form">
+		<form id="signup-form" action="/api/auth/signup" method="POST">
 			<div class="input-group">
 				<label for="username">Username:</label>
 				<input type="text" id="username" name="username" required placeholder="Choose a username" />
@@ -31,12 +31,6 @@ import {
 			
 			<button type="submit">Sign Up</button>
 		</form>
-
-		<!-- Google Sign Up Button -->
-		<button id="google-sign-up">Sign up with Google</button>
-
-		<!-- Apple Sign Up Button -->
-		<button id="apple-sign-up">Sign up with Apple</button>
 
 		<div id="error-message" class="error-message hidden"></div>
 		<div id="success-message" class="success-message hidden"></div>
@@ -143,22 +137,10 @@ import {
 </style>
 
 <script>
-	import { auth } from '../firebase';
-
 	// Get DOM elements
 	const form = document.getElementById('signup-form') as HTMLFormElement;
 	const errorMessage = document.getElementById('error-message') as HTMLDivElement;
 	const successMessage = document.getElementById('success-message') as HTMLDivElement;
-	const emailInput = document.getElementById('email') as HTMLInputElement;
-	const passwordInput = document.getElementById('password') as HTMLInputElement;
-	const usernameInput = document.getElementById('username') as HTMLInputElement;
-
-	// Auth state observer
-	auth.onAuthStateChanged((user) => {
-		if (user) {
-			window.location.href = '/dashboard';
-		}
-	});
 
 	function showMessage(element: HTMLElement | null, message: string): void {
 		if (!element) return;
@@ -181,130 +163,40 @@ import {
 			button.disabled = isLoading;
 			button.classList.toggle('loading', isLoading);
 		});
-
+		
 		inputs.forEach(input => {
 			input.disabled = isLoading;
-			input.classList.toggle('loading', isLoading);
 		});
 	}
 
-	function validateEmail(email: string): boolean {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
-	}
+	// Form submission handler
+	if (form) {
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			setLoading(true);
 
-	function validatePassword(password: string): boolean {
-		return password.length >= 8;
-	}
-
-	// Email/Password Sign Up
-	form?.addEventListener('submit', async (e: Event) => {
-		e.preventDefault();
-		
-		// Get and validate form inputs
-		const formData = {
-			email: emailInput?.value.trim(),
-			password: passwordInput?.value,
-			username: usernameInput?.value.trim()
-		};
-
-		// Validate all fields are present
-		if (Object.values(formData).some(value => !value)) {
-			showMessage(errorMessage, 'Please fill in all fields');
-			return;
-		}
-
-		// Validate email and password format
-		if (!validateEmail(formData.email)) {
-			showMessage(errorMessage, 'Please enter a valid email address');
-			return;
-		}
-
-		if (!validatePassword(formData.password)) {
-			showMessage(errorMessage, 'Password must be at least 8 characters long');
-			return;
-		}
-
-		setLoading(true);
-
-		try {
-			// Create user account
-			const userCredential = await auth.createUserWithEmailAndPassword(
-				formData.email, 
-				formData.password
-			);
-			
-			if (userCredential.user) {
-				// Update profile with username
-				await userCredential.user.updateProfile({
-					displayName: formData.username
-				});
-				
-				showMessage(successMessage, 'Account created successfully!');
-				
-				// Reset form
-				[emailInput, passwordInput, usernameInput].forEach(input => {
-					if (input) input.value = '';
+			try {
+				const formData = new FormData(form);
+				const response = await fetch('/api/auth/signup', {
+					method: 'POST',
+					body: formData,
 				});
 
-				// Redirect after delay
-				setTimeout(() => window.location.href = '/dashboard', 1500);
+				const data = await response.json();
+
+				if (!response.ok) {
+					throw new Error(data.message || 'Signup failed');
+				}
+
+				showMessage(successMessage, 'Account created successfully! Redirecting...');
+				setTimeout(() => {
+					window.location.href = '/dashboard';
+				}, 2000);
+			} catch (error) {
+				showMessage(errorMessage, error instanceof Error ? error.message : 'An error occurred');
+			} finally {
+				setLoading(false);
 			}
-		} catch (error: any) {
-			console.error('Email/Password sign up error:', error);
-			
-			// Map error codes to user-friendly messages
-			const errorMessages = {
-				'auth/email-already-in-use': 'This email is already registered',
-				'auth/invalid-email': 'Invalid email address',
-				'auth/weak-password': 'Password is too weak',
-				'auth/network-request-failed': 'Network error. Please check your connection'
-			};
-			
-			showMessage(errorMessage, errorMessages[error.code] || 'Failed to create account');
-		} finally {
-			setLoading(false);
-		}
-	});
-
-	// Handle OAuth Sign Up (Google & Apple)
-	const handleOAuthSignUp = async (providerName: 'Google' | 'Apple') => {
-		setLoading(true);
-		try {
-			const provider = providerName === 'Google' 
-				? new auth.GoogleAuthProvider()
-				: new auth.OAuthProvider('apple.com');
-
-			// Add required scopes
-			provider.addScope('email');
-			provider.addScope(providerName === 'Google' ? 'profile' : 'name');
-			
-			const result = await auth.signInWithPopup(provider);
-			if (!result.user) throw new Error('No user data returned');
-			
-			showMessage(successMessage, `Successfully signed up with ${providerName}!`);
-			setTimeout(() => window.location.href = '/dashboard', 1500);
-			
-		} catch (error: any) {
-			console.error(`${providerName} sign up error:`, error);
-			
-			// Map common OAuth error codes to user-friendly messages
-			const errorMessages = {
-				'auth/popup-closed-by-user': 'Sign up cancelled',
-				'auth/popup-blocked': `Please enable popups to sign up with ${providerName}`,
-				'auth/account-exists-with-different-credential': 'An account already exists with this email',
-				'auth/network-request-failed': 'Network error. Please check your connection',
-				'auth/operation-not-allowed': `${providerName} sign up is not enabled`,
-				'auth/invalid-oauth-provider': `${providerName} sign in is not configured correctly`
-			};
-			
-			showMessage(errorMessage, errorMessages[error.code] || `Failed to sign up with ${providerName}`);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// Attach OAuth click handlers
-	document.getElementById('google-sign-up')?.addEventListener('click', () => handleOAuthSignUp('Google'));
-	document.getElementById('apple-sign-up')?.addEventListener('click', () => handleOAuthSignUp('Apple'));
+		});
+	}
 </script>

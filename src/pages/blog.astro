@@ -126,23 +126,23 @@ const uniqueTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
           <h2>Categories</h2>
           <ul class="category-list">
             {categories.map((cat, index) => (
-              <li key={index}>
+              <li>
                 <a 
                   href={`#${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  className={cat.name === "All Posts" ? "active" : ""}
+                  class={cat.name === "All Posts" ? "active" : ""}
                 >
-                  {cat.name} <span className="category-count">({cat.count})</span>
+                  {cat.name} <span class="category-count">({cat.count})</span>
                 </a>
               </li>
             ))}
           </ul>
         </nav>
 
-        <div className="tags-box">
+        <div class="tags-box">
           <h2>Popular Tags</h2>
-          <div className="tags-cloud">
+          <div class="tags-cloud">
             {uniqueTags.map((tag, index) => (
-              <a key={index} href={`#tag-${tag.toLowerCase()}`} className="tag">
+              <a href={`#tag-${tag.toLowerCase()}`} class="tag">
                 {tag}
               </a>
             ))}
@@ -150,10 +150,10 @@ const uniqueTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
         </div>
       </aside>
 
-      <section className="blog-posts" aria-label="Blog posts">
+      <section class="blog-posts" aria-label="Blog posts">
         {blogPosts.map((post, index) => (
-          <article key={index} className="blog-card">
-            <div className="blog-card-image">
+          <article class="blog-card">
+            <div class="blog-card-image">
               <img 
                 src={post.imageUrl} 
                 alt={`Illustration for ${post.title}`}
@@ -162,22 +162,22 @@ const uniqueTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
                 height="225"
               />
             </div>
-            <div className="blog-card-content">
-              <div className="blog-card-meta">
-                <span className="category">{post.category}</span>
-                <span className="read-time">{post.readTime}</span>
+            <div class="blog-card-content">
+              <div class="blog-card-meta">
+                <span class="category">{post.category}</span>
+                <span class="read-time">{post.readTime}</span>
               </div>
-              <h2 className="blog-card-title">
+              <h2 class="blog-card-title">
                 <a href={`/blog/${post.id}`}>{post.title}</a>
               </h2>
-              <p className="blog-card-excerpt">{post.excerpt}</p>
-              <div className="blog-card-footer">
-                <div className="author">By {post.author}</div>
-                <time dateTime={post.date.toISOString()}>{formatDate(post.date)}</time>
+              <p class="blog-card-excerpt">{post.excerpt}</p>
+              <div class="blog-card-footer">
+                <div class="author">By {post.author}</div>
+                <time datetime={post.date.toISOString()}>{formatDate(post.date)}</time>
               </div>
-              <div className="blog-card-tags">
+              <div class="blog-card-tags">
                 {post.tags.map((tag, index) => (
-                  <span key={index} className="tag">{tag}</span>
+                  <span class="tag">{tag}</span>
                 ))}
               </div>
             </div>
