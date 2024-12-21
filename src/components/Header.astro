@@ -2,47 +2,47 @@
 const currentRoute = Astro.url.pathname;
 ---
 
-<header>
-	<div class="header-wrapper">
-		<a href="/" class="brand-link" aria-label="Medicinal Cannabis Reviews - Home">
-			<h1 class="brand-title">Medicinal Cannabis Reviews</h1>
+<header class="header">
+	<div class="header__wrapper">
+		<a href="/" class="header__brand-link" aria-label="Medicinal Cannabis Reviews - Home">
+			<h1 class="header__brand-title">Medicinal Cannabis Reviews</h1>
 		</a>
-		<nav aria-label="Primary navigation">
-			<div class="navigation-links" id="navigation-links">
-				<a href="/strains" class={currentRoute === '/strains' ? 'active' : ''} aria-current={currentRoute === '/strains' ? 'page' : undefined}>
-					<span class="nav-icon" aria-hidden="true">🌿</span>
+		<nav class="header__nav" aria-label="Primary navigation">
+			<div class="header__navigation-links" id="navigation-links">
+				<a href="/strains" class={`header__nav-link ${currentRoute === '/strains' ? 'header__nav-link--active' : ''}`} aria-current={currentRoute === '/strains' ? 'page' : undefined}>
+					<span class="header__nav-icon" aria-hidden="true">🌿</span>
 					<span>Strains</span>
 				</a>
-				<a href="/community" class={currentRoute === '/community' ? 'active' : ''} aria-current={currentRoute === '/community' ? 'page' : undefined}>
-					<span class="nav-icon" aria-hidden="true">👥</span>
+				<a href="/community" class={`header__nav-link ${currentRoute === '/community' ? 'header__nav-link--active' : ''}`} aria-current={currentRoute === '/community' ? 'page' : undefined}>
+					<span class="header__nav-icon" aria-hidden="true">👥</span>
 					<span>Community</span>
 				</a>
-				<a href="https://cannabisreviews.com/blog" rel="noopener noreferrer" target="_blank">
-					<span class="nav-icon" aria-hidden="true">📝</span>
+				<a href="https://cannabisreviews.com/blog" class="header__nav-link" rel="noopener noreferrer" target="_blank">
+					<span class="header__nav-icon" aria-hidden="true">📝</span>
 					<span>Blog</span>
 				</a>
 			</div>
-			<div class="auth-links" role="navigation" aria-label="User authentication">
-				<a href="/signin" class="auth-link">Sign In</a>
-				<a href="/signup" class="auth-link highlight">Sign Up</a>
+			<div class="header__auth-links" role="navigation" aria-label="User authentication">
+				<a href="/signin" class="header__auth-link">Sign In</a>
+				<a href="/signup" class="header__auth-link header__auth-link--highlight">Sign Up</a>
 			</div>
 			<button 
-				class="menu-toggle" 
+				class="header__menu-toggle" 
 				aria-label="Toggle menu" 
 				aria-expanded="false" 
 				aria-controls="navigation-links"
 				aria-haspopup="true"
 			>
-				<span class="toggle-bar"></span>
-				<span class="toggle-bar"></span>
-				<span class="toggle-bar"></span>
+				<span class="header__toggle-bar"></span>
+				<span class="header__toggle-bar"></span>
+				<span class="header__toggle-bar"></span>
 			</button>
 		</nav>
 	</div>
 </header>
 
 <style>
-	header {
+	.header {
 		background: #fff;
 		padding: 1rem;
 		position: sticky;
@@ -52,7 +52,7 @@ const currentRoute = Astro.url.pathname;
 		border-bottom: 1px solid rgba(229, 231, 235, 0.8);
 	}
 
-	.header-wrapper {
+	.header__wrapper {
 		max-width: var(--content-width);
 		margin: 0 auto;
 		display: flex;
@@ -62,19 +62,19 @@ const currentRoute = Astro.url.pathname;
 		padding: 0 var(--spacing-base);
 	}
 
-	.brand-link {
+	.header__brand-link {
 		text-decoration: none;
 		padding: 0.75rem 1rem;
 		border-radius: var(--border-radius);
-		transition: background var(--transition-smooth), transform var(--transition-smooth);
+		transition: background 0.3s ease, transform 0.3s ease;
 	}
 
-	.brand-link:hover {
+	.header__brand-link:hover {
 		background: rgba(79, 70, 229, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.brand-title {
+	.header__brand-title {
 		margin: 0;
 		font-size: 1.625rem;
 		font-weight: 800;
@@ -85,55 +85,55 @@ const currentRoute = Astro.url.pathname;
 		-webkit-text-fill-color: transparent;
 	}
 
-	nav {
+	.header__nav {
 		display: flex;
 		align-items: center;
 		gap: 2.5rem;
 	}
 
-	.navigation-links {
+	.header__navigation-links {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
 	}
 
-	nav a {
+	.header__nav-link {
 		color: #4B5563;
 		text-decoration: none;
 		font-size: 1.0625rem;
 		font-weight: 500;
 		padding: 0.875rem 1.25rem;
 		border-radius: var(--border-radius);
-		transition: background var(--transition-smooth), transform var(--transition-smooth), color var(--transition-smooth);
+		transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
 		display: flex;
 		align-items: center;
 		gap: 0.625rem;
 	}
 
-	nav a:not(.auth-link):hover {
+	.header__nav-link:hover {
 		color: #1F2937;
 		background: rgba(79, 70, 229, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.nav-icon {
+	.header__nav-icon {
 		font-size: 1.375rem;
 		opacity: 0.9;
-		transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+		transition: opacity 0.3s ease, transform 0.3s ease;
 	}
 
-	nav a:hover .nav-icon {
+	.header__nav-link:hover .header__nav-icon {
 		opacity: 1;
 		transform: scale(1.1);
 	}
 
-	.active {
+	.header__nav-link--active {
 		color: #4F46E5 !important;
 		background: rgba(79, 70, 229, 0.08);
 		font-weight: 600;
 	}
 
-	.auth-links {
+	.header__auth-links {
 		display: flex;
 		gap: 1rem;
 		margin-left: 2.5rem;
@@ -141,36 +141,36 @@ const currentRoute = Astro.url.pathname;
 		border-left: 2px solid rgba(229, 231, 235, 0.8);
 	}
 
-	.auth-link {
+	.header__auth-link {
 		padding: 0.875rem 1.5rem;
 		border-radius: var(--border-radius);
 		font-weight: 600;
 		font-size: 1.0625rem;
-		transition: background var(--transition-smooth), transform var(--transition-smooth), color var(--transition-smooth);
+		transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
 	}
 
-	.auth-link:not(.highlight) {
+	.header__auth-link:not(.header__auth-link--highlight) {
 		color: #4B5563;
 	}
 
-	.auth-link:not(.highlight):hover {
+	.header__auth-link:not(.header__auth-link--highlight):hover {
 		color: #1F2937;
 		background: rgba(79, 70, 229, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.auth-link.highlight {
+	.header__auth-link--highlight {
 		background: var(--primary-gradient);
 		color: white;
 		box-shadow: var(--card-shadow);
 	}
 
-	.auth-link.highlight:hover {
+	.header__auth-link--highlight:hover {
 		transform: translateY(-2px);
 		box-shadow: var(--hover-shadow);
 	}
 
-	.menu-toggle {
+	.header__menu-toggle {
 		display: none;
 		flex-direction: column;
 		gap: 6px;
@@ -179,30 +179,30 @@ const currentRoute = Astro.url.pathname;
 		border: none;
 		cursor: pointer;
 		border-radius: var(--border-radius);
-		transition: background var(--transition-smooth);
+		transition: background 0.3s ease;
 	}
 
-	.menu-toggle:hover {
+	.header__menu-toggle:hover {
 		background: rgba(79, 70, 229, 0.08);
 	}
 
-	.toggle-bar {
+	.header__toggle-bar {
 		width: 26px;
 		height: 2px;
 		background: #4F46E5;
-		transition: transform var(--transition-smooth);
+		transition: transform 0.3s ease;
 		border-radius: 4px;
 	}
 
 	@media (max-width: 1200px) {
-		.header-wrapper {
+		.header__wrapper {
 			padding: 0 2rem;
 		}
 	}
 
 	@media (max-width: 768px) {
-		.navigation-links,
-		.auth-links {
+		.header__navigation-links,
+		.header__auth-links {
 			display: none;
 			position: absolute;
 			top: 100%;
@@ -216,41 +216,41 @@ const currentRoute = Astro.url.pathname;
 			box-shadow: var(--hover-shadow);
 		}
 
-		.navigation-links.show,
-		.auth-links.show {
+		.header__navigation-links.show,
+		.header__auth-links.show {
 			display: flex;
 		}
 
-		.auth-links {
+		.header__auth-links {
 			border: none;
 			margin: 0;
 			padding: 1.25rem;
 			background: #F9FAFB;
 		}
 
-		.menu-toggle {
+		.header__menu-toggle {
 			display: flex;
 		}
 
-		nav a,
-		.auth-link {
+		.header__nav-link,
+		.header__auth-link {
 			width: 100%;
 			justify-content: center;
 			padding: 1.125rem;
 		}
 
-		.auth-link.highlight {
+		.header__auth-link--highlight {
 			margin-top: 0.75rem;
 		}
 	}
 
 	@media (max-width: 480px) {
-		.header-wrapper {
+		.header__wrapper {
 			height: 3.75rem;
 			padding: 0 1.25rem;
 		}
 		
-		.brand-title {
+		.header__brand-title {
 			font-size: 1.375rem;
 		}
 	}
