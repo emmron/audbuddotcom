@@ -293,90 +293,112 @@ const categories = [
 </style>
 
 <script>
-    const form = document.getElementById('discussion-form') as HTMLFormElement;
-    const titleInput = document.getElementById('title') as HTMLInputElement;
-    const contentInput = document.getElementById('content') as HTMLTextAreaElement;
-    const tagsInput = document.getElementById('tags') as HTMLInputElement;
-    const tagsContainer = document.getElementById('tags-container');
-    const titleCount = document.getElementById('title-count');
-    const contentCount = document.getElementById('content-count');
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('discussion-form') as HTMLFormElement | null;
+        const titleInput = document.getElementById('title') as HTMLInputElement | null;
+        const contentInput = document.getElementById('content') as HTMLTextAreaElement | null;
+        const tagsInput = document.getElementById('tags') as HTMLInputElement | null;
+        const tagsContainer = document.getElementById('tags-container') as HTMLElement | null;
+        const titleCount = document.getElementById('title-count') as HTMLElement | null;
+        const contentCount = document.getElementById('content-count') as HTMLElement | null;
 
-    // Character count updates
-    titleInput?.addEventListener('input', () => {
-        if (titleCount) titleCount.textContent = titleInput.value.length.toString();
-    });
-
-    contentInput?.addEventListener('input', () => {
-        if (contentCount) contentCount.textContent = contentInput.value.length.toString();
-    });
-
-    // Tags handling
-    let tags: string[] = [];
-
-    tagsInput?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            const value = tagsInput.value.trim();
-            if (value && !tags.includes(value) && tags.length < 5) {
-                tags.push(value);
-                renderTags();
-                tagsInput.value = '';
-            }
+        if (!form || !titleInput || !contentInput || !tagsInput || !tagsContainer || !titleCount || !contentCount) {
+            console.error('One or more elements are missing from the DOM.');
+            return;
         }
-    });
 
-    function renderTags() {
-        if (!tagsContainer) return;
-        
-        tagsContainer.innerHTML = tags.map(tag => `
-            <span class="tag">
-                ${tag}
-                <button type="button" onclick="removeTag('${tag}')" aria-label="Remove ${tag}">×</button>
-            </span>
-        `).join('');
-    }
+        // Character count updates
+        titleInput.addEventListener('input', () => {
+            titleCount.textContent = titleInput.value.length.toString();
+        });
 
-    // Make removeTag available globally
-    (window as any).removeTag = (tag: string) => {
-        tags = tags.filter(t => t !== tag);
-        renderTags();
-    };
+        contentInput.addEventListener('input', () => {
+            contentCount.textContent = contentInput.value.length.toString();
+        });
 
-    // Form submission
-    form?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-        const defaultText = submitButton?.querySelector('.default-text') as HTMLElement;
-        const loadingText = submitButton?.querySelector('.loading-text') as HTMLElement;
+        // Tags handling
+        let tags: string[] = [];
 
-        try {
-            // Show loading state
-            submitButton.disabled = true;
-            defaultText.hidden = true;
-            loadingText.hidden = false;
+        tagsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const value = tagsInput.value.trim();
+                if (value && !tags.includes(value) && tags.length < 5) {
+                    tags.push(value);
+                    renderTags();
+                    tagsInput.value = '';
+                }
+            }
+        });
+        function renderTags() {
+            if (!tagsContainer) {
+                console.error('Tags container is missing.');
+                return;
+            }
+            tagsContainer.innerHTML = '';
+            tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'tag';
+                tagElement.textContent = tag;
 
-            const formData = new FormData(form);
-            formData.set('tags', JSON.stringify(tags));
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.setAttribute('aria-label', `Remove ${tag}`);
+                removeButton.textContent = '×';
+                removeButton.addEventListener('click', () => removeTag(tag));
 
-            const response = await fetch('/api/discussions', {
-                method: 'POST',
-                body: formData
+                tagElement.appendChild(removeButton);
+                tagsContainer.appendChild(tagElement);
             });
+        }
 
-            if (!response.ok) {
-                throw new Error('Failed to create discussion');
+        // Make removeTag available globally
+        (window as any).removeTag = (tag: string) => {
+            tags = tags.filter(t => t !== tag);
+            renderTags();
+        };
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+            const defaultText = submitButton?.querySelector('.default-text') as HTMLElement | null;
+            const loadingText = submitButton?.querySelector('.loading-text') as HTMLElement | null;
+
+            if (!submitButton || !defaultText || !loadingText) {
+                console.error('Submit button or its text elements are missing.');
+                return;
             }
 
-            // Redirect to the community page
-            window.location.href = '/community';
-        } catch (error) {
-            console.error('Error creating discussion:', error);
-            alert('Failed to create discussion. Please try again.');
+            try {
+                // Show loading state
+                submitButton.disabled = true;
+                defaultText.hidden = true;
+                loadingText.hidden = false;
 
-            // Reset button state
-            submitButton.disabled = false;
-            defaultText.hidden = false;
-            loadingText.hidden = true;
-        }
+                const formData = new FormData(form);
+                formData.set('tags', JSON.stringify(tags));
+
+                const response = await fetch('/api/discussions', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create discussion');
+                }
+
+                // Redirect to the community page
+                window.location.href = '/community';
+            } catch (error) {
+                console.error('Error creating discussion:', error);
+                alert('Failed to create discussion. Please try again.');
+
+                // Reset button state
+                submitButton.disabled = false;
+                defaultText.hidden = false;
+                loadingText.hidden = true;
+            }
+        });
     });
 </script>
