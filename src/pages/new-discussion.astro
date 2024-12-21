@@ -330,6 +330,7 @@ const categories = [
                 }
             }
         });
+
         function renderTags() {
             if (!tagsContainer) {
                 console.error('Tags container is missing.');
@@ -345,18 +346,15 @@ const categories = [
                 removeButton.type = 'button';
                 removeButton.setAttribute('aria-label', `Remove ${tag}`);
                 removeButton.textContent = '×';
-                removeButton.addEventListener('click', () => removeTag(tag));
+                removeButton.addEventListener('click', () => {
+                    tags = tags.filter(t => t !== tag);
+                    renderTags();
+                });
 
                 tagElement.appendChild(removeButton);
                 tagsContainer.appendChild(tagElement);
             });
         }
-
-        // Make removeTag available globally
-        (window as any).removeTag = (tag: string) => {
-            tags = tags.filter(t => t !== tag);
-            renderTags();
-        };
 
         // Form submission
         form.addEventListener('submit', async (e) => {
@@ -385,7 +383,8 @@ const categories = [
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to create discussion');
+                    const errorText = await response.text();
+                    throw new Error(`Failed to create discussion: ${errorText}`);
                 }
 
                 // Redirect to the community page
