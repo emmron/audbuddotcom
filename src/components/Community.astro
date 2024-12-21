@@ -84,17 +84,19 @@ function getTimeAgo(date: Date): string {
 
 <main class="community">
     <section class="community__hero">
-        <h1 class="community__title">Community Discussions</h1>
-        <p class="community__subtitle">Share experiences and learn from other patients</p>
-        
-        <div class="search-wrapper">
-            <input 
-                type="search" 
-                id="search-input"
-                class="search-input" 
-                placeholder="Search discussions..."
-                aria-label="Search discussions"
-            />
+        <div class="hero-content">
+            <h1>Community Discussions</h1>
+            <p>Share experiences and learn from other patients</p>
+            <div class="search-wrapper">
+                <input 
+                    type="search" 
+                    id="search-input"
+                    class="search-input" 
+                    placeholder="Search discussions..."
+                    aria-label="Search discussions"
+                />
+                <span class="search-icon">🔍</span>
+            </div>
         </div>
     </section>
 
@@ -102,17 +104,25 @@ function getTimeAgo(date: Date): string {
         <aside class="sidebar">
             <nav class="categories">
                 <h2>Categories</h2>
-                <ul>
+                <ul class="category-list">
                     {categories.map(cat => (
                         <li>
-                            <button class="category-btn" data-category={cat.id}>
-                                <span class="category-icon">{cat.icon}</span>
-                                <span>{cat.name}</span>
-                                <span class="post-count">
-                                    {cat.id === 'all' 
-                                        ? discussions.length 
-                                        : discussions.filter(d => d.category === cat.id).length}
-                                </span>
+                            <button 
+                                class="category-btn" 
+                                data-category={cat.id}
+                                data-count={cat.id === 'all' 
+                                    ? discussions.length 
+                                    : discussions.filter(d => d.category === cat.id).length}
+                            >
+                                <div class="category-icon">{cat.icon}</div>
+                                <div class="category-info">
+                                    <span class="category-name">{cat.name}</span>
+                                    <span class="category-count">
+                                        {cat.id === 'all' 
+                                            ? discussions.length 
+                                            : discussions.filter(d => d.category === cat.id).length} discussions
+                                    </span>
+                                </div>
                             </button>
                         </li>
                     ))}
@@ -127,6 +137,14 @@ function getTimeAgo(date: Date): string {
 
         <section class="discussions">
             <div class="discussions__header">
+                <div class="view-options">
+                    <button class="view-btn active" data-view="list">
+                        <span class="icon">📝</span> List
+                    </button>
+                    <button class="view-btn" data-view="grid">
+                        <span class="icon">📑</span> Grid
+                    </button>
+                </div>
                 <select class="sort-select">
                     <option value="recent">Most Recent</option>
                     <option value="popular">Most Popular</option>
@@ -134,7 +152,7 @@ function getTimeAgo(date: Date): string {
                 </select>
             </div>
 
-            <div class="discussions">
+            <div class="discussions__list">
                 {discussions.map((discussion) => (
                     <article 
                         class="discussion-card" 
@@ -174,32 +192,55 @@ function getTimeAgo(date: Date): string {
     .community {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 0 2rem 4rem;
     }
 
     .community__hero {
-        text-align: center;
-        padding: 3rem 1rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        padding: 4rem 0;
         margin-bottom: 2rem;
-        background: linear-gradient(to right, #4f46e5, #6366f1);
-        border-radius: 1rem;
-        color: white;
+        position: relative;
+        overflow: hidden;
     }
 
-    .community__title {
+    .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-content::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        animation: pulse 15s infinite;
+        z-index: -1;
+    }
+
+    .hero-content h1 {
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .community__subtitle {
+    .hero-content p {
         font-size: 1.2rem;
-        opacity: 0.9;
+        opacity: 0.8;
+        max-width: 600px;
+        margin: 0 auto 2rem;
     }
 
     .search-wrapper {
         max-width: 600px;
         margin: 2rem auto 0;
+        position: relative;
     }
 
     .search-input {
@@ -209,7 +250,22 @@ function getTimeAgo(date: Date): string {
         border-radius: 9999px;
         background: white;
         font-size: 1.1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding-right: 3rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.5;
     }
 
     .community__layout {
@@ -421,6 +477,11 @@ function getTimeAgo(date: Date): string {
             border-top: 1px solid #e5e7eb;
         }
     }
+
+    @keyframes pulse {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 
 <script>
@@ -429,7 +490,9 @@ function getTimeAgo(date: Date): string {
             searchInput: document.querySelector('.search-input') as HTMLInputElement | null,
             categoryButtons: Array.from(document.querySelectorAll<HTMLElement>('.category-btn')),
             discussionCards: Array.from(document.querySelectorAll<HTMLElement>('.discussion-card')),
-            newPostBtn: document.getElementById('new-post-btn') as HTMLElement | null
+            newPostBtn: document.getElementById('new-post-btn') as HTMLElement | null,
+            viewButtons: Array.from(document.querySelectorAll<HTMLElement>('.view-btn')),
+            discussionsList: document.querySelector('.discussions__list') as HTMLElement | null
         };
 
         const toggleDisplay = (element: HTMLElement, condition: boolean) => {
@@ -483,9 +546,20 @@ function getTimeAgo(date: Date): string {
             }
         };
 
+        const handleViewChange = (button: HTMLElement) => {
+            const view = button.dataset.view;
+            elements.viewButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            elements.discussionsList?.classList.remove('grid-view', 'list-view');
+            elements.discussionsList?.classList.add(`${view}-view`);
+        };
+
         elements.searchInput?.addEventListener('input', handleSearch);
         elements.categoryButtons.forEach((button) => button.addEventListener('click', () => handleCategoryClick(button)));
         elements.newPostBtn?.addEventListener('click', createNewPost);
         elements.discussionCards.forEach((card) => card.addEventListener('click', () => navigateToDiscussion(card)));
+        elements.viewButtons.forEach(button => {
+            button.addEventListener('click', () => handleViewChange(button));
+        });
     });
 </script>
