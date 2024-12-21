@@ -427,48 +427,44 @@ function getTimeAgo(date: Date): string {
 </style>
 
 <script>
-    // Client-side interactivity
+    // Client-side interactivity with a futuristic touch
     document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.querySelector('.search-input');
-        const categoryButtons = document.querySelectorAll('.category-btn');
-        const sortSelect = document.querySelector('.sort-select');
-        const discussionCards = document.querySelectorAll('.discussion-card');
-        const newPostBtn = document.getElementById('new-post-btn');
+        const elements = {
+            searchInput: document.querySelector('.search-input'),
+            categoryButtons: document.querySelectorAll('.category-btn'),
+            discussionCards: document.querySelectorAll('.discussion-card'),
+            newPostBtn: document.getElementById('new-post-btn')
+        };
 
-        // Search functionality
-        searchInput?.addEventListener('input', (e) => {
+        const toggleDisplay = (element: HTMLElement, condition: boolean) => {
+            element.style.display = condition ? 'flex' : 'none';
+        };
+
+        const handleSearch = (e: Event) => {
             const query = (e.target as HTMLInputElement).value.toLowerCase();
-            discussionCards.forEach(card => {
+            elements.discussionCards.forEach((card: HTMLElement) => {
                 const title = card.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
                 const content = card.querySelector('.discussion-card__preview')?.textContent?.toLowerCase() || '';
-                const isVisible = title.includes(query) || content.includes(query);
-                (card as HTMLElement).style.display = isVisible ? 'flex' : 'none';
+                toggleDisplay(card, title.includes(query) || content.includes(query));
             });
-        });
+        };
 
-        // Category filtering
-        categoryButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const category = button.getAttribute('data-category');
-                categoryButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+        const handleCategoryClick = (button: HTMLElement) => {
+            const category = button.getAttribute('data-category');
+            elements.categoryButtons.forEach((btn: HTMLElement) => btn.classList.remove('active'));
+            button.classList.add('active');
 
-                discussionCards.forEach(card => {
-                    const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase();
-                    const shouldShow = category === 'all' || cardCategory === category;
-                    (card as HTMLElement).style.display = shouldShow ? 'flex' : 'none';
-                });
+            elements.discussionCards.forEach((card: HTMLElement) => {
+                const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase();
+                toggleDisplay(card, category === 'all' || cardCategory === category);
             });
-        });
+        };
 
-        // New post button functionality
-        newPostBtn?.addEventListener('click', async () => {
+        const createNewPost = async () => {
             try {
                 const response = await fetch('/api/discussions', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         title: 'New Discussion',
                         content: 'This is a new discussion.',
@@ -477,24 +473,21 @@ function getTimeAgo(date: Date): string {
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to create discussion');
-                }
-
+                if (!response.ok) throw new Error('Failed to create discussion');
                 window.location.href = '/new-discussion';
             } catch (error) {
                 alert('Failed to create discussion. Please try again.');
             }
-        });
+        };
 
-        // Click into a thread
-        discussionCards.forEach(card => {
-            card.addEventListener('click', () => {
-                const discussionId = card.querySelector('.discussion-card__title a')?.getAttribute('href');
-                if (discussionId) {
-                    window.location.href = discussionId;
-                }
-            });
-        });
+        const navigateToDiscussion = (card: HTMLElement) => {
+            const discussionId = card.querySelector('.discussion-card__title a')?.getAttribute('href');
+            if (discussionId) window.location.href = discussionId;
+        };
+
+        elements.searchInput?.addEventListener('input', handleSearch);
+        elements.categoryButtons.forEach((button: HTMLElement) => button.addEventListener('click', () => handleCategoryClick(button)));
+        elements.newPostBtn?.addEventListener('click', createNewPost);
+        elements.discussionCards.forEach((card: HTMLElement) => card.addEventListener('click', () => navigateToDiscussion(card)));
     });
 </script>
