@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig } from 'astro';
 import auth from 'auth-astro';
 import node from '@astrojs/node';
 
