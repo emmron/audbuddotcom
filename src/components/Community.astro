@@ -236,6 +236,18 @@ import Header from './Header.astro';
         transition: var(--transition-smooth);
         position: relative;
         overflow: hidden;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .card::before {
@@ -313,6 +325,13 @@ import Header from './Header.astro';
         background: var(--background-alt);
         border-radius: 16px;
         box-shadow: var(--shadow-sm);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
     }
 
     .modal {
@@ -328,6 +347,14 @@ import Header from './Header.astro';
         align-items: center;
         z-index: 1000;
         padding: 1.5rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .modal:not(.hidden) {
+        opacity: 1;
+        visibility: visible;
     }
 
     .modal-content {
@@ -341,6 +368,12 @@ import Header from './Header.astro';
         position: relative;
         box-shadow: var(--shadow-lg);
         border: 1px solid rgba(255,255,255,0.1);
+        transform: scale(0.9);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .modal:not(.hidden) .modal-content {
+        transform: scale(1);
     }
 
     @media (max-width: 768px) {
@@ -386,6 +419,19 @@ import Header from './Header.astro';
     .hidden {
         display: none;
     }
+
+    .highlight {
+        background-color: rgba(34, 197, 94, 0.2);
+        padding: 0.2em;
+        border-radius: 4px;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
 </style>
 
 <script>
@@ -397,36 +443,78 @@ import Header from './Header.astro';
         authorName: string;
         createdAt: Date;
         likes: number;
-        comments: number;
+        comments: Comment[];
     }
 
-    // Mock data store with proper typing
+    interface Comment {
+        id: string;
+        authorName: string;
+        content: string;
+        createdAt: Date;
+        likes: number;
+    }
+
     let discussions: Discussion[] = [];
+    let filteredDiscussions: Discussion[] = [];
     
     const discussionCards = document.getElementById('discussion-cards');
     const newDiscussionBtn = document.getElementById('new-discussion-btn');
     const modal = document.getElementById('new-discussion-modal');
     const form = document.getElementById('new-discussion-form') as HTMLFormElement | null;
     const cancelBtn = document.getElementById('cancel-discussion');
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const searchButton = document.getElementById('search-button');
+
+    // Search functionality
+    function searchDiscussions(query: string) {
+        if (!query.trim()) {
+            filteredDiscussions = [...discussions];
+            renderDiscussions(filteredDiscussions);
+            return;
+        }
+
+        const searchTerms = query.toLowerCase().trim().split(' ');
+        
+        filteredDiscussions = discussions.filter(discussion => {
+            const searchableText = `
+                ${discussion.title.toLowerCase()} 
+                ${discussion.content.toLowerCase()} 
+                ${discussion.category.toLowerCase()} 
+                ${discussion.authorName.toLowerCase()}
+                ${discussion.comments.map(c => `${c.content.toLowerCase()} ${c.authorName.toLowerCase()}`).join(' ')}
+            `;
+
+            return searchTerms.every(term => searchableText.includes(term));
+        });
+
+        renderDiscussions(filteredDiscussions);
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value;
+        searchDiscussions(query);
+    });
+
+    searchButton?.addEventListener('click', () => {
+        searchDiscussions(searchInput?.value || '');
+    });
 
     // Error handling utility
     const handleError = (error: unknown, context: string) => {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         console.error(`${context}:`, errorMessage);
-        // Show error to user
         const errorAlert = document.createElement('div');
         errorAlert.setAttribute('role', 'alert');
-        errorAlert.className = 'error-message';
+        errorAlert.className = 'error';
         errorAlert.textContent = 'An error occurred. Please try again.';
         document.body.appendChild(errorAlert);
         setTimeout(() => errorAlert.remove(), 5000);
     };
 
-    // Show modal with error handling
+    // Modal handlers
     newDiscussionBtn?.addEventListener('click', () => {
         try {
             modal?.classList.remove('hidden');
-            // Set focus to first input when modal opens
             setTimeout(() => {
                 document.getElementById('discussion-title')?.focus();
             }, 100);
@@ -435,7 +523,6 @@ import Header from './Header.astro';
         }
     });
 
-    // Hide modal with error handling
     cancelBtn?.addEventListener('click', () => {
         try {
             modal?.classList.add('hidden');
@@ -445,33 +532,11 @@ import Header from './Header.astro';
         }
     });
 
-    // Handle form submission with proper validation and error handling
-    // Update Discussion type to include comments
-    type Comment = {
-        id: string;
-        authorName: string;
-        content: string;
-        createdAt: Date;
-        likes: number;
-    };
-
-    // Add comments to Discussion type
-    interface Discussion {
-        id: string;
-        title: string;
-        category: string;
-        content: string;
-        authorName: string;
-        createdAt: Date;
-        likes: number;
-        comments: Comment[];
-    }
-
+    // Form submission handler
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         try {
-            // Get form elements with type safety
             const formElements = {
                 authorName: document.getElementById('author-name') as HTMLInputElement,
                 title: document.getElementById('discussion-title') as HTMLInputElement,
@@ -479,12 +544,10 @@ import Header from './Header.astro';
                 content: document.getElementById('discussion-content') as HTMLTextAreaElement
             };
 
-            // Validate all form elements exist
             if (Object.values(formElements).some(el => !el)) {
                 throw new Error('Required form elements not found');
             }
 
-            // Input validation with descriptive errors
             const validations = [
                 {
                     condition: formElements.title.value.trim().length < 5,
@@ -501,7 +564,6 @@ import Header from './Header.astro';
                 throw new Error(failedValidation.message);
             }
 
-            // Create new discussion with sanitized inputs
             const newDiscussion: Discussion = {
                 id: crypto.randomUUID(),
                 title: formElements.title.value.trim(),
@@ -510,18 +572,15 @@ import Header from './Header.astro';
                 authorName: formElements.authorName.value.trim() || 'Anonymous',
                 createdAt: new Date(),
                 likes: 0,
-                comments: [] // Initialize empty comments array
+                comments: []
             };
 
-            // Update discussions array and localStorage atomically
             discussions.unshift(newDiscussion);
             localStorage.setItem('discussions', JSON.stringify(discussions));
 
-            // Reset UI state
             modal?.classList.add('hidden');
             form.reset();
             
-            // Show success message with ARIA support
             const successMsg = document.createElement('div');
             successMsg.setAttribute('role', 'alert');
             successMsg.setAttribute('aria-live', 'polite');
@@ -529,10 +588,10 @@ import Header from './Header.astro';
             successMsg.textContent = 'Discussion posted successfully!';
             document.body.appendChild(successMsg);
 
-            // Cleanup success message after animation
             setTimeout(() => {
                 successMsg.remove();
-                renderDiscussions();
+                filteredDiscussions = [...discussions];
+                renderDiscussions(filteredDiscussions);
             }, 3000);
 
         } catch (error) {
@@ -540,7 +599,7 @@ import Header from './Header.astro';
         }
     });
 
-    // Load saved discussions from localStorage with proper type handling
+    // Load saved discussions
     try {
         const savedDiscussions = localStorage.getItem('discussions');
         if (savedDiscussions) {
@@ -554,7 +613,6 @@ import Header from './Header.astro';
                 })) || []
             }));
         } else {
-            // Initial mock data with comments
             discussions = [
                 {
                     id: crypto.randomUUID(),
@@ -576,31 +634,49 @@ import Header from './Header.astro';
                 }
             ];
         }
+        filteredDiscussions = [...discussions];
     } catch (error) {
         handleError(error, 'Error loading saved discussions');
     }
 
-    // Enhanced rendering with comments support
-    function renderDiscussions() {
+    function highlightSearchTerms(text: string, searchQuery: string): string {
+        if (!searchQuery.trim()) return text;
+        
+        const terms = searchQuery.toLowerCase().trim().split(' ');
+        let highlightedText = text;
+        
+        terms.forEach(term => {
+            const regex = new RegExp(`(${term})`, 'gi');
+            highlightedText = highlightedText.replace(regex, '<span class="highlight">$1</span>');
+        });
+        
+        return highlightedText;
+    }
+
+    function renderDiscussions(discussionsToRender: Discussion[]) {
         if (!discussionCards) return;
 
         try {
             discussionCards.innerHTML = '';
             
-            if (discussions.length === 0) {
+            if (discussionsToRender.length === 0) {
                 discussionCards.innerHTML = `
-                    <div class="no-discussions">
-                        <p>No discussions yet. Be the first to start one!</p>
+                    <div class="no-results">
+                        <p>No discussions found. Try different search terms or start a new discussion!</p>
                     </div>
                 `;
                 return;
             }
             
-            discussions.forEach((data) => {
+            discussionsToRender.forEach((data) => {
                 const timeAgo = getTimeAgo(data.createdAt);
-                const truncatedContent = data.content.length > 150 
-                    ? `${data.content.substring(0, 150)}...` 
-                    : data.content;
+                const searchQuery = searchInput?.value || '';
+                
+                const highlightedTitle = highlightSearchTerms(data.title, searchQuery);
+                const highlightedContent = highlightSearchTerms(
+                    data.content.length > 150 ? `${data.content.substring(0, 150)}...` : data.content,
+                    searchQuery
+                );
 
                 const commentsHTML = data.comments.map(comment => `
                     <div class="comment" data-comment-id="${comment.id}">
@@ -608,7 +684,7 @@ import Header from './Header.astro';
                             <span class="comment-author">👤 ${comment.authorName}</span>
                             <span class="comment-date">${getTimeAgo(comment.createdAt)}</span>
                         </div>
-                        <p class="comment-content">${comment.content}</p>
+                        <p class="comment-content">${highlightSearchTerms(comment.content, searchQuery)}</p>
                         <div class="comment-actions">
                             <button class="like-button" aria-label="Like comment">❤️ ${comment.likes}</button>
                         </div>
@@ -621,8 +697,8 @@ import Header from './Header.astro';
                             <span class="tag" role="status">${data.category}</span>
                             <span class="date" aria-label="Posted ${timeAgo}">${timeAgo}</span>
                         </div>
-                        <h3>${data.title}</h3>
-                        <p>${truncatedContent}</p>
+                        <h3>${highlightedTitle}</h3>
+                        <p>${highlightedContent}</p>
                         <div class="stats" role="group" aria-label="Post statistics">
                             <span aria-label="Author: ${data.authorName}">👤 ${data.authorName}</span>
                             <button class="like-button" aria-label="Like discussion">❤️ ${data.likes}</button>
@@ -639,7 +715,6 @@ import Header from './Header.astro';
                 `;
             });
 
-            // Add event listeners for likes and comments
             attachInteractionHandlers();
 
         } catch (error) {
@@ -647,7 +722,6 @@ import Header from './Header.astro';
         }
     }
 
-    // Handle likes and comments
     function attachInteractionHandlers() {
         const likeButtons = document.querySelectorAll('.like-button');
         const commentForms = document.querySelectorAll('.comment-form');
@@ -676,7 +750,8 @@ import Header from './Header.astro';
                     discussion.likes++;
                 }
                 localStorage.setItem('discussions', JSON.stringify(discussions));
-                renderDiscussions();
+                filteredDiscussions = [...discussions];
+                renderDiscussions(filteredDiscussions);
             }
         }
     }
@@ -699,13 +774,11 @@ import Header from './Header.astro';
                 };
                 discussion.comments.push(newComment);
                 localStorage.setItem('discussions', JSON.stringify(discussions));
-                renderDiscussions();
+                filteredDiscussions = [...discussions];
+                renderDiscussions(filteredDiscussions);
             }
         }
     }
-
-    // Initial render
-    renderDiscussions();
 
     function getTimeAgo(date: Date): string {
         try {
@@ -736,4 +809,7 @@ import Header from './Header.astro';
             return 'some time ago';
         }
     }
+
+    // Initial render
+    renderDiscussions(filteredDiscussions);
 </script>
