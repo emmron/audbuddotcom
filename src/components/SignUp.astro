@@ -130,22 +130,19 @@
 </style>
 
 <script>
-	// Ensure the script runs after the DOM is fully loaded
 	document.addEventListener('DOMContentLoaded', () => {
-		const form = document.getElementById('signup-form') as HTMLFormElement;
-		const errorMessage = document.getElementById('error-message') as HTMLDivElement;
-		const successMessage = document.getElementById('success-message') as HTMLDivElement;
-		const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+		const form = document.getElementById('signup-form');
+		const errorMessage = document.getElementById('error-message');
+		const successMessage = document.getElementById('success-message');
+		const submitButton = form?.querySelector('button[type="submit"]');
 
-		function showMessage(element: HTMLElement, message: string) {
+		const showMessage = (element, message) => {
 			element.textContent = message;
 			element.classList.remove('hidden');
-			setTimeout(() => {
-				element.classList.add('hidden');
-			}, 5000);
-		}
+			setTimeout(() => element.classList.add('hidden'), 5000);
+		};
 
-		form?.addEventListener('submit', async (e: Event) => {
+		form?.addEventListener('submit', async (e) => {
 			e.preventDefault();
 			if (!form || !submitButton) return;
 
