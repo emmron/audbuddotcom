@@ -9,8 +9,8 @@ if (typeof window !== 'undefined') {
   if (savedDiscussions) {
     try {
       latestDiscussions = JSON.parse(savedDiscussions)
-        .map(d => ({ ...d, createdAt: new Date(d.createdAt) }))
-        .sort((a, b) => b.createdAt - a.createdAt)
+        .map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) }))
+        .sort((a: any, b: any) => b.createdAt - a.createdAt)
         .slice(0, 3); // Get 3 most recent
     } catch (error) {
       console.error('Error loading discussions:', error);
@@ -38,7 +38,8 @@ function getTimeAgo(date: Date): string {
 
   return 'just now';
 }
-
+---
+<div>
 	<img class="background" src={background.src} alt="Background" fetchpriority="high" />
 	
 	<Header />
