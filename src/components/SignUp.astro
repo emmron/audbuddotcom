@@ -131,12 +131,12 @@
 
 <script>
 	document.addEventListener('DOMContentLoaded', () => {
-		const form = document.getElementById('signup-form');
-		const errorMessage = document.getElementById('error-message');
-		const successMessage = document.getElementById('success-message');
-		const submitButton = form?.querySelector('button[type="submit"]');
+		const form = document.getElementById('signup-form') as HTMLFormElement | null;
+		const errorMessage = document.getElementById('error-message') as HTMLDivElement | null;
+		const successMessage = document.getElementById('success-message') as HTMLDivElement | null;
+		const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 
-		const showMessage = (element, message) => {
+		const showMessage = (element: HTMLDivElement, message: string): void => {
 			element.textContent = message;
 			element.classList.remove('hidden');
 			setTimeout(() => element.classList.add('hidden'), 5000);
@@ -144,7 +144,7 @@
 
 		form?.addEventListener('submit', async (e) => {
 			e.preventDefault();
-			if (!form || !submitButton) return;
+			if (!form || !submitButton || !errorMessage || !successMessage) return;
 
 			submitButton.disabled = true;
 

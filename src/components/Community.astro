@@ -136,11 +136,13 @@ function getTimeAgo(date: Date): string {
 
             <div class="discussions__list">
                 {discussions.map((discussion) => (
-                    <article class="discussion-card" onclick={`window.location.href='/discussion/${discussion.id}'`}>
+                    <article class="discussion-card" data-discussion-id={discussion.id} onclick={`window.location.href='/discussion/${discussion.id}'`}>
                         <div class="discussion-card__main">
                             <div class="discussion-card__meta">
                                 <span class="category-tag">{discussion.category}</span>
-                                <span class="time">{getTimeAgo(discussion.created_at)}</span>
+                                <time class="time" datetime={discussion.created_at.toISOString()}>
+                                    {new Date(discussion.created_at).toLocaleDateString()}
+                                </time>
                             </div>
                             
                             <h3 class="discussion-card__title">
@@ -150,19 +152,16 @@ function getTimeAgo(date: Date): string {
                             <p class="discussion-card__preview">{discussion.content}</p>
                             
                             <div class="discussion-card__author">
-                                <span class="avatar">👤</span>
-                                <span class="name">{discussion.author}</span>
+                                By {discussion.author}
                             </div>
                         </div>
 
                         <div class="discussion-card__stats">
                             <div class="stat">
-                                <span class="icon">❤️</span>
-                                <span class="count">{discussion.likes}</span>
+                                <span>👍</span> {discussion.likes}
                             </div>
                             <div class="stat">
-                                <span class="icon">💬</span>
-                                <span class="count">{discussion.comments.length}</span>
+                                <span>💬</span> {discussion.comments.length}
                             </div>
                         </div>
                     </article>
@@ -479,8 +478,10 @@ function getTimeAgo(date: Date): string {
         };
 
         const navigateToDiscussion = (card: HTMLElement) => {
-            const discussionId = card.querySelector('.discussion-card__title')?.textContent;
-            if (discussionId) window.location.href = `/discussion/${discussionId}`;
+            const discussionId = card.getAttribute('data-discussion-id');
+            if (discussionId) {
+                window.location.href = `/discussion/${discussionId}`;
+            }
         };
 
         elements.searchInput?.addEventListener('input', handleSearch);
