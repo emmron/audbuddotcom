@@ -3,7 +3,7 @@ import Header from '../components/Header.astro';
 import { supabase } from '../lib/supabase';
 import type { Strain } from '../types/supabase';
 
-// Fetch strains from Supabase
+// Fetch strains from Supabase with error handling and type safety
 const { data: strains, error } = await supabase
   .from('strains')
   .select('*')
@@ -18,30 +18,35 @@ if (error) {
 
 <main class="strains-page">
   <section class="hero">
-    <h1>Cannabis Strains Database</h1>
-    <p>Explore our comprehensive collection of cannabis strains and their properties</p>
+    <h1>Cannabis Strains Library</h1>
+    <p>Discover detailed profiles of medicinal cannabis strains, their effects, and therapeutic properties</p>
   </section>
 
   <div class="strains-grid">
-    {strains?.map((strain) => (
+    {strains?.map((strain: Strain) => (
       <article class="strain-card">
-        <div class="strain-image">
-          <img src={strain.image_url || '/placeholder-strain.jpg'} alt={strain.name} />
-        </div>
         <div class="strain-content">
-          <h2>{strain.name}</h2>
-          <div class="strain-type">{strain.type}</div>
-          <div class="strain-thc">THC: {strain.thc}%</div>
-          <div class="strain-cbd">CBD: {strain.cbd}%</div>
-          <p class="strain-description">{strain.description}</p>
-          <div class="strain-effects">
-            <h3>Effects</h3>
-            <div class="effects-tags">
-              {strain.effects?.map((effect: string) => (
-                <span class="effect-tag">{effect}</span>
-              ))}
+          <header class="strain-header">
+            <h2>{strain.name}</h2>
+            <div class="strain-badges">
+              <span class="badge type">{strain.type}</span>
+              {strain.thc && <span class="badge thc">THC: {strain.thc}%</span>}
+              {strain.cbd && <span class="badge cbd">CBD: {strain.cbd}%</span>}
             </div>
-          </div>
+          </header>
+
+          <p class="strain-description">{strain.description}</p>
+
+          {strain.effects && strain.effects.length > 0 && (
+            <div class="strain-effects">
+              <h3>Primary Effects</h3>
+              <div class="effects-tags">
+                {strain.effects.map((effect: string) => (
+                  <span class="effect-tag">{effect}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </article>
     ))}
@@ -89,50 +94,51 @@ if (error) {
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
+    padding: 1.5rem;
   }
 
   .strain-card:hover {
     transform: translateY(-4px);
   }
 
-  .strain-image {
-    height: 200px;
-    overflow: hidden;
-  }
-
-  .strain-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .strain-content {
-    padding: 1.5rem;
-  }
-
-  .strain-content h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-gray-900);
-    margin-bottom: 0.5rem;
-  }
-
-  .strain-type {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: var(--color-primary-100);
-    color: var(--color-primary-700);
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
+  .strain-header {
     margin-bottom: 1rem;
   }
 
-  .strain-thc,
-  .strain-cbd {
+  .strain-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+    margin-bottom: 0.75rem;
+  }
+
+  .strain-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
     font-size: 0.875rem;
-    color: var(--color-gray-600);
-    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .badge.type {
+    background: var(--color-primary-100);
+    color: var(--color-primary-700);
+  }
+
+  .badge.thc {
+    background: var(--color-green-100);
+    color: var(--color-green-700);
+  }
+
+  .badge.cbd {
+    background: var(--color-blue-100);
+    color: var(--color-blue-700);
   }
 
   .strain-description {
@@ -145,7 +151,7 @@ if (error) {
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-gray-900);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .effects-tags {
@@ -183,4 +189,4 @@ if (error) {
       grid-template-columns: 1fr;
     }
   }
-</style> 
+</style>
