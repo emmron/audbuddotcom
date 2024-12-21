@@ -1,6 +1,7 @@
 ---
 import background from '../assets/background.svg';
 import Header from './Header.astro';
+import { Fragment } from 'astro/components';
 // Get latest discussions from localStorage
 let latestDiscussions = [];
 
@@ -135,55 +136,60 @@ function getTimeAgo(date: Date): string {
       </div>
       {latestDiscussions.length > 0 ? (
         <div class="posts">
-          {latestDiscussions.map((discussion: any) => (
-            <a href={`/community#${discussion.id}`} class="post" key={discussion.id}>
-              <div class="post-header">
-                <div class="post-category" style={{ background: `var(--category-${discussion.category.toLowerCase()})` }}>
-                  {discussion.category}
-                </div>
-                <time class="post-time" datetime={discussion.createdAt.toISOString()} title={discussion.createdAt.toLocaleString()}>
-                  {getTimeAgo(discussion.createdAt)}
-                </time>
-              </div>
-              <h3 class="post-title">{discussion.title}</h3>
-              <p class="post-excerpt">
-                {discussion.content.length > 120 
-                  ? `${discussion.content.substring(0, 120).trim()}...` 
-                  : discussion.content}
-              </p>
-              <div class="post-footer">
-                <div class="author">
-                  {discussion.authorImage ? (
-                    <img 
-                      src={discussion.authorImage} 
-                      alt={`${discussion.authorName}'s avatar`} 
-                      class="author-avatar"
-                      width="32"
-                      height="32"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div class="author-avatar" aria-hidden="true">👤</div>
-                  )}
-                  <span class="author-name">{discussion.authorName}</span>
-                </div>
-                <div class="post-stats">
-                  <span class="stat" title={`${discussion.comments.length} Comments`}>
-                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                      <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                    </svg>
-                    {discussion.comments.length}
-                  </span>
-                  <span class="stat" title={`${discussion.likes} Likes`}>
-                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                      <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                    {discussion.likes}
-                  </span>
-                </div>
-              </div>
-            </a>
-          ))}
+          {latestDiscussions.map((discussion: any) => {
+            const discussionId = discussion.id;
+            return (
+              <Fragment key={discussionId}>
+                <a href={`/community#${discussionId}`} class="post">
+                  <div class="post-header">
+                    <div class="post-category" style={{ background: `var(--category-${discussion.category.toLowerCase()})` }}>
+                      {discussion.category}
+                    </div>
+                    <time class="post-time" datetime={discussion.createdAt.toISOString()} title={discussion.createdAt.toLocaleString()}>
+                      {getTimeAgo(discussion.createdAt)}
+                    </time>
+                  </div>
+                  <h3 class="post-title">{discussion.title}</h3>
+                  <p class="post-excerpt">
+                    {discussion.content.length > 120 
+                      ? `${discussion.content.substring(0, 120).trim()}...` 
+                      : discussion.content}
+                  </p>
+                  <div class="post-footer">
+                    <div class="author">
+                      {discussion.authorImage ? (
+                        <img 
+                          src={discussion.authorImage} 
+                          alt={`${discussion.authorName}'s avatar`} 
+                          class="author-avatar"
+                          width="32"
+                          height="32"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div class="author-avatar" aria-hidden="true">👤</div>
+                      )}
+                      <span class="author-name">{discussion.authorName}</span>
+                    </div>
+                    <div class="post-stats">
+                      <span class="stat" title={`${discussion.comments.length} Comments`}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                          <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        {discussion.comments.length}
+                      </span>
+                      <span class="stat" title={`${discussion.likes} Likes`}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                          <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                        {discussion.likes}
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              </Fragment>
+            );
+          })}
         </div>
       ) : (
         <div class="empty-state">
