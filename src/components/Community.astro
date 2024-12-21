@@ -462,8 +462,29 @@ function getTimeAgo(date: Date): string {
         });
 
         // New post button functionality
-        newPostBtn?.addEventListener('click', () => {
-            window.location.href = '/new-discussion';
+        newPostBtn?.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/discussions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: 'New Discussion',
+                        content: 'This is a new discussion.',
+                        category: 'general',
+                        author: 'User5'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create discussion');
+                }
+
+                window.location.href = '/new-discussion';
+            } catch (error) {
+                alert('Failed to create discussion. Please try again.');
+            }
         });
 
         // Click into a thread
