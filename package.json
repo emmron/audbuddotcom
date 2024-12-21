@@ -23,6 +23,6 @@
   },
   "resolutions": {
     "astro": "4.3.2",
-    "@astrojs/node": "7.0.0"
+    "@astrojs_ssr_adapter": "7.0.0"
   }
 }
