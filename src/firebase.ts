@@ -8,8 +8,23 @@ import {
     createUserWithEmailAndPassword,
     updateProfile,
     onAuthStateChanged,
-    signOut
+    signOut,
+    type User
 } from 'firebase/auth';
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    query, 
+    orderBy, 
+    limit,
+    serverTimestamp,
+    onSnapshot,
+    type DocumentData,
+    type QuerySnapshot,
+    type DocumentSnapshot
+} from 'firebase/firestore';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -25,9 +40,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 export { 
     auth, 
+    db,
     GoogleAuthProvider, 
     signInWithPopup, 
     OAuthProvider,
@@ -35,5 +52,15 @@ export {
     createUserWithEmailAndPassword,
     updateProfile,
     onAuthStateChanged,
-    signOut
-}; 
+    signOut,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    limit,
+    serverTimestamp,
+    onSnapshot
+};
+
+export type { User, DocumentData, QuerySnapshot, DocumentSnapshot }; 

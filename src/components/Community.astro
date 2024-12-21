@@ -8,8 +8,8 @@ import Header from './Header.astro';
         <h1>Cannabis Community</h1>
         <p>Connect with other medicinal cannabis patients and share experiences</p>
         <div class="search-bar">
-            <input type="search" placeholder="Search discussions..." />
-            <button>Search</button>
+            <input type="search" id="search-input" placeholder="Search discussions..." />
+            <button id="search-button">Search</button>
         </div>
     </section>
 
@@ -17,73 +17,42 @@ import Header from './Header.astro';
         <section class="discussions">
             <div class="section-header">
                 <h2>Popular Discussions</h2>
-                <button class="new-discussion">Start Discussion</button>
+                <button id="new-discussion-btn" class="new-discussion">Start Discussion</button>
             </div>
-            <div class="discussion-cards">
-                <article class="card">
-                    <div class="card-header">
-                        <span class="tag">Treatment</span>
-                        <span class="date">2 hours ago</span>
-                    </div>
-                    <h3>Treatment Experiences</h3>
-                    <p>Share and learn from others' experiences with different strains and treatments.</p>
-                    <div class="stats">
-                        <span>👥 2.4k members</span>
-                        <span>💬 180 active</span>
-                        <span>🔥 Trending</span>
-                    </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-header">
-                        <span class="tag">Reviews</span>
-                        <span class="date">5 hours ago</span>
-                    </div>
-                    <h3>Strain Reviews</h3>
-                    <p>Detailed discussions about specific cannabis strains and their medical benefits.</p>
-                    <div class="stats">
-                        <span>👥 3.1k members</span>
-                        <span>💬 245 active</span>
-                        <span>⭐ Popular</span>
-                    </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-header">
-                        <span class="tag">Support</span>
-                        <span class="date">1 day ago</span>
-                    </div>
-                    <h3>Medical Support</h3>
-                    <p>Connect with others managing similar conditions with medicinal cannabis.</p>
-                    <div class="stats">
-                        <span>👥 1.8k members</span>
-                        <span>💬 120 active</span>
-                    </div>
-                </article>
+            <div id="discussion-cards" class="discussion-cards">
+                <div class="loading">Loading discussions...</div>
             </div>
         </section>
 
-        <aside class="sidebar">
-            <section class="guidelines">
-                <h2>Community Guidelines</h2>
-                <ul>
-                    <li><span class="icon">✨</span> Be respectful and supportive of others</li>
-                    <li><span class="icon">💡</span> Share experiences, not medical advice</li>
-                    <li><span class="icon">🎯</span> Keep discussions focused on medicinal use</li>
-                    <li><span class="icon">🔒</span> Protect your privacy and others'</li>
-                </ul>
-            </section>
-
-            <section class="trending-topics">
-                <h2>Trending Topics</h2>
-                <div class="topic-list">
-                    <a href="#" class="topic">#PainManagement</a>
-                    <a href="#" class="topic">#AnxietyRelief</a>
-                    <a href="#" class="topic">#SleepHealth</a>
-                    <a href="#" class="topic">#WellnessTips</a>
-                </div>
-            </section>
-        </aside>
+        <!-- New Discussion Modal -->
+        <div id="new-discussion-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Start a New Discussion</h2>
+                <form id="new-discussion-form">
+                    <div class="input-group">
+                        <label for="discussion-title">Title</label>
+                        <input type="text" id="discussion-title" required minlength="5" maxlength="100">
+                    </div>
+                    <div class="input-group">
+                        <label for="discussion-category">Category</label>
+                        <select id="discussion-category" required>
+                            <option value="treatment">Treatment</option>
+                            <option value="reviews">Reviews</option>
+                            <option value="questions">Questions</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="discussion-content">Content</label>
+                        <textarea id="discussion-content" required minlength="20" maxlength="2000"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" id="cancel-discussion" class="secondary-button">Cancel</button>
+                        <button type="submit" class="primary-button">Post Discussion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -275,4 +244,202 @@ import Header from './Header.astro';
             text-align: center;
         }
     }
-</style> 
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .input-group {
+        margin-bottom: 1rem;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .input-group textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1rem;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+
+    .error {
+        color: #dc3545;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
+</style>
+
+<script>
+    import { 
+        auth, 
+        db, 
+        collection, 
+        addDoc, 
+        query, 
+        orderBy, 
+        onSnapshot,
+        serverTimestamp 
+    } from '../firebase';
+
+    const discussionCards = document.getElementById('discussion-cards');
+    const newDiscussionBtn = document.getElementById('new-discussion-btn');
+    const modal = document.getElementById('new-discussion-modal');
+    const form = document.getElementById('new-discussion-form');
+    const cancelBtn = document.getElementById('cancel-discussion');
+
+    // Listen for authentication state
+    auth.onAuthStateChanged((user) => {
+        if (newDiscussionBtn) {
+            if (user) {
+                newDiscussionBtn.style.display = 'block';
+            } else {
+                newDiscussionBtn.style.display = 'none';
+            }
+        }
+    });
+
+    // Show modal
+    newDiscussionBtn?.addEventListener('click', () => {
+        if (!auth.currentUser) {
+            window.location.href = '/signin';
+            return;
+        }
+        modal?.classList.remove('hidden');
+    });
+
+    // Hide modal
+    cancelBtn?.addEventListener('click', () => {
+        modal?.classList.add('hidden');
+    });
+
+    // Handle form submission
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!auth.currentUser) {
+            window.location.href = '/signin';
+            return;
+        }
+
+        const title = (document.getElementById('discussion-title') as HTMLInputElement).value;
+        const category = (document.getElementById('discussion-category') as HTMLSelectElement).value;
+        const content = (document.getElementById('discussion-content') as HTMLTextAreaElement).value;
+
+        try {
+            await addDoc(collection(db, 'discussions'), {
+                title,
+                category,
+                content,
+                authorId: auth.currentUser.uid,
+                authorName: auth.currentUser.displayName || 'Anonymous',
+                createdAt: serverTimestamp(),
+                likes: 0,
+                comments: 0
+            });
+
+            modal?.classList.add('hidden');
+            form.reset();
+        } catch (error) {
+            console.error('Error posting discussion:', error);
+        }
+    });
+
+    // Listen for discussions in real-time
+    const q = query(collection(db, 'discussions'), orderBy('createdAt', 'desc'));
+    onSnapshot(q, (snapshot) => {
+        if (!discussionCards) return;
+
+        discussionCards.innerHTML = '';
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const date = data.createdAt?.toDate() || new Date();
+            const timeAgo = getTimeAgo(date);
+
+            discussionCards.innerHTML += `
+                <article class="card" data-id="${doc.id}">
+                    <div class="card-header">
+                        <span class="tag">${data.category}</span>
+                        <span class="date">${timeAgo}</span>
+                    </div>
+                    <h3>${data.title}</h3>
+                    <p>${data.content.substring(0, 150)}${data.content.length > 150 ? '...' : ''}</p>
+                    <div class="stats">
+                        <span>👤 ${data.authorName}</span>
+                        <span>❤️ ${data.likes}</span>
+                        <span>💬 ${data.comments}</span>
+                    </div>
+                </article>
+            `;
+        });
+    });
+
+    function getTimeAgo(date: Date): string {
+        const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+        
+        let interval = Math.floor(seconds / 31536000);
+        if (interval > 1) return interval + ' years ago';
+        
+        interval = Math.floor(seconds / 2592000);
+        if (interval > 1) return interval + ' months ago';
+        
+        interval = Math.floor(seconds / 86400);
+        if (interval > 1) return interval + ' days ago';
+        
+        interval = Math.floor(seconds / 3600);
+        if (interval > 1) return interval + ' hours ago';
+        
+        interval = Math.floor(seconds / 60);
+        if (interval > 1) return interval + ' minutes ago';
+        
+        return Math.floor(seconds) + ' seconds ago';
+    }
+</script> 
