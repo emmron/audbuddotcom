@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "astro": "^4.3.2",
-    "@auth/core": "^0.18.0",
-    "auth-astro": "^0.3.0",
+    "@auth/core": "^0.5.0",
+    "@auth/astro": "^0.5.0",
     "@astrojs/node": "^7.0.0"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { defineConfig } from 'astro/config';
-import auth from 'auth-astro';
+import auth from '@auth/astro';
 import node from '@astrojs/node';
 
 export default defineConfig({
