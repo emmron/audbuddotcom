@@ -1,22 +1,21 @@
 ---
 import background from '../assets/background.svg';
 import Header from './Header.astro';
-// Get latest discussions from localStorage
-let latestDiscussions = [];
 
-if (typeof window !== 'undefined') {
-  const savedDiscussions = localStorage.getItem('discussions');
-  if (savedDiscussions) {
-    try {
-      latestDiscussions = JSON.parse(savedDiscussions)
-        .map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) }))
-        .sort((a: any, b: any) => b.createdAt - a.createdAt)
-        .slice(0, 3); // Get 3 most recent
-    } catch (error) {
-      console.error('Error loading discussions:', error);
-    }
-  }
+interface Discussion {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  createdAt: Date;
+  authorName: string;
+  authorImage?: string;
+  comments: any[];
+  likes: number;
 }
+
+// Initialize with empty array of Discussion type
+let latestDiscussions: Discussion[] = [];
 
 function getTimeAgo(date: Date): string {
   const secondsElapsed = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -39,6 +38,7 @@ function getTimeAgo(date: Date): string {
   return 'just now';
 }
 ---
+
 <main class="page-container">
   <img class="background-image" src={background.src} alt="Background" fetchpriority="high" />
   
@@ -135,6 +135,13 @@ function getTimeAgo(date: Date): string {
       </div>
       {latestDiscussions.length > 0 ? (
         <div class="posts">
+          {latestDiscussions.map((discussion) => (
+            <a href={`/community#${discussion.id}`} class="post">
+              <div class="post-header">
+                <div class="post-category" style={{ background: `var(--category-${discussion.category.toLowerCase()})` }}>
+                  {discussion.category}
+                </div>
+                <time class="post-time" datetime={discussion.createdAt.toISOString()} title={discussion.createdAt.toLocaleString()}>
           {latestDiscussions.map((discussion: any) => {
             const discussionId = discussion.id;
             return (
@@ -202,6 +209,42 @@ function getTimeAgo(date: Date): string {
     </section>
   </div>
 </main>
+
+<script>
+  // Move localStorage logic here
+  function loadDiscussions() {
+    try {
+      const savedDiscussions = localStorage.getItem('discussions');
+      if (savedDiscussions) {
+        const discussions = JSON.parse(savedDiscussions)
+          .map(d => ({ ...d, createdAt: new Date(d.createdAt) }))
+          .sort((a, b) => b.createdAt - a.createdAt)
+          .slice(0, 3);
+        
+        // Update the DOM with the discussions
+        const postsContainer = document.querySelector('.posts');
+        const emptyState = document.querySelector('.empty-state');
+        
+        if (discussions.length > 0 && postsContainer && emptyState) {
+          postsContainer.style.display = 'grid';
+          emptyState.style.display = 'none';
+          // Add discussion items to the container
+          // ... (implement rendering logic)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading discussions:', error);
+    }
+  }
+
+  // Execute when the DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadDiscussions);
+  } else {
+    loadDiscussions();
+  }
+</script>
+
 <style>
   :root {
     --primary-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
