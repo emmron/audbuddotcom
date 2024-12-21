@@ -427,13 +427,12 @@ function getTimeAgo(date: Date): string {
 </style>
 
 <script>
-    // Client-side interactivity with a futuristic touch
     document.addEventListener('DOMContentLoaded', () => {
         const elements = {
-            searchInput: document.querySelector('.search-input'),
-            categoryButtons: document.querySelectorAll('.category-btn'),
-            discussionCards: document.querySelectorAll('.discussion-card'),
-            newPostBtn: document.getElementById('new-post-btn')
+            searchInput: document.querySelector('.search-input') as HTMLInputElement | null,
+            categoryButtons: Array.from(document.querySelectorAll<HTMLElement>('.category-btn')),
+            discussionCards: Array.from(document.querySelectorAll<HTMLElement>('.discussion-card')),
+            newPostBtn: document.getElementById('new-post-btn') as HTMLElement | null
         };
 
         const toggleDisplay = (element: HTMLElement, condition: boolean) => {
@@ -442,7 +441,7 @@ function getTimeAgo(date: Date): string {
 
         const handleSearch = (e: Event) => {
             const query = (e.target as HTMLInputElement).value.toLowerCase();
-            elements.discussionCards.forEach((card: HTMLElement) => {
+            elements.discussionCards.forEach((card) => {
                 const title = card.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
                 const content = card.querySelector('.discussion-card__preview')?.textContent?.toLowerCase() || '';
                 toggleDisplay(card, title.includes(query) || content.includes(query));
@@ -451,10 +450,10 @@ function getTimeAgo(date: Date): string {
 
         const handleCategoryClick = (button: HTMLElement) => {
             const category = button.getAttribute('data-category');
-            elements.categoryButtons.forEach((btn: HTMLElement) => btn.classList.remove('active'));
+            elements.categoryButtons.forEach((btn) => btn.classList.remove('active'));
             button.classList.add('active');
 
-            elements.discussionCards.forEach((card: HTMLElement) => {
+            elements.discussionCards.forEach((card) => {
                 const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase();
                 toggleDisplay(card, category === 'all' || cardCategory === category);
             });
@@ -486,8 +485,8 @@ function getTimeAgo(date: Date): string {
         };
 
         elements.searchInput?.addEventListener('input', handleSearch);
-        elements.categoryButtons.forEach((button: HTMLElement) => button.addEventListener('click', () => handleCategoryClick(button)));
+        elements.categoryButtons.forEach((button) => button.addEventListener('click', () => handleCategoryClick(button)));
         elements.newPostBtn?.addEventListener('click', createNewPost);
-        elements.discussionCards.forEach((card: HTMLElement) => card.addEventListener('click', () => navigateToDiscussion(card)));
+        elements.discussionCards.forEach((card) => card.addEventListener('click', () => navigateToDiscussion(card)));
     });
 </script>
