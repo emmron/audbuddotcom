@@ -268,9 +268,10 @@ const currentRoute = Astro.url.pathname;
 <script>
 	// Type definitions for better type safety
 	type MenuElements = {
-		toggleButton: HTMLButtonElement | null;
+		button: HTMLButtonElement | null;
 		navLinks: HTMLElement | null;
 		authLinks: HTMLElement | null;
+		authButtons: HTMLElement | null;
 		bars: HTMLElement[];
 	};
 
@@ -296,9 +297,10 @@ const currentRoute = Astro.url.pathname;
 	// Initialize DOM elements with error handling
 	function initializeMenuElements(): MenuElements {
 		try {
-			const toggleButton = document.querySelector('.menu-toggle') as HTMLButtonElement | null;
+			const button = document.querySelector('.menu-toggle') as HTMLButtonElement | null;
 			const navLinks = document.querySelector('.navigation-links') as HTMLElement | null;
 			const authLinks = document.querySelector('.auth-links') as HTMLElement | null;
+			const authButtons = document.querySelector('.auth-links') as HTMLElement | null;
 			
 			// Convert NodeList to Array and ensure HTMLElement type with validation
 			const bars = Array.from(document.querySelectorAll('.toggle-bar')).map((el, index) => {
@@ -308,7 +310,7 @@ const currentRoute = Astro.url.pathname;
 				return el;
 			});
 
-			if (!toggleButton || !navLinks || !authLinks) {
+			if (!button || !navLinks || !authLinks || !authButtons) {
 				throw new Error('Required menu elements not found');
 			}
 
@@ -316,14 +318,15 @@ const currentRoute = Astro.url.pathname;
 				throw new Error(`Expected 3 bar elements, found ${bars.length}`);
 			}
 
-			return { toggleButton, navLinks, authLinks, bars };
+			return { button, navLinks, authLinks, authButtons, bars };
 		} catch (error) {
 			console.error('Failed to initialize menu elements:', error instanceof Error ? error.message : 'Unknown error');
 			// Return safe default state
 			return {
-				toggleButton: null,
+				button: null,
 				navLinks: null,
 				authLinks: null,
+				authButtons: null,
 				bars: []
 			};
 		}
@@ -397,22 +400,22 @@ const currentRoute = Astro.url.pathname;
 
 	// Core menu state handler
 	function handleMenuState(elements: MenuElements, open: boolean): void {
-		if (!elements?.toggleButton || !elements?.navLinks || !elements?.authLinks || typeof open !== 'boolean') {
+		if (!elements?.button || !elements?.navLinks || !elements?.authLinks || typeof open !== 'boolean') {
 			throw new Error('Invalid menu state parameters');
 		}
 
-		const { toggleButton, navLinks, authLinks } = elements;
+		const { button, navLinks, authLinks } = elements;
 
 		// Update button state
-		toggleButton.setAttribute('aria-expanded', String(open));
-		toggleButton.setAttribute('aria-label', `${open ? 'Close' : 'Open'} menu`);
+		button.setAttribute('aria-expanded', String(open));
+		button.setAttribute('aria-label', `${open ? 'Close' : 'Open'} menu`);
 
 		// Batch all animations in a single frame
 		requestAnimationFrame(() => {
 			const transition = `opacity ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}, transform ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}`;
 			
 			// Update menu elements
-			[navLinks, authButtons].forEach(element => {
+			[navLinks, authLinks].forEach(element => {
 				if (element instanceof HTMLElement) {
 					element.style.transition = transition;
 					element.classList.toggle('show', open);
@@ -420,7 +423,7 @@ const currentRoute = Astro.url.pathname;
 			});
 
 			// Update hamburger icon
-			animateHamburger(elements, open);
+			animateMenuToggle(elements, open);
 
 			// Update body state
 			document.body.style.overflow = open ? 'hidden' : '';
@@ -433,7 +436,7 @@ const currentRoute = Astro.url.pathname;
 
 	// Menu initialization and event management
 	function initializeMenu(): void {
-		const elements = initializeElements();
+		const elements = initializeMenuElements();
 		if (!elements?.button) {
 			throw new Error('Menu initialization failed: button not found');
 		}

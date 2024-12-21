@@ -13,10 +13,11 @@
   "dependencies": {
     "astro": "^4.3.2",
     "@auth/core": "^0.5.0",
-    "@astrojs/node": "^7.0.0"
+    "@astrojs/netlify": "^3.0.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.2",
+    "@netlify/functions": "^2.0.0",
     "typescript": "^5.3.2"
   },
   "resolutions": {
