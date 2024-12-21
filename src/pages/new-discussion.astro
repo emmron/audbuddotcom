@@ -1,0 +1,382 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+
+const categories = [
+    { id: 'treatment', name: 'Treatment & Methods', icon: '💊' },
+    { id: 'reviews', name: 'Strain Reviews', icon: '⭐' },
+    { id: 'research', name: 'Research & Studies', icon: '🔬' },
+    { id: 'questions', name: 'Questions & Support', icon: '❓' }
+];
+---
+
+<Layout>
+    <Header />
+    <main class="new-discussion">
+        <div class="container">
+            <header class="page-header">
+                <h1>Start a New Discussion</h1>
+                <p class="subtitle">Share your thoughts with the community</p>
+            </header>
+
+            <form id="discussion-form" class="discussion-form">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        required 
+                        minlength="10" 
+                        maxlength="150"
+                        placeholder="What would you like to discuss?"
+                    />
+                    <div class="character-count">
+                        <span id="title-count">0</span>/150
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select a category</option>
+                        {categories.map(cat => (
+                            <option value={cat.id}>
+                                {cat.icon} {cat.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <div class="editor-toolbar">
+                        <button type="button" data-format="bold" title="Bold">
+                            <span class="icon">B</span>
+                        </button>
+                        <button type="button" data-format="italic" title="Italic">
+                            <span class="icon">I</span>
+                        </button>
+                        <button type="button" data-format="link" title="Add link">
+                            <span class="icon">🔗</span>
+                        </button>
+                    </div>
+                    <textarea 
+                        id="content" 
+                        name="content" 
+                        required 
+                        minlength="30"
+                        rows="8"
+                        placeholder="Share your thoughts, experiences, or questions..."
+                    ></textarea>
+                    <div class="character-count">
+                        <span id="content-count">0</span>/2000
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tags</label>
+                    <input 
+                        type="text" 
+                        id="tags" 
+                        name="tags" 
+                        placeholder="Add tags separated by commas (e.g., anxiety, sleep, pain)"
+                    />
+                    <div class="tags-container" id="tags-container"></div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/community" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="default-text">Post Discussion</span>
+                        <span class="loading-text" hidden>
+                            <span class="spinner"></span>
+                            Posting...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    .new-discussion {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+    }
+
+    .discussion-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        display: block;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .editor-toolbar {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-bottom: none;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .editor-toolbar button {
+        padding: 0.5rem;
+        background: none;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        color: #4b5563;
+        transition: all 0.2s;
+    }
+
+    .editor-toolbar button:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+    }
+
+    textarea {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        resize: vertical;
+        min-height: 200px;
+    }
+
+    .character-count {
+        text-align: right;
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .tag {
+        background: #f3f4f6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .tag button {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        color: #9ca3af;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #4b5563;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-primary {
+        background: #4f46e5;
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: #4338ca;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #ffffff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+        .new-discussion {
+            padding: 1rem;
+        }
+
+        .discussion-form {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<script>
+    const form = document.getElementById('discussion-form') as HTMLFormElement;
+    const titleInput = document.getElementById('title') as HTMLInputElement;
+    const contentInput = document.getElementById('content') as HTMLTextAreaElement;
+    const tagsInput = document.getElementById('tags') as HTMLInputElement;
+    const tagsContainer = document.getElementById('tags-container');
+    const titleCount = document.getElementById('title-count');
+    const contentCount = document.getElementById('content-count');
+
+    // Character count updates
+    titleInput?.addEventListener('input', () => {
+        if (titleCount) titleCount.textContent = titleInput.value.length.toString();
+    });
+
+    contentInput?.addEventListener('input', () => {
+        if (contentCount) contentCount.textContent = contentInput.value.length.toString();
+    });
+
+    // Tags handling
+    let tags: string[] = [];
+
+    tagsInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const value = tagsInput.value.trim();
+            if (value && !tags.includes(value) && tags.length < 5) {
+                tags.push(value);
+                renderTags();
+                tagsInput.value = '';
+            }
+        }
+    });
+
+    function renderTags() {
+        if (!tagsContainer) return;
+        
+        tagsContainer.innerHTML = tags.map(tag => `
+            <span class="tag">
+                ${tag}
+                <button type="button" onclick="removeTag('${tag}')" aria-label="Remove ${tag}">×</button>
+            </span>
+        `).join('');
+    }
+
+    // Make removeTag available globally
+    (window as any).removeTag = (tag: string) => {
+        tags = tags.filter(t => t !== tag);
+        renderTags();
+    };
+
+    // Form submission
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = form.querySelector('button[type="submit"]');
+        const defaultText = submitButton?.querySelector('.default-text');
+        const loadingText = submitButton?.querySelector('.loading-text');
+
+        try {
+            // Show loading state
+            if (submitButton) submitButton.disabled = true;
+            if (defaultText) defaultText.hidden = true;
+            if (loadingText) loadingText.hidden = false;
+
+            const formData = new FormData(form);
+            formData.set('tags', JSON.stringify(tags));
+
+            const response = await fetch('/api/discussions', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create discussion');
+            }
+
+            // Redirect to the community page
+            window.location.href = '/community';
+        } catch (error) {
+            console.error('Error creating discussion:', error);
+            alert('Failed to create discussion. Please try again.');
+
+            // Reset button state
+            if (submitButton) submitButton.disabled = false;
+            if (defaultText) defaultText.hidden = false;
+            if (loadingText) loadingText.hidden = true;
+        }
+    });
+</script>
