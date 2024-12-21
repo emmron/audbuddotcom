@@ -134,9 +134,12 @@ function getTimeAgo(date: Date): string {
                 </select>
             </div>
 
-            <div class="discussions__list">
+            <div class="discussions">
                 {discussions.map((discussion) => (
-                    <article class="discussion-card" data-discussion-id={discussion.id} onclick={`window.location.href='/discussion/${discussion.id}'`}>
+                    <article 
+                        class="discussion-card" 
+                        data-discussion-id={discussion.id}
+                    >
                         <div class="discussion-card__main">
                             <div class="discussion-card__meta">
                                 <span class="category-tag">{discussion.category}</span>
@@ -144,18 +147,14 @@ function getTimeAgo(date: Date): string {
                                     {new Date(discussion.created_at).toLocaleDateString()}
                                 </time>
                             </div>
-                            
                             <h3 class="discussion-card__title">
                                 {discussion.title}
                             </h3>
-                            
                             <p class="discussion-card__preview">{discussion.content}</p>
-                            
                             <div class="discussion-card__author">
                                 By {discussion.author}
                             </div>
                         </div>
-
                         <div class="discussion-card__stats">
                             <div class="stat">
                                 <span>👍</span> {discussion.likes}
