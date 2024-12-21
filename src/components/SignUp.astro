@@ -130,48 +130,50 @@
 </style>
 
 <script>
-	// Client-side form handling
-	const form = document.getElementById('signup-form') as HTMLFormElement;
-	const errorMessage = document.getElementById('error-message') as HTMLDivElement;
-	const successMessage = document.getElementById('success-message') as HTMLDivElement;
-	const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+	// Ensure the script runs after the DOM is fully loaded
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.getElementById('signup-form') as HTMLFormElement;
+		const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+		const successMessage = document.getElementById('success-message') as HTMLDivElement;
+		const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
 
-	function showMessage(element: HTMLElement, message: string): void {
-		element.textContent = message;
-		element.classList.remove('hidden');
-		setTimeout(() => {
-			element.classList.add('hidden');
-		}, 5000);
-	}
-
-	form?.addEventListener('submit', async (e: SubmitEvent) => {
-		e.preventDefault();
-		if (!form || !submitButton) return;
-
-		submitButton.disabled = true;
-
-		try {
-			const formData = new FormData(form);
-			const response = await fetch('/api/auth/signup', {
-				method: 'POST',
-				body: formData,
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(data.message || 'Signup failed');
-			}
-
-			showMessage(successMessage, 'Account created successfully! Redirecting...');
+		function showMessage(element: HTMLElement, message: string) {
+			element.textContent = message;
+			element.classList.remove('hidden');
 			setTimeout(() => {
-				window.location.href = '/dashboard';
-			}, 2000);
-		} catch (error) {
-			const errorMsg = error instanceof Error ? error.message : 'An error occurred';
-			showMessage(errorMessage, errorMsg);
-		} finally {
-			submitButton.disabled = false;
+				element.classList.add('hidden');
+			}, 5000);
 		}
+
+		form?.addEventListener('submit', async (e: Event) => {
+			e.preventDefault();
+			if (!form || !submitButton) return;
+
+			submitButton.disabled = true;
+
+			try {
+				const formData = new FormData(form);
+				const response = await fetch('/api/auth/signup', {
+					method: 'POST',
+					body: formData,
+				});
+
+				const data = await response.json();
+
+				if (!response.ok) {
+					throw new Error(data.message || 'Signup failed');
+				}
+
+				showMessage(successMessage, 'Account created successfully! Redirecting...');
+				setTimeout(() => {
+					window.location.href = '/dashboard';
+				}, 2000);
+			} catch (error) {
+				const errorMsg = error instanceof Error ? error.message : 'An error occurred';
+				showMessage(errorMessage, errorMsg);
+			} finally {
+				submitButton.disabled = false;
+			}
+		});
 	});
 </script>

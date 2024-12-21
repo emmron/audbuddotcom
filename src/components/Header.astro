@@ -1,48 +1,47 @@
 ---
-const currentPath = Astro.url.pathname;
+const currentRoute = Astro.url.pathname;
 ---
 
 <header>
-	<div class="header-content">
-		<a href="/" class="logo-link" aria-label="Medicinal Cannabis Reviews - Home">
-			<h1 class="site-title">Medicinal Cannabis Reviews</h1>
+	<div class="header-wrapper">
+		<a href="/" class="brand-link" aria-label="Medicinal Cannabis Reviews - Home">
+			<h1 class="brand-title">Medicinal Cannabis Reviews</h1>
 		</a>
-		<nav aria-label="Main navigation">
-			<div class="nav-links" id="nav-links">
-				<a href="/strains" class={currentPath === '/strains' ? 'active' : ''} aria-current={currentPath === '/strains' ? 'page' : undefined}>
-					<span class="icon" aria-hidden="true">🌿</span>
+		<nav aria-label="Primary navigation">
+			<div class="navigation-links" id="navigation-links">
+				<a href="/strains" class={currentRoute === '/strains' ? 'active' : ''} aria-current={currentRoute === '/strains' ? 'page' : undefined}>
+					<span class="nav-icon" aria-hidden="true">🌿</span>
 					<span>Strains</span>
 				</a>
-				<a href="/community" class={currentPath === '/community' ? 'active' : ''} aria-current={currentPath === '/community' ? 'page' : undefined}>
-					<span class="icon" aria-hidden="true">👥</span>
+				<a href="/community" class={currentRoute === '/community' ? 'active' : ''} aria-current={currentRoute === '/community' ? 'page' : undefined}>
+					<span class="nav-icon" aria-hidden="true">👥</span>
 					<span>Community</span>
 				</a>
 				<a href="https://cannabisreviews.com/blog" rel="noopener">
-					<span class="icon" aria-hidden="true">📝</span>
+					<span class="nav-icon" aria-hidden="true">📝</span>
 					<span>Blog</span>
 				</a>
 			</div>
-			<div class="auth-buttons" role="navigation" aria-label="User authentication">
-				<a href="/signin" class="auth-button">Sign In</a>
-				<a href="/signup" class="auth-button highlight">Sign Up</a>
+			<div class="auth-links" role="navigation" aria-label="User authentication">
+				<a href="/signin" class="auth-link">Sign In</a>
+				<a href="/signup" class="auth-link highlight">Sign Up</a>
 			</div>
 			<button 
-				class="mobile-menu-button" 
+				class="menu-toggle" 
 				aria-label="Toggle menu" 
 				aria-expanded="false" 
-				aria-controls="nav-links"
+				aria-controls="navigation-links"
 				aria-haspopup="true"
 			>
-				<span class="bar"></span>
-				<span class="bar"></span>
-				<span class="bar"></span>
+				<span class="toggle-bar"></span>
+				<span class="toggle-bar"></span>
+				<span class="toggle-bar"></span>
 			</button>
 		</nav>
 	</div>
 </header>
 
 <style>
-	/* Core Layout */
 	header {
 		background: #ffffff;
 		padding: 1rem;
@@ -53,7 +52,7 @@ const currentPath = Astro.url.pathname;
 		border-bottom: 1px solid rgba(229, 231, 235, 0.8);
 	}
 
-	.header-content {
+	.header-wrapper {
 		max-width: 1200px;
 		margin: 0 auto;
 		display: flex;
@@ -62,20 +61,20 @@ const currentPath = Astro.url.pathname;
 		height: 4rem;
 	}
 
-	/* Logo */
-	.logo-link {
+	/* Brand */
+	.brand-link {
 		text-decoration: none;
 		padding: 0.75rem 1rem;
 		border-radius: 12px;
 		transition: all 0.3s ease;
 	}
 
-	.logo-link:hover {
+	.brand-link:hover {
 		background: rgba(79, 70, 229, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.site-title {
+	.brand-title {
 		margin: 0;
 		font-size: 1.625rem;
 		font-weight: 800;
@@ -93,7 +92,7 @@ const currentPath = Astro.url.pathname;
 		gap: 2.5rem;
 	}
 
-	.nav-links {
+	.navigation-links {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
@@ -112,19 +111,19 @@ const currentPath = Astro.url.pathname;
 		gap: 0.625rem;
 	}
 
-	nav a:not(.auth-button):hover {
+	nav a:not(.auth-link):hover {
 		color: #1F2937;
 		background: rgba(79, 70, 229, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.icon {
+	.nav-icon {
 		font-size: 1.375rem;
 		opacity: 0.9;
 		transition: all 0.3s ease;
 	}
 
-	nav a:hover .icon {
+	nav a:hover .nav-icon {
 		opacity: 1;
 		transform: scale(1.1);
 	}
@@ -136,7 +135,7 @@ const currentPath = Astro.url.pathname;
 	}
 
 	/* Auth Section */
-	.auth-buttons {
+	.auth-links {
 		display: flex;
 		gap: 1rem;
 		margin-left: 2.5rem;
@@ -144,7 +143,7 @@ const currentPath = Astro.url.pathname;
 		border-left: 2px solid rgba(229, 231, 235, 0.8);
 	}
 
-	.auth-button {
+	.auth-link {
 		padding: 0.875rem 1.5rem;
 		border-radius: 12px;
 		font-weight: 600;
@@ -152,29 +151,29 @@ const currentPath = Astro.url.pathname;
 		transition: all 0.3s ease;
 	}
 
-	.auth-button:not(.highlight) {
+	.auth-link:not(.highlight) {
 		color: #4B5563;
 	}
 
-	.auth-button:not(.highlight):hover {
+	.auth-link:not(.highlight):hover {
 		color: #1F2937;
 		background: rgba(79, 70, 229, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.auth-button.highlight {
+	.auth-link.highlight {
 		background: linear-gradient(135deg, #4F46E5, #7C3AED);
 		color: white;
 		box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 	}
 
-	.auth-button.highlight:hover {
+	.auth-link.highlight:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 	}
 
 	/* Mobile Menu */
-	.mobile-menu-button {
+	.menu-toggle {
 		display: none;
 		flex-direction: column;
 		gap: 6px;
@@ -186,11 +185,11 @@ const currentPath = Astro.url.pathname;
 		transition: all 0.3s ease;
 	}
 
-	.mobile-menu-button:hover {
+	.menu-toggle:hover {
 		background: rgba(79, 70, 229, 0.08);
 	}
 
-	.bar {
+	.toggle-bar {
 		width: 26px;
 		height: 2px;
 		background: #4F46E5;
@@ -200,14 +199,14 @@ const currentPath = Astro.url.pathname;
 
 	/* Responsive */
 	@media (max-width: 1200px) {
-		.header-content {
+		.header-wrapper {
 			padding: 0 2rem;
 		}
 	}
 
 	@media (max-width: 768px) {
-		.nav-links,
-		.auth-buttons {
+		.navigation-links,
+		.auth-links {
 			display: none;
 			position: absolute;
 			top: 100%;
@@ -221,41 +220,41 @@ const currentPath = Astro.url.pathname;
 			box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 		}
 
-		.nav-links.show,
-		.auth-buttons.show {
+		.navigation-links.show,
+		.auth-links.show {
 			display: flex;
 		}
 
-		.auth-buttons {
+		.auth-links {
 			border: none;
 			margin: 0;
 			padding: 1.25rem;
 			background: #F9FAFB;
 		}
 
-		.mobile-menu-button {
+		.menu-toggle {
 			display: flex;
 		}
 
 		nav a,
-		.auth-button {
+		.auth-link {
 			width: 100%;
 			justify-content: center;
 			padding: 1.125rem;
 		}
 
-		.auth-button.highlight {
+		.auth-link.highlight {
 			margin-top: 0.75rem;
 		}
 	}
 
 	@media (max-width: 480px) {
-		.header-content {
+		.header-wrapper {
 			height: 3.75rem;
 			padding: 0 1.25rem;
 		}
 		
-		.site-title {
+		.brand-title {
 			font-size: 1.375rem;
 		}
 	}
@@ -269,9 +268,9 @@ const currentPath = Astro.url.pathname;
 <script>
 	// Type definitions for better type safety
 	type MenuElements = {
-		button: HTMLButtonElement | null;
+		toggleButton: HTMLButtonElement | null;
 		navLinks: HTMLElement | null;
-		authButtons: HTMLElement | null;
+		authLinks: HTMLElement | null;
 		bars: HTMLElement[];
 	};
 
@@ -295,21 +294,21 @@ const currentPath = Astro.url.pathname;
 	} as const;
 
 	// Initialize DOM elements with error handling
-	function initializeElements(): MenuElements {
+	function initializeMenuElements(): MenuElements {
 		try {
-			const button = document.querySelector('.mobile-menu-button') as HTMLButtonElement | null;
-			const navLinks = document.querySelector('.nav-links') as HTMLElement | null;
-			const authButtons = document.querySelector('.auth-buttons') as HTMLElement | null;
+			const toggleButton = document.querySelector('.menu-toggle') as HTMLButtonElement | null;
+			const navLinks = document.querySelector('.navigation-links') as HTMLElement | null;
+			const authLinks = document.querySelector('.auth-links') as HTMLElement | null;
 			
 			// Convert NodeList to Array and ensure HTMLElement type with validation
-			const bars = Array.from(document.querySelectorAll('.bar')).map((el, index) => {
+			const bars = Array.from(document.querySelectorAll('.toggle-bar')).map((el, index) => {
 				if (!(el instanceof HTMLElement)) {
 					throw new Error(`Bar element at index ${index} is not HTMLElement`);
 				}
 				return el;
 			});
 
-			if (!button || !navLinks || !authButtons) {
+			if (!toggleButton || !navLinks || !authLinks) {
 				throw new Error('Required menu elements not found');
 			}
 
@@ -317,21 +316,21 @@ const currentPath = Astro.url.pathname;
 				throw new Error(`Expected 3 bar elements, found ${bars.length}`);
 			}
 
-			return { button, navLinks, authButtons, bars };
+			return { toggleButton, navLinks, authLinks, bars };
 		} catch (error) {
 			console.error('Failed to initialize menu elements:', error instanceof Error ? error.message : 'Unknown error');
 			// Return safe default state
 			return {
-				button: null,
+				toggleButton: null,
 				navLinks: null,
-				authButtons: null,
+				authLinks: null,
 				bars: []
 			};
 		}
 	}
 
 	// Enhanced hamburger animation with error boundaries and validation
-	function animateHamburger(elements: MenuElements, isOpen: boolean): void {
+	function animateMenuToggle(elements: MenuElements, isOpen: boolean): void {
 		try {
 			if (elements.bars.length !== 3) {
 				throw new Error('Invalid number of bar elements');
@@ -357,7 +356,7 @@ const currentPath = Astro.url.pathname;
 				});
 			});
 		} catch (error) {
-			console.error('Error in hamburger animation:', error instanceof Error ? error.message : 'Unknown error');
+			console.error('Error in menu toggle animation:', error instanceof Error ? error.message : 'Unknown error');
 		}
 	}
 
@@ -398,15 +397,15 @@ const currentPath = Astro.url.pathname;
 
 	// Core menu state handler
 	function handleMenuState(elements: MenuElements, open: boolean): void {
-		if (!elements?.button || !elements?.navLinks || !elements?.authButtons || typeof open !== 'boolean') {
+		if (!elements?.toggleButton || !elements?.navLinks || !elements?.authLinks || typeof open !== 'boolean') {
 			throw new Error('Invalid menu state parameters');
 		}
 
-		const { button, navLinks, authButtons } = elements;
+		const { toggleButton, navLinks, authLinks } = elements;
 
 		// Update button state
-		button.setAttribute('aria-expanded', String(open));
-		button.setAttribute('aria-label', `${open ? 'Close' : 'Open'} menu`);
+		toggleButton.setAttribute('aria-expanded', String(open));
+		toggleButton.setAttribute('aria-label', `${open ? 'Close' : 'Open'} menu`);
 
 		// Batch all animations in a single frame
 		requestAnimationFrame(() => {
