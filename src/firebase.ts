@@ -6,7 +6,9 @@ import {
     OAuthProvider,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    updateProfile 
+    updateProfile,
+    onAuthStateChanged,
+    signOut
 } from 'firebase/auth';
 import type { User, Auth, AuthProvider } from 'firebase/auth';
 
@@ -31,7 +33,9 @@ export {
     OAuthProvider,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    updateProfile 
+    updateProfile,
+    onAuthStateChanged,
+    signOut
 };
 
 export type { User, Auth, AuthProvider }; 

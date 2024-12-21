@@ -1,12 +1,12 @@
 ---
-import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase';
+import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWithEmailAndPassword, updateProfile } from '../firebase';
 ---
 
 <div class="auth-container">
 	<section id="sign-up">
 		<h2>Create Account</h2>
 		<p class="subtitle">Join our community today</p>
-		<form action="/api/signup" method="POST">
+		<form id="signup-form">
 			<div class="input-group">
 				<label for="username">Username:</label>
 				<input type="text" id="username" name="username" required placeholder="Choose a username" />
@@ -41,7 +41,6 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		padding: 20px;
 		background: rgba(255, 255, 255, 0.9);
 		border-radius: 10px;
-		
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 		margin: 20px auto;
 		max-width: 400px;
@@ -113,18 +112,27 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 
 <script>
 	import { 
-		auth, 
-		GoogleAuthProvider, 
-		signInWithPopup, 
+		auth,
+		GoogleAuthProvider,
+		signInWithPopup,
 		OAuthProvider,
 		createUserWithEmailAndPassword,
 		updateProfile,
-		type User 
+		onAuthStateChanged,
+		type User
 	} from '../firebase';
 
-	const form = document.querySelector('form');
+	const form = document.getElementById('signup-form');
 	const errorMessage = document.getElementById('error-message');
 	const successMessage = document.getElementById('success-message');
+
+	// Auth state observer
+	onAuthStateChanged(auth, (user: User | null) => {
+		if (user) {
+			// User is signed in
+			window.location.href = '/dashboard';
+		}
+	});
 
 	function showMessage(element: HTMLElement | null, message: string) {
 		if (!element) return;
@@ -158,24 +166,35 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 				displayName: username
 			});
 			showMessage(successMessage, 'Account created successfully!');
-			window.location.href = '/dashboard';
 		} catch (error: any) {
 			showMessage(errorMessage, error.message || 'Failed to create account');
 		} finally {
 			setLoading(false);
 		}
 	});
-
 	// Google Sign Up
 	document.getElementById('google-sign-up')?.addEventListener('click', async () => {
 		setLoading(true);
 		try {
 			const provider = new GoogleAuthProvider();
+			// Add scopes for additional Google account info
+			provider.addScope('email');
+			provider.addScope('profile');
+			
 			const result = await signInWithPopup(auth, provider);
+			// Get Google access token
+			const credential = GoogleAuthProvider.credentialFromResult(result);
+			
 			showMessage(successMessage, 'Successfully signed up with Google!');
-			window.location.href = '/dashboard';
 		} catch (error: any) {
-			showMessage(errorMessage, error.message || 'Failed to sign up with Google');
+			console.error('Google sign up error:', error);
+			let message = 'Failed to sign up with Google';
+			if (error.code === 'auth/popup-closed-by-user') {
+				message = 'Sign up cancelled';
+			} else if (error.code === 'auth/popup-blocked') {
+				message = 'Please enable popups to sign up with Google';
+			}
+			showMessage(errorMessage, message);
 		} finally {
 			setLoading(false);
 		}
@@ -186,13 +205,26 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		setLoading(true);
 		try {
 			const provider = new OAuthProvider('apple.com');
+			// Add scopes for Apple sign in
+			provider.addScope('email');
+			provider.addScope('name');
+			
 			const result = await signInWithPopup(auth, provider);
+			// Get Apple credentials
+			const credential = OAuthProvider.credentialFromResult(result);
+			
 			showMessage(successMessage, 'Successfully signed up with Apple!');
-			window.location.href = '/dashboard';
 		} catch (error: any) {
-			showMessage(errorMessage, error.message || 'Failed to sign up with Apple');
+			console.error('Apple sign up error:', error);
+			let message = 'Failed to sign up with Apple';
+			if (error.code === 'auth/popup-closed-by-user') {
+				message = 'Sign up cancelled';
+			} else if (error.code === 'auth/popup-blocked') {
+				message = 'Please enable popups to sign up with Apple';
+			}
+			showMessage(errorMessage, message);
 		} finally {
 			setLoading(false);
 		}
 	});
-</script> 
+</script>
