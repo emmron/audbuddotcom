@@ -7,7 +7,7 @@ interface Discussion {
   title: string;
   content: string;
   category: string;
-  createdAt: Date;
+  createdAt: string;
   authorName: string;
   authorImage?: string;
   comments: any[];
@@ -196,19 +196,23 @@ function getTimeAgo(date: Date): string {
 </main>
 
 <script>
-  // Move localStorage logic here
   function loadDiscussions() {
     try {
       const savedDiscussions = localStorage.getItem('discussions');
       if (savedDiscussions) {
         const discussions = JSON.parse(savedDiscussions)
-          .map(d => ({ ...d, createdAt: new Date(d.createdAt) }))
-          .sort((a, b) => b.createdAt - a.createdAt)
+          .map((d: Discussion) => ({ 
+            ...d, 
+            createdAt: new Date(d.createdAt) 
+          }))
+          .sort((a: Discussion, b: Discussion) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
           .slice(0, 3);
         
         // Update the DOM with the discussions
-        const postsContainer = document.querySelector('.posts');
-        const emptyState = document.querySelector('.empty-state');
+        const postsContainer = document.querySelector('.posts') as HTMLDivElement;
+        const emptyState = document.querySelector('.empty-state') as HTMLDivElement;
         
         if (discussions.length > 0 && postsContainer && emptyState) {
           postsContainer.style.display = 'grid';
