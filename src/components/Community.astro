@@ -158,23 +158,51 @@ function getTimeAgo(dateStr: string): string {
 </main>
 
 <script>
-    interface Discussion {
-        id: string;
-        title: string;
-        content: string;
-        category: string;
-        author: string;
-        created_at: string;
-        likes: number;
-        comments: Comment[];
-    }
+    // Move these to be accessible in the script scope
+    const defaultDiscussions = [
+        {
+            id: crypto.randomUUID(),
+            title: 'Best strains for anxiety?',
+            content: 'Looking for recommendations on strains that have helped others with anxiety management.',
+            category: 'treatment',
+            author: 'HealthSeeker',
+            created_at: new Date().toISOString(),
+            likes: 15,
+            comments: [
+                {
+                    id: crypto.randomUUID(),
+                    author: 'CannabisExpert',
+                    content: 'High-CBD strains like ACDC or Harlequin are often recommended for anxiety. They provide calming effects without intense psychoactivity.',
+                    created_at: new Date().toISOString(),
+                    likes: 8
+                }
+            ]
+        },
+        {
+            id: crypto.randomUUID(),
+            title: 'New Research: Cannabis and Pain Management',
+            content: 'Recent study shows promising results for chronic pain treatment using specific cannabinoid combinations.',
+            category: 'research',
+            author: 'MedResearcher',
+            created_at: new Date().toISOString(),
+            likes: 23,
+            comments: []
+        }
+    ] as const;
 
-    interface Comment {
+    const categories = [
+        { id: 'all', name: 'All Topics', icon: '📋', description: 'View all discussions' },
+        { id: 'treatment', name: 'Treatment & Methods', icon: '💊', description: 'Discuss treatment approaches' },
+        { id: 'reviews', name: 'Strain Reviews', icon: '⭐', description: 'Share experiences with specific strains' },
+        { id: 'research', name: 'Research & Studies', icon: '🔬', description: 'Latest medical cannabis research' },
+        { id: 'questions', name: 'Questions & Support', icon: '❓', description: 'Get help from the community' }
+    ] as const;
+
+    interface Category {
         id: string;
-        author: string;
-        content: string;
-        created_at: string;
-        likes: number;
+        name: string;
+        icon: string;
+        description: string;
     }
 
     class ForumManager {
@@ -201,12 +229,12 @@ function getTimeAgo(dateStr: string): string {
         }
 
         private updateCategoryCounts() {
-            const counts = new Map();
+            const counts = new Map<string, number>();
             this.discussions.forEach(d => {
                 counts.set(d.category, (counts.get(d.category) || 0) + 1);
             });
 
-            categories.forEach(cat => {
+            categories.forEach((cat: Category) => {
                 const countElement = document.getElementById(`count-${cat.id}`);
                 if (countElement) {
                     const count = cat.id === 'all' ? this.discussions.length : (counts.get(cat.id) || 0);
@@ -254,7 +282,7 @@ function getTimeAgo(dateStr: string): string {
 
         private toggleView(view: string) {
             const container = document.getElementById('discussions-container');
-            const buttons = document.querySelectorAll('.view-btn');
+            const buttons = document.querySelectorAll<HTMLButtonElement>('.view-btn');
             
             buttons.forEach(btn => {
                 const isActive = btn.dataset.view === view;
@@ -316,23 +344,25 @@ function getTimeAgo(dateStr: string): string {
         }
 
         private getDiscussionHTML(discussion: Discussion): string {
+            const { id, category, created_at, title, content, author, likes, comments } = discussion;
+            const timeAgo = this.getTimeAgo(created_at);
             return `
-                <article class="discussion-card" data-id="${discussion.id}">
+                <article class="discussion-card" data-id="${id}">
                     <div class="discussion-card__main">
                         <div class="discussion-card__meta">
-                            <span class="category-tag">${discussion.category}</span>
-                            <time datetime="${discussion.created_at}">${this.getTimeAgo(discussion.created_at)}</time>
+                            <span class="category-tag">${category}</span>
+                            <time datetime="${created_at}">${timeAgo}</time>
                         </div>
-                        <h3 class="discussion-card__title">${discussion.title}</h3>
-                        <p class="discussion-card__preview">${discussion.content}</p>
-                        <div class="discussion-card__author">By ${discussion.author}</div>
+                        <h3 class="discussion-card__title">${title}</h3>
+                        <p class="discussion-card__preview">${content}</p>
+                        <div class="discussion-card__author">By ${author}</div>
                     </div>
                     <div class="discussion-card__stats">
-                        <button class="stat-btn likes-btn" data-id="${discussion.id}">
-                            <span>👍</span> ${discussion.likes}
+                        <button class="stat-btn likes-btn" data-id="${id}">
+                            <span>👍</span> ${likes}
                         </button>
                         <div class="stat">
-                            <span>💬</span> ${discussion.comments.length}
+                            <span>💬</span> ${comments.length}
                         </div>
                     </div>
                 </article>
@@ -355,29 +385,20 @@ function getTimeAgo(dateStr: string): string {
             const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
             
             if (seconds < 60) return 'just now';
-            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-            return `${Math.floor(seconds / 86400)}d ago`;
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            return `${Math.floor(seconds / 86400)} days ago`;
         }
 
         private debounce(func: Function, wait: number) {
-            let timeout: number;
+            let timeout: ReturnType<typeof setTimeout>;
             return (...args: any[]) => {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => func.apply(this, args), wait);
             };
         }
     }
-    // Initialize the forum when the DOM is ready
-    function initializeForum() {
-        new ForumManager();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeForum);
-    } else {
-        initializeForum();
-    }
+    document.addEventListener('DOMContentLoaded', () => new ForumManager());
 </script>
 
 <style>
@@ -388,6 +409,14 @@ function getTimeAgo(dateStr: string): string {
         padding: 4rem 2rem;
         background: #f8fafc;
         border-radius: 1rem;
+        color: #374151;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .empty-state:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
     }
 
     .empty-state__icon {
