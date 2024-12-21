@@ -3,10 +3,13 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 ---
 
 <section id="sign-up">
-	<h2>Sign Up</h2>
+	<h2>Create Account</h2>
+	<p class="subtitle">Join our community today</p>
 	<form action="/api/signup" method="POST">
-		<label for="username">Username:</label>
-		<input type="text" id="username" name="username" required />
+		<div class="input-group">
+			<label for="username">Username:</label>
+			<input type="text" id="username" name="username" required placeholder="Choose a username" />
+		</div>
 		
 		<label for="email">Email:</label>
 		<input type="email" id="email" name="email" required />
@@ -22,6 +25,10 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 
 	<!-- Apple Sign Up Button -->
 	<button id="apple-sign-up">Sign up with Apple</button>
+
+	<p class="auth-footer">
+		Already have an account? <a href="/signin">Sign in</a>
+	</p>
 </section>
 
 <style>
@@ -29,6 +36,7 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		padding: 20px;
 		background: rgba(255, 255, 255, 0.9);
 		border-radius: 10px;
+		
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 		margin: 20px auto;
 		max-width: 400px;

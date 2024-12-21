@@ -1,14 +1,36 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
 <header>
 	<div class="header-content">
-		<h1 class="site-title">Medicinal Cannabis Reviews</h1>
+		<a href="/" class="logo-link">
+			<h1 class="site-title">Medicinal Cannabis Reviews</h1>
+		</a>
 		<nav>
-			<a href="/strains">Strains</a>
-			<a href="/community">Community</a>
-			<a href="https://cannabisreviews.com/blog">Blog</a>
+			<div class="nav-links">
+				<a href="/strains" class={currentPath === '/strains' ? 'active' : ''}>
+					<span class="icon">🌿</span>
+					Strains
+				</a>
+				<a href="/community" class={currentPath === '/community' ? 'active' : ''}>
+					<span class="icon">👥</span>
+					Community
+				</a>
+				<a href="https://cannabisreviews.com/blog">
+					<span class="icon">📝</span>
+					Blog
+				</a>
+			</div>
 			<div class="auth-buttons">
 				<a href="/signin" class="auth-button">Sign In</a>
 				<a href="/signup" class="auth-button highlight">Sign Up</a>
 			</div>
+			<button class="mobile-menu-button" aria-label="Toggle menu">
+				<span class="bar"></span>
+				<span class="bar"></span>
+				<span class="bar"></span>
+			</button>
 		</nav>
 	</div>
 </header>
@@ -17,9 +39,11 @@
 	header {
 		background: rgba(255, 255, 255, 0.95);
 		padding: 15px 30px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-		position: relative;
-		z-index: 1;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+			backdrop-filter: blur(10px);
 	}
 
 	.header-content {
@@ -27,7 +51,16 @@
 		margin: 0 auto;
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+			align-items: center;
+	}
+
+	.logo-link {
+		text-decoration: none;
+		transition: transform 0.2s ease;
+	}
+
+	.logo-link:hover {
+		transform: translateY(-2px);
 	}
 
 	.site-title {
@@ -35,9 +68,18 @@
 		font-size: 1.8em;
 		color: #2c3e50;
 		font-weight: 700;
+		background: linear-gradient(90deg, #2c3e50, #4caf50);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
 	}
 
 	nav {
+		display: flex;
+		align-items: center;
+		gap: 30px;
+	}
+
+	.nav-links {
 		display: flex;
 		align-items: center;
 		gap: 30px;
@@ -48,11 +90,26 @@
 		text-decoration: none;
 		font-size: 1.1em;
 		font-weight: 500;
-		transition: color 0.2s ease;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 12px;
+		border-radius: 8px;
 	}
 
 	nav a:not(.auth-button):hover {
 		color: #4caf50;
+		background: rgba(76, 175, 80, 0.1);
+	}
+
+	.icon {
+		font-size: 1.2em;
+	}
+
+	.active {
+		color: #4caf50 !important;
+		background: rgba(76, 175, 80, 0.1);
 	}
 
 	.auth-buttons {
@@ -65,8 +122,9 @@
 
 	.auth-button {
 		padding: 8px 16px;
-		border-radius: 6px;
-		transition: all 0.2s ease;
+		border-radius: 8px;
+		transition: all 0.3s ease;
+		font-weight: 600;
 	}
 
 	.auth-button:hover {
@@ -74,32 +132,83 @@
 	}
 
 	.auth-button.highlight {
-		background: linear-gradient(90deg, #4caf50, #45a049);
+		background: linear-gradient(135deg, #4caf50, #45a049);
 		color: white;
+		box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 	}
 
 	.auth-button.highlight:hover {
-		background: linear-gradient(90deg, #45a049, #388e3c);
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+		background: linear-gradient(135deg, #45a049, #388e3c);
+		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+	}
+
+	.mobile-menu-button {
+		display: none;
+		flex-direction: column;
+		gap: 4px;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 8px;
+	}
+
+	.bar {
+		width: 24px;
+		height: 2px;
+		background: #34495e;
+		transition: 0.3s;
 	}
 
 	@media (max-width: 768px) {
-		.header-content {
-			flex-direction: column;
-			text-align: center;
-			gap: 15px;
+		header {
+			padding: 10px 15px;
 		}
 
-		nav {
+		.site-title {
+			font-size: 1.5em;
+		}
+
+		.nav-links {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			background: white;
 			flex-direction: column;
-			gap: 15px;
+			padding: 20px;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+		}
+
+		.nav-links.show {
+			display: flex;
 		}
 
 		.auth-buttons {
 			margin-left: 0;
 			padding-left: 0;
 			border-left: none;
-			margin-top: 10px;
+		}
+
+		.mobile-menu-button {
+			display: flex;
 		}
 	}
-</style> 
+</style>
+
+<script>
+	const mobileMenuButton = document.querySelector('.mobile-menu-button');
+	const navLinks = document.querySelector('.nav-links');
+
+	mobileMenuButton?.addEventListener('click', () => {
+		navLinks?.classList.toggle('show');
+		const bars = mobileMenuButton.querySelectorAll('.bar');
+		bars[0].style.transform = navLinks?.classList.contains('show') 
+			? 'rotate(45deg) translate(5px, 5px)' 
+			: 'none';
+		bars[1].style.opacity = navLinks?.classList.contains('show') ? '0' : '1';
+		bars[2].style.transform = navLinks?.classList.contains('show') 
+			? 'rotate(-45deg) translate(7px, -7px)' 
+			: 'none';
+	});
+</script> 
