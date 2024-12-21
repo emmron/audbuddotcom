@@ -7,7 +7,7 @@ interface Discussion {
     content: string;
     category: string;
     author: string;
-    created_at: Date;
+    created_at: string;
     likes: number;
     comments: Comment[];
 }
@@ -16,67 +16,69 @@ interface Comment {
     id: string;
     author: string;
     content: string;
-    created_at: Date;
+    created_at: string;
     likes: number;
 }
 
-// Mock data for discussions
-const discussions: Discussion[] = [
+// Initial discussions data - will be used if no stored data exists
+const defaultDiscussions: Discussion[] = [
     {
-        id: '1',
+        id: crypto.randomUUID(),
         title: 'Best strains for anxiety?',
-        content: 'I have been struggling with anxiety and I am looking for strain recommendations.',
+        content: 'Looking for recommendations on strains that have helped others with anxiety management.',
         category: 'treatment',
-        author: 'User1',
-        created_at: new Date(),
-        likes: 10,
+        author: 'HealthSeeker',
+        created_at: new Date().toISOString(),
+        likes: 15,
         comments: [
             {
-                id: '1',
-                author: 'User2',
-                content: 'I recommend trying CBD-rich strains like ACDC or Harlequin.',
-                created_at: new Date(),
-                likes: 5
+                id: crypto.randomUUID(),
+                author: 'CannabisExpert',
+                content: 'High-CBD strains like ACDC or Harlequin are often recommended for anxiety. They provide calming effects without intense psychoactivity.',
+                created_at: new Date().toISOString(),
+                likes: 8
             }
         ]
     },
     {
-        id: '2',
-        title: 'Research on pain management',
-        content: 'New study shows promising results for chronic pain treatment.',
+        id: crypto.randomUUID(),
+        title: 'New Research: Cannabis and Pain Management',
+        content: 'Recent study shows promising results for chronic pain treatment using specific cannabinoid combinations.',
         category: 'research',
-        author: 'User3',
-        created_at: new Date(Date.now() - 86400000), // 1 day ago
-        likes: 15,
-        comments: []
-    },
-    {
-        id: '3',
-        title: 'Strain review: Blue Dream',
-        content: 'Sharing my experience with Blue Dream for sleep issues.',
-        category: 'reviews',
-        author: 'User4',
-        created_at: new Date(Date.now() - 172800000), // 2 days ago
-        likes: 8,
+        author: 'MedResearcher',
+        created_at: new Date().toISOString(),
+        likes: 23,
         comments: []
     }
 ];
 
 const categories = [
-    { id: 'all', name: 'All Topics', icon: '📋' },
-    { id: 'treatment', name: 'Treatment & Methods', icon: '💊' },
-    { id: 'reviews', name: 'Strain Reviews', icon: '⭐' },
-    { id: 'research', name: 'Research & Studies', icon: '🔬' },
-    { id: 'questions', name: 'Questions & Support', icon: '❓' }
+    { id: 'all', name: 'All Topics', icon: '📋', description: 'View all discussions' },
+    { id: 'treatment', name: 'Treatment & Methods', icon: '💊', description: 'Discuss treatment approaches' },
+    { id: 'reviews', name: 'Strain Reviews', icon: '⭐', description: 'Share experiences with specific strains' },
+    { id: 'research', name: 'Research & Studies', icon: '🔬', description: 'Latest medical cannabis research' },
+    { id: 'questions', name: 'Questions & Support', icon: '❓', description: 'Get help from the community' }
 ];
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(dateStr: string): string {
+    const date = new Date(dateStr);
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
     
-    if (seconds < 60) return 'just now';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
-    return `${Math.floor(seconds / 86400)} days ago`;
+    const intervals = [
+        { seconds: 31536000, label: 'year' },
+        { seconds: 2592000, label: 'month' },
+        { seconds: 86400, label: 'day' },
+        { seconds: 3600, label: 'hour' },
+        { seconds: 60, label: 'minute' }
+    ];
+
+    for (const interval of intervals) {
+        const count = Math.floor(seconds / interval.seconds);
+        if (count >= 1) {
+            return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+        }
+    }
+    return 'just now';
 }
 ---
 
@@ -86,23 +88,25 @@ function getTimeAgo(date: Date): string {
     <section class="community__hero">
         <div class="hero-content">
             <h1>Community Discussions</h1>
-            <p>Share experiences and learn from other patients</p>
+            <p>Connect, share experiences, and learn from other patients</p>
             <div class="search-wrapper">
                 <input 
                     type="search" 
-                    id="search-input"
+                    id="search-discussions"
                     class="search-input" 
                     placeholder="Search discussions..."
                     aria-label="Search discussions"
                 />
-                <span class="search-icon">🔍</span>
+                <button class="search-button" aria-label="Search">
+                    <span class="search-icon">🔍</span>
+                </button>
             </div>
         </div>
     </section>
 
     <div class="community__layout">
         <aside class="sidebar">
-            <nav class="categories">
+            <nav class="categories" aria-label="Discussion categories">
                 <h2>Categories</h2>
                 <ul class="category-list">
                     {categories.map(cat => (
@@ -110,18 +114,12 @@ function getTimeAgo(date: Date): string {
                             <button 
                                 class="category-btn" 
                                 data-category={cat.id}
-                                data-count={cat.id === 'all' 
-                                    ? discussions.length 
-                                    : discussions.filter(d => d.category === cat.id).length}
+                                aria-label={cat.description}
                             >
-                                <div class="category-icon">{cat.icon}</div>
+                                <span class="category-icon" aria-hidden="true">{cat.icon}</span>
                                 <div class="category-info">
                                     <span class="category-name">{cat.name}</span>
-                                    <span class="category-count">
-                                        {cat.id === 'all' 
-                                            ? discussions.length 
-                                            : discussions.filter(d => d.category === cat.id).length} discussions
-                                    </span>
+                                    <span class="category-count" id={`count-${cat.id}`}></span>
                                 </div>
                             </button>
                         </li>
@@ -129,490 +127,306 @@ function getTimeAgo(date: Date): string {
                 </ul>
             </nav>
 
-            <button class="new-post-btn" id="new-post-btn">
-                <span class="icon">✏️</span>
+            <a href="/new-discussion" class="new-post-btn" id="new-post-btn">
+                <span class="icon" aria-hidden="true">✏️</span>
                 Start New Discussion
-            </button>
+            </a>
         </aside>
 
         <section class="discussions">
             <div class="discussions__header">
                 <div class="view-options">
-                    <button class="view-btn active" data-view="list">
-                        <span class="icon">📝</span> List
+                    <button class="view-btn active" data-view="list" aria-pressed="true">
+                        <span class="icon" aria-hidden="true">📝</span> List View
                     </button>
-                    <button class="view-btn" data-view="grid">
-                        <span class="icon">📑</span> Grid
+                    <button class="view-btn" data-view="grid" aria-pressed="false">
+                        <span class="icon" aria-hidden="true">📑</span> Grid View
                     </button>
                 </div>
-                <select class="sort-select">
+                <select class="sort-select" aria-label="Sort discussions">
                     <option value="recent">Most Recent</option>
                     <option value="popular">Most Popular</option>
                     <option value="commented">Most Discussed</option>
                 </select>
             </div>
 
-            <div class="discussions__list">
-                {discussions.map((discussion) => (
-                    <article 
-                        class="discussion-card" 
-                        data-discussion-id={discussion.id}
-                    >
-                        <div class="discussion-card__main">
-                            <div class="discussion-card__meta">
-                                <span class="category-tag">{discussion.category}</span>
-                                <time class="time" datetime={discussion.created_at.toISOString()}>
-                                    {new Date(discussion.created_at).toLocaleDateString()}
-                                </time>
-                            </div>
-                            <h3 class="discussion-card__title">
-                                {discussion.title}
-                            </h3>
-                            <p class="discussion-card__preview">{discussion.content}</p>
-                            <div class="discussion-card__author">
-                                By {discussion.author}
-                            </div>
-                        </div>
-                        <div class="discussion-card__stats">
-                            <div class="stat">
-                                <span>👍</span> {discussion.likes}
-                            </div>
-                            <div class="stat">
-                                <span>💬</span> {discussion.comments.length}
-                            </div>
-                        </div>
-                    </article>
-                ))}
+            <div class="discussions__list" id="discussions-container">
+                <!-- Discussions will be dynamically inserted here -->
             </div>
         </section>
     </div>
 </main>
 
+<script>
+    interface Discussion {
+        id: string;
+        title: string;
+        content: string;
+        category: string;
+        author: string;
+        created_at: string;
+        likes: number;
+        comments: Comment[];
+    }
+
+    interface Comment {
+        id: string;
+        author: string;
+        content: string;
+        created_at: string;
+        likes: number;
+    }
+
+    class ForumManager {
+        private discussions: Discussion[] = [];
+        private currentCategory: string = 'all';
+        private currentSort: string = 'recent';
+        private searchTerm: string = '';
+
+        constructor() {
+            this.initializeDiscussions();
+            this.setupEventListeners();
+        }
+
+        private initializeDiscussions() {
+            const stored = localStorage.getItem('forum_discussions');
+            this.discussions = stored ? JSON.parse(stored) : defaultDiscussions;
+            this.saveDiscussions();
+            this.updateUI();
+        }
+
+        private saveDiscussions() {
+            localStorage.setItem('forum_discussions', JSON.stringify(this.discussions));
+            this.updateCategoryCounts();
+        }
+
+        private updateCategoryCounts() {
+            const counts = new Map();
+            this.discussions.forEach(d => {
+                counts.set(d.category, (counts.get(d.category) || 0) + 1);
+            });
+
+            categories.forEach(cat => {
+                const countElement = document.getElementById(`count-${cat.id}`);
+                if (countElement) {
+                    const count = cat.id === 'all' ? this.discussions.length : (counts.get(cat.id) || 0);
+                    countElement.textContent = `${count} discussions`;
+                }
+            });
+        }
+
+        private setupEventListeners() {
+            // Category filtering
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const category = (e.currentTarget as HTMLElement).dataset.category || 'all';
+                    this.filterByCategory(category);
+                });
+            });
+
+            // Search
+            const searchInput = document.getElementById('search-discussions') as HTMLInputElement;
+            searchInput?.addEventListener('input', this.debounce((e: Event) => {
+                this.searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
+                this.updateUI();
+            }, 300));
+
+            // Sorting
+            const sortSelect = document.querySelector('.sort-select') as HTMLSelectElement;
+            sortSelect?.addEventListener('change', (e) => {
+                this.currentSort = (e.target as HTMLSelectElement).value;
+                this.updateUI();
+            });
+
+            // View toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const view = (e.currentTarget as HTMLElement).dataset.view;
+                    this.toggleView(view || 'list');
+                });
+            });
+        }
+
+        private filterByCategory(category: string) {
+            this.currentCategory = category;
+            this.updateUI();
+        }
+
+        private toggleView(view: string) {
+            const container = document.getElementById('discussions-container');
+            const buttons = document.querySelectorAll('.view-btn');
+            
+            buttons.forEach(btn => {
+                const isActive = btn.dataset.view === view;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-pressed', isActive.toString());
+            });
+
+            if (container) {
+                container.className = `discussions__list ${view}-view`;
+            }
+        }
+
+        private getFilteredDiscussions(): Discussion[] {
+            let filtered = [...this.discussions];
+
+            // Category filter
+            if (this.currentCategory !== 'all') {
+                filtered = filtered.filter(d => d.category === this.currentCategory);
+            }
+
+            // Search filter
+            if (this.searchTerm) {
+                filtered = filtered.filter(d => 
+                    d.title.toLowerCase().includes(this.searchTerm) ||
+                    d.content.toLowerCase().includes(this.searchTerm)
+                );
+            }
+
+            // Sorting
+            switch (this.currentSort) {
+                case 'popular':
+                    filtered.sort((a, b) => b.likes - a.likes);
+                    break;
+                case 'commented':
+                    filtered.sort((a, b) => b.comments.length - a.comments.length);
+                    break;
+                default: // recent
+                    filtered.sort((a, b) => 
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    );
+            }
+
+            return filtered;
+        }
+
+        private updateUI() {
+            const container = document.getElementById('discussions-container');
+            if (!container) return;
+
+            const discussions = this.getFilteredDiscussions();
+            
+            if (discussions.length === 0) {
+                container.innerHTML = this.getEmptyStateHTML();
+                return;
+            }
+
+            container.innerHTML = discussions.map(d => this.getDiscussionHTML(d)).join('');
+            this.updateCategoryCounts();
+        }
+
+        private getDiscussionHTML(discussion: Discussion): string {
+            return `
+                <article class="discussion-card" data-id="${discussion.id}">
+                    <div class="discussion-card__main">
+                        <div class="discussion-card__meta">
+                            <span class="category-tag">${discussion.category}</span>
+                            <time datetime="${discussion.created_at}">${this.getTimeAgo(discussion.created_at)}</time>
+                        </div>
+                        <h3 class="discussion-card__title">${discussion.title}</h3>
+                        <p class="discussion-card__preview">${discussion.content}</p>
+                        <div class="discussion-card__author">By ${discussion.author}</div>
+                    </div>
+                    <div class="discussion-card__stats">
+                        <button class="stat-btn likes-btn" data-id="${discussion.id}">
+                            <span>👍</span> ${discussion.likes}
+                        </button>
+                        <div class="stat">
+                            <span>💬</span> ${discussion.comments.length}
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        private getEmptyStateHTML(): string {
+            return `
+                <div class="empty-state">
+                    <div class="empty-state__icon">🔍</div>
+                    <h3>No discussions found</h3>
+                    <p>Try adjusting your filters or start a new discussion</p>
+                    <a href="/new-discussion" class="button">Start New Discussion</a>
+                </div>
+            `;
+        }
+
+        private getTimeAgo(dateStr: string): string {
+            const date = new Date(dateStr);
+            const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return `${Math.floor(seconds / 86400)}d ago`;
+        }
+
+        private debounce(func: Function, wait: number) {
+            let timeout: number;
+            return (...args: any[]) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+    }
+    // Initialize the forum when the DOM is ready
+    function initializeForum() {
+        new ForumManager();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeForum);
+    } else {
+        initializeForum();
+    }
+</script>
+
 <style>
-    .community {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem 4rem;
-    }
+    /* ... existing styles ... */
 
-    .community__hero {
-        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-        padding: 4rem 0;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .hero-content {
-        max-width: 800px;
-        margin: 0 auto;
+    .empty-state {
         text-align: center;
-        position: relative;
-        z-index: 1;
-    }
-
-    .hero-content::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-        animation: pulse 15s infinite;
-        z-index: -1;
-    }
-
-    .hero-content h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .hero-content p {
-        font-size: 1.2rem;
-        opacity: 0.8;
-        max-width: 600px;
-        margin: 0 auto 2rem;
-    }
-
-    .search-wrapper {
-        max-width: 600px;
-        margin: 2rem auto 0;
-        position: relative;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 1rem 1.5rem;
-        border: none;
-        border-radius: 9999px;
-        background: white;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        padding-right: 3rem;
-        transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-        transform: translateY(-1px);
-    }
-
-    .search-icon {
-        position: absolute;
-        right: 1.25rem;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: 0.5;
-    }
-
-    .community__layout {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        gap: 2rem;
-        align-items: start;
-    }
-
-    .sidebar {
-        position: sticky;
-        top: 2rem;
-    }
-
-    .categories {
-        background: white;
-        padding: 1.5rem;
+        padding: 4rem 2rem;
+        background: #f8fafc;
         border-radius: 1rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .categories h2 {
-        font-size: 1.2rem;
-        font-weight: 600;
+    .empty-state__icon {
+        font-size: 3rem;
         margin-bottom: 1rem;
-        color: #1f2937;
     }
 
-    .category-btn {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
+    .stat-btn {
         background: none;
         border: none;
-        border-radius: 0.5rem;
+        padding: 0.5rem;
         cursor: pointer;
-        color: #4b5563;
-        transition: all 0.2s;
-    }
-
-    .category-btn:hover {
-        background: #f3f4f6;
-        color: #1f2937;
-    }
-
-    .post-count {
-        margin-left: auto;
-        background: #e5e7eb;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-    }
-
-    .new-post-btn {
-        width: 100%;
-        margin-top: 1rem;
-        padding: 1rem;
-        background: linear-gradient(135deg, #4f46e5, #6b5bff);
-        color: #ffffff;
-        border: none;
-        border-radius: 0.75rem;
-        cursor: pointer;
-        font-weight: 600;
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 0.5rem;
-        transition: background 0.3s ease, transform 0.2s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .new-post-btn:hover {
-        background: linear-gradient(135deg, #4338ca, #5a4bff);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .discussions__header {
-        margin-bottom: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .sort-select {
-        padding: 0.5rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.5rem;
-        background: #f9fafb;
-        color: #374151;
-        transition: border-color 0.2s ease;
-    }
-
-    .sort-select:focus {
-        border-color: #4f46e5;
-        outline: none;
-    }
-
-    .discussion-card {
-        background: #ffffff;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        gap: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        cursor: pointer;
-    }
-
-    .discussion-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .discussion-card__main {
-        flex: 1;
-    }
-
-    .discussion-card__meta {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 0.75rem;
-        font-size: 0.875rem;
         color: #6b7280;
-    }
-
-    .category-tag {
-        background: #e5e7eb;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        color: #374151;
-    }
-
-    .time {
-        color: #9ca3af;
-    }
-
-    .discussion-card__title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.75rem;
-        color: #1f2937;
-    }
-
-    .discussion-card__title a {
-        color: inherit;
-        text-decoration: none;
         transition: color 0.2s ease;
     }
 
-    .discussion-card__title a:hover {
+    .stat-btn:hover {
         color: #4f46e5;
     }
 
-    .discussion-card__preview {
-        color: #4b5563;
-        margin-bottom: 1rem;
-        line-height: 1.6;
-    }
-
-    .discussion-card__author {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6b7280;
-        font-size: 0.875rem;
-    }
-
-    .discussion-card__stats {
+    .list-view {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
-        padding-left: 1rem;
-        border-left: 1px solid #e5e7eb;
+        gap: 1rem;
     }
 
-    .stat {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6b7280;
+    .grid-view {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
     }
 
-    @media (max-width: 768px) {
-        .community__layout {
-            grid-template-columns: 1fr;
-            padding: 1rem;
-            gap: 1rem;
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation: none !important;
+            transition: none !important;
         }
-
-        .sidebar {
-            position: static;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            background-color: #f9fafb;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .discussion-card {
-            flex-direction: column;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .discussion-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .discussion-card__stats {
-            flex-direction: row;
-            justify-content: space-between;
-            padding: 1rem 0 0;
-            border-left: none;
-            border-top: 1px solid #e5e7eb;
-            background-color: #f0f4f8;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .discussion-card__stats:hover {
-            background-color: #e2e8f0;
-            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        @media (max-width: 480px) {
-            .discussion-card__stats {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 0.5rem 0;
-                border-top: none;
-                border-bottom: 1px solid #e5e7eb;
-            }
-        }
-    }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
     }
 </style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const querySelector = <T extends HTMLElement>(selector: string): T | null => document.querySelector(selector);
-        const querySelectorAll = <T extends HTMLElement>(selector: string): NodeListOf<T> => document.querySelectorAll(selector);
-
-        const searchInput = querySelector<HTMLInputElement>('.search-input');
-        const categoryButtons = querySelectorAll<HTMLElement>('.category-btn');
-        const discussionCards = querySelectorAll<HTMLElement>('.discussion-card');
-        const newPostButton = querySelector<HTMLElement>('#new-post-btn');
-        const viewButtons = querySelectorAll<HTMLElement>('.view-btn');
-        const discussionsList = querySelector<HTMLElement>('.discussions__list');
-
-        const filterDiscussions = (searchTerm: string, selectedCategory: string) => {
-            discussionCards.forEach(card => {
-                const title = card.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
-                const content = card.querySelector('.discussion-card__preview')?.textContent?.toLowerCase() || '';
-                const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase() || '';
-                const matchesSearch = title.includes(searchTerm) || content.includes(searchTerm);
-                const matchesCategory = selectedCategory === 'all' || cardCategory === selectedCategory;
-                card.style.display = matchesSearch && matchesCategory ? 'block' : 'none';
-            });
-        };
-
-        const onSearchInput = (event: Event) => {
-            const inputElement = event.target as HTMLInputElement;
-            const searchTerm = inputElement.value.trim().toLowerCase();
-            const activeCategory = querySelector<HTMLElement>('.category-btn.active')?.dataset.category || 'all';
-            filterDiscussions(searchTerm, activeCategory);
-        };
-
-        const onCategoryButtonClick = (event: Event) => {
-            const button = event.currentTarget as HTMLElement;
-            const selectedCategory = button.dataset.category || 'all';
-            categoryButtons.forEach(btn => {
-                btn.classList.toggle('active', btn === button);
-            });
-            const searchTerm = searchInput?.value.trim().toLowerCase() || '';
-            filterDiscussions(searchTerm, selectedCategory);
-        };
-
-        // Enhance: Add debounce to search input to improve performance
-        const debounce = (func: Function, wait: number) => {
-            let timeout: number | undefined;
-            return (...args: any[]) => {
-                clearTimeout(timeout);
-                timeout = window.setTimeout(() => func(...args), wait);
-            };
-        };
-
-        const debouncedOnSearchInput = debounce(onSearchInput, 300);
-
-        // Update event listener to use debounced function
-        searchInput?.addEventListener('input', debouncedOnSearchInput);
-
-        const createDiscussion = async () => {
-            try {
-                const response = await fetch('/api/discussions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: 'New Discussion',
-                        content: 'This is a new discussion.',
-                        category: 'general',
-                        author: 'User5'
-                    })
-                });
-
-                if (!response.ok) throw new Error('Failed to create discussion');
-                window.location.href = '/new-discussion';
-            } catch (error) {
-                console.error('Error creating discussion:', error);
-                alert('Failed to create discussion. Please try again.');
-            }
-        };
-
-        const goToDiscussion = (event: Event) => {
-            const card = event.currentTarget as HTMLElement;
-            const discussionId = card.getAttribute('data-discussion-id');
-            if (discussionId) {
-                window.location.href = `/discussion/${discussionId}`;
-            }
-        };
-
-        const changeView = (event: Event) => {
-            const button = event.currentTarget as HTMLElement;
-            const viewMode = button.dataset.view || 'list';
-            viewButtons.forEach(btn => btn.classList.toggle('active', btn === button));
-            if (discussionsList) {
-                discussionsList.className = `discussions__list ${viewMode}-view`;
-            }
-        };
-
-        searchInput?.addEventListener('input', onSearchInput);
-        categoryButtons.forEach(button => button.addEventListener('click', onCategoryButtonClick));
-        newPostButton?.addEventListener('click', createDiscussion);
-        discussionCards.forEach(card => card.addEventListener('click', goToDiscussion));
-        viewButtons.forEach(button => button.addEventListener('click', changeView));
-    });
-</script>
