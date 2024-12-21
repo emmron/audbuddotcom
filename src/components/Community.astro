@@ -334,37 +334,48 @@ function getTimeAgo(dateStr: string): string {
 
             const discussions = this.getFilteredDiscussions();
             
-            if (discussions.length === 0) {
-                container.innerHTML = this.getEmptyStateHTML();
-                return;
-            }
+            container.innerHTML = discussions.length === 0 
+                ? this.getEmptyStateHTML() 
+                : discussions.map(d => this.getDiscussionHTML(d)).join('');
 
-            container.innerHTML = discussions.map(d => this.getDiscussionHTML(d)).join('');
             this.updateCategoryCounts();
         }
 
         private getDiscussionHTML(discussion: Discussion): string {
             const { id, category, created_at, title, content, author, likes, comments } = discussion;
             const timeAgo = this.getTimeAgo(created_at);
+
+            const metaHTML = `
+                <div class="discussion-card__meta">
+                    <span class="category-tag">${category}</span>
+                    <time datetime="${created_at}">${timeAgo}</time>
+                </div>
+            `;
+
+            const mainHTML = `
+                <div class="discussion-card__main">
+                    ${metaHTML}
+                    <h3 class="discussion-card__title">${title}</h3>
+                    <p class="discussion-card__preview">${content}</p>
+                    <div class="discussion-card__author">By ${author}</div>
+                </div>
+            `;
+
+            const statsHTML = `
+                <div class="discussion-card__stats">
+                    <button class="stat-btn likes-btn" data-id="${id}">
+                        <span>👍</span> ${likes}
+                    </button>
+                    <div class="stat">
+                        <span>💬</span> ${comments.length}
+                    </div>
+                </div>
+            `;
+
             return `
                 <article class="discussion-card" data-id="${id}">
-                    <div class="discussion-card__main">
-                        <div class="discussion-card__meta">
-                            <span class="category-tag">${category}</span>
-                            <time datetime="${created_at}">${timeAgo}</time>
-                        </div>
-                        <h3 class="discussion-card__title">${title}</h3>
-                        <p class="discussion-card__preview">${content}</p>
-                        <div class="discussion-card__author">By ${author}</div>
-                    </div>
-                    <div class="discussion-card__stats">
-                        <button class="stat-btn likes-btn" data-id="${id}">
-                            <span>👍</span> ${likes}
-                        </button>
-                        <div class="stat">
-                            <span>💬</span> ${comments.length}
-                        </div>
-                    </div>
+                    ${mainHTML}
+                    ${statsHTML}
                 </article>
             `;
         }
