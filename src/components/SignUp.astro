@@ -143,19 +143,22 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 		type User
 	} from '../firebase';
 
-	const form = document.getElementById('signup-form');
-	const errorMessage = document.getElementById('error-message');
-	const successMessage = document.getElementById('success-message');
+	// Get DOM elements
+	const form = document.getElementById('signup-form') as HTMLFormElement;
+	const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+	const successMessage = document.getElementById('success-message') as HTMLDivElement;
+	const emailInput = document.getElementById('email') as HTMLInputElement;
+	const passwordInput = document.getElementById('password') as HTMLInputElement;
+	const usernameInput = document.getElementById('username') as HTMLInputElement;
 
 	// Auth state observer
 	onAuthStateChanged(auth, (user: User | null) => {
 		if (user) {
-			// User is signed in
 			window.location.href = '/dashboard';
 		}
 	});
 
-	function showMessage(element: HTMLElement | null, message: string) {
+	function showMessage(element: HTMLElement | null, message: string): void {
 		if (!element) return;
 		element.textContent = message;
 		element.classList.remove('hidden');
@@ -164,13 +167,13 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 			element.style.opacity = '0';
 			setTimeout(() => {
 				element.classList.add('hidden');
-			}, 300); // Wait for fade out animation
+			}, 300);
 		}, 5000);
 	}
 
-	function setLoading(isLoading: boolean) {
-		const buttons = document.querySelectorAll('button');
-		const inputs = document.querySelectorAll('input');
+	function setLoading(isLoading: boolean): void {
+		const buttons = document.querySelectorAll<HTMLButtonElement>('button');
+		const inputs = document.querySelectorAll<HTMLInputElement>('input');
 		
 		buttons.forEach(button => {
 			button.disabled = isLoading;
@@ -179,6 +182,7 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 
 		inputs.forEach(input => {
 			input.disabled = isLoading;
+			input.classList.toggle('loading', isLoading);
 		});
 	}
 
@@ -192,13 +196,9 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 	}
 
 	// Email/Password Sign Up
-	form?.addEventListener('submit', async (e) => {
+	form?.addEventListener('submit', async (e: Event) => {
 		e.preventDefault();
 		
-		const emailInput = document.getElementById('email') as HTMLInputElement;
-		const passwordInput = document.getElementById('password') as HTMLInputElement;
-		const usernameInput = document.getElementById('username') as HTMLInputElement;
-
 		const email = emailInput?.value.trim();
 		const password = passwordInput?.value;
 		const username = usernameInput?.value.trim();
@@ -222,15 +222,24 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 
 		try {
 			const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-			await updateProfile(userCredential.user, {
-				displayName: username
-			});
-			showMessage(successMessage, 'Account created successfully!');
 			
-			// Clear form
-			emailInput.value = '';
-			passwordInput.value = '';
-			usernameInput.value = '';
+			if (userCredential.user) {
+				await updateProfile(userCredential.user, {
+					displayName: username
+				});
+				
+				showMessage(successMessage, 'Account created successfully!');
+				
+				// Clear form
+				emailInput.value = '';
+				passwordInput.value = '';
+				usernameInput.value = '';
+
+				// Redirect after short delay
+				setTimeout(() => {
+					window.location.href = '/dashboard';
+				}, 1500);
+			}
 		} catch (error: any) {
 			console.error('Email/Password sign up error:', error);
 			let message = 'Failed to create account';
@@ -241,6 +250,8 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 				message = 'Invalid email address';
 			} else if (error.code === 'auth/weak-password') {
 				message = 'Password is too weak';
+			} else if (error.code === 'auth/network-request-failed') {
+				message = 'Network error. Please check your connection';
 			}
 			
 			showMessage(errorMessage, message);
@@ -264,7 +275,6 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 			
 			showMessage(successMessage, 'Successfully signed up with Google!');
 			
-			// Optional: Redirect user after successful signup
 			setTimeout(() => {
 				window.location.href = '/dashboard';
 			}, 1500);
@@ -281,6 +291,8 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 				message = 'An account already exists with this email';
 			} else if (error.code === 'auth/network-request-failed') {
 				message = 'Network error. Please check your connection';
+			} else if (error.code === 'auth/operation-not-allowed') {
+				message = 'Google sign up is not enabled';
 			}
 			
 			showMessage(errorMessage, message);
@@ -304,7 +316,6 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 			
 			showMessage(successMessage, 'Successfully signed up with Apple!');
 			
-			// Optional: Redirect user after successful signup
 			setTimeout(() => {
 				window.location.href = '/dashboard';
 			}, 1500);
@@ -323,6 +334,8 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider, createUserWit
 				message = 'Network error. Please check your connection';
 			} else if (error.code === 'auth/invalid-oauth-provider') {
 				message = 'Apple sign in is not configured correctly';
+			} else if (error.code === 'auth/operation-not-allowed') {
+				message = 'Apple sign up is not enabled';
 			}
 			
 			showMessage(errorMessage, message);

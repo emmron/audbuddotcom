@@ -291,92 +291,185 @@ const currentPath = Astro.url.pathname;
 	}
 </style>
 <script>
-	// Get DOM elements with type safety
-	const mobileMenuButton = document.querySelector('.mobile-menu-button') as HTMLButtonElement;
-	const navLinks = document.querySelector('.nav-links') as HTMLElement;
-	const authButtons = document.querySelector('.auth-buttons') as HTMLElement; 
-	const bars = document.querySelectorAll('.bar') as NodeListOf<HTMLElement>;
+	// Type definitions for better type safety
+	type MenuElements = {
+		button: HTMLButtonElement | null;
+		navLinks: HTMLElement | null;
+		authButtons: HTMLElement | null;
+		bars: HTMLElement[]; // Fixed type from NodeListOf
+	};
 
-	// Constants for animation
-	const ANIMATION_TRANSFORMS = {
-		open: [
-			'rotate(45deg) translate(5px, 5px)',
-			'none', 
-			'rotate(-45deg) translate(5px, -5px)'
-		],
-		closed: ['none', 'none', 'none']
+	type AnimationConfig = {
+		readonly open: readonly [string, string, string];
+		readonly closed: readonly [string, string, string];
+	};
+
+	// Core animation and transition constants
+	const ANIMATION = {
+		DURATION: 300,
+		TIMING: 'cubic-bezier(0.4, 0, 0.2, 1)',
+		TRANSFORMS: {
+			open: [
+				'rotate(45deg) translate(6px, 6px)',
+				'scale(0)',
+				'rotate(-45deg) translate(6px, -6px)'
+			],
+			closed: ['none', 'none', 'none']
+		} as AnimationConfig
 	} as const;
 
-	// Helper function to animate hamburger icon with proper typing
-	function animateHamburger(isOpen: boolean): void {
-		const transforms = isOpen ? ANIMATION_TRANSFORMS.open : ANIMATION_TRANSFORMS.closed;
-		bars.forEach((bar, index) => {
-			bar.style.transform = transforms[index];
-			if (index === 1) {
-				bar.style.opacity = isOpen ? '0' : '1';
-				// Add transition for smoother opacity change
-				bar.style.transition = 'opacity 0.2s ease-in-out';
+	// Initialize DOM elements with error handling
+	function initializeElements(): MenuElements {
+		const button = document.querySelector('.mobile-menu-button') as HTMLButtonElement | null;
+		const navLinks = document.querySelector('.nav-links') as HTMLElement | null;
+		const authButtons = document.querySelector('.auth-buttons') as HTMLElement | null;
+		// Convert NodeList to Array and ensure HTMLElement type
+		const bars = Array.from(document.querySelectorAll('.bar')).map(el => {
+			if (!(el instanceof HTMLElement)) {
+				throw new Error('Bar element is not HTMLElement');
 			}
+			return el;
 		});
+
+		if (!button || !navLinks || !authButtons || bars.length !== 3) {
+			throw new Error('Failed to initialize required menu elements');
+		}
+
+		return { button, navLinks, authButtons, bars };
 	}
 
-	// Main function to handle menu state changes
-	function handleMenuState(isOpen: boolean): void {
-		if (!mobileMenuButton || !navLinks || !authButtons) return;
+	// Enhanced hamburger animation with error boundaries
+	function animateHamburger(elements: MenuElements, isOpen: boolean): void {
+		try {
+			elements.bars.forEach((bar, index) => {
+				const transition = `transform ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}, opacity ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}`;
+				const transform = ANIMATION.TRANSFORMS[isOpen ? 'open' : 'closed'][index];
+				const opacity = isOpen && index === 1 ? '0' : '1';
 
-		// Update ARIA state
-		mobileMenuButton.setAttribute('aria-expanded', isOpen.toString());
-		
-		// Toggle classes with force parameter for reliability
-		navLinks.classList.toggle('show', isOpen);
-		authButtons.classList.toggle('show', isOpen);
-
-		// Animate hamburger
-		animateHamburger(isOpen);
-
-		// Add overlay effect when menu is open
-		document.body.style.overflow = isOpen ? 'hidden' : '';
-		
-		// Announce menu state to screen readers
-		const announcement = isOpen ? 'Menu opened' : 'Menu closed';
-		const ariaLive = document.createElement('div');
-		ariaLive.setAttribute('aria-live', 'polite');
-		ariaLive.setAttribute('class', 'sr-only');
-		ariaLive.textContent = announcement;
-		document.body.appendChild(ariaLive);
-		setTimeout(() => ariaLive.remove(), 1000);
+				requestAnimationFrame(() => {
+					bar.style.transition = transition;
+					bar.style.transform = transform;
+					bar.style.opacity = opacity;
+				});
+			});
+		} catch (error) {
+			console.error('Error in hamburger animation:', error instanceof Error ? error.message : 'Unknown error');
+		}
 	}
 
-	// Event handler for menu button
-	mobileMenuButton?.addEventListener('click', (e: MouseEvent) => {
-		e.stopPropagation(); // Prevent event bubbling
-		const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-		handleMenuState(!isExpanded);
-	});
-
-	// Event handler for clicks outside menu
-	document.addEventListener('click', (e: MouseEvent) => {
-		const target = e.target as Node;
-		const isMenuOpen = navLinks?.classList.contains('show');
-		const isOutsideClick = mobileMenuButton && 
-			!mobileMenuButton.contains(target) && 
-			!navLinks?.contains(target);
-
-		if (isMenuOpen && isOutsideClick) {
-			handleMenuState(false);
+	// Accessibility announcer utility with ARIA live region
+	function announceToScreenReader(message: string): void {
+		try {
+			const ariaLive = document.createElement('div');
+			ariaLive.setAttribute('aria-live', 'polite');
+			ariaLive.setAttribute('aria-atomic', 'true');
+			ariaLive.className = 'sr-only';
+			ariaLive.textContent = message;
+			
+			document.body.appendChild(ariaLive);
+			setTimeout(() => {
+				if (document.body.contains(ariaLive)) {
+					document.body.removeChild(ariaLive);
+				}
+			}, ANIMATION.DURATION + 700);
+		} catch (error) {
+			console.error('Screen reader announcement failed:', error instanceof Error ? error.message : 'Unknown error');
 		}
-	});
+	}
 
-	// Handle escape key to close menu
-	document.addEventListener('keydown', (e: KeyboardEvent) => {
-		if (e.key === 'Escape' && navLinks?.classList.contains('show')) {
-			handleMenuState(false);
+	// Core menu state handler with error boundaries and performance optimization
+	function handleMenuState(elements: MenuElements, isOpen: boolean): void {
+		try {
+			const { button, navLinks, authButtons } = elements;
+			if (!button || !navLinks || !authButtons) return;
+
+			// Update ARIA attributes for accessibility
+			button.setAttribute('aria-expanded', isOpen.toString());
+			button.setAttribute('aria-label', `${isOpen ? 'Close' : 'Open'} menu`);
+
+			// Batch DOM updates using requestAnimationFrame
+			requestAnimationFrame(() => {
+				// Apply transitions
+				[navLinks, authButtons].forEach(element => {
+					element.style.transition = `opacity ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}, transform ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}`;
+					element.classList.toggle('show', isOpen);
+				});
+
+				// Handle animations and body states
+				animateHamburger(elements, isOpen);
+				document.body.style.overflow = isOpen ? 'hidden' : '';
+				document.body.classList.toggle('menu-open', isOpen);
+			});
+
+			announceToScreenReader(isOpen ? 'Menu opened' : 'Menu closed');
+
+		} catch (error) {
+			console.error('Error handling menu state:', error instanceof Error ? error.message : 'Unknown error');
+			// Restore safe state
+			document.body.style.overflow = '';
+			document.body.classList.remove('menu-open');
 		}
-	});
+	}
 
-	// Clean up on page unload
-	window.addEventListener('unload', () => {
-		document.body.style.overflow = '';
-	});
+	// Initialize and set up event listeners with error handling and debouncing
+	function initializeMenu(): void {
+		try {
+			const elements = initializeElements();
+			let isProcessing = false;
+			let lastClickTime = 0;
+			const DEBOUNCE_THRESHOLD = 200; // ms
+
+			// Click handler with debounce
+			elements.button.addEventListener('click', (e: MouseEvent) => {
+				const now = Date.now();
+				if (isProcessing || (now - lastClickTime) < DEBOUNCE_THRESHOLD) return;
+
+				isProcessing = true;
+				lastClickTime = now;
+				e.stopPropagation();
+
+				const isExpanded = elements.button?.getAttribute('aria-expanded') === 'true';
+				handleMenuState(elements, !isExpanded);
+
+				setTimeout(() => { isProcessing = false; }, DEBOUNCE_THRESHOLD);
+			});
+
+			// Outside click handler with validation
+			document.addEventListener('click', (e: MouseEvent) => {
+				const target = e.target as Node;
+				const isMenuOpen = elements.navLinks?.classList.contains('show');
+				const isClickOutside = !elements.button.contains(target) && 
+					!elements.navLinks.contains(target) &&
+					!elements.authButtons.contains(target);
+
+				if (isMenuOpen && isClickOutside) {
+					handleMenuState(elements, false);
+				}
+			});
+
+			// Keyboard navigation
+			document.addEventListener('keydown', (e: KeyboardEvent) => {
+				if (e.key === 'Escape' && elements.navLinks?.classList.contains('show')) {
+					handleMenuState(elements, false);
+				}
+			});
+
+			// Cleanup handler
+			window.addEventListener('beforeunload', () => {
+				document.body.style.overflow = '';
+				document.body.classList.remove('menu-open');
+			});
+
+		} catch (error) {
+			console.error('Menu initialization failed:', error instanceof Error ? error.message : 'Unknown error');
+		}
+	}
+
+	// Initialize the menu system when DOM is ready
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initializeMenu);
+	} else {
+		initializeMenu();
+	}
 </script>
 </script>
