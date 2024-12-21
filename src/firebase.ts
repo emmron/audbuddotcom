@@ -11,13 +11,7 @@ import {
     signOut
 } from 'firebase/auth';
 
-// Separate type imports
-import type { 
-    User, 
-    Auth, 
-    AuthProvider 
-} from 'firebase/auth';
-
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCLY3gExeJDCmPfVBD4-8hXHsYQhHgnKv8",
     authDomain: "ausbuddotcom.firebaseapp.com",
@@ -32,7 +26,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function exports
 export { 
     auth, 
     GoogleAuthProvider, 
@@ -43,7 +36,4 @@ export {
     updateProfile,
     onAuthStateChanged,
     signOut
-};
-
-// Type exports
-export type { User, Auth, AuthProvider }; 
+}; 
