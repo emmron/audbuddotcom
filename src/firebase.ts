@@ -6,11 +6,9 @@ import {
     OAuthProvider,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    updateProfile,
-    type User,
-    type Auth,
-    type AuthProvider 
+    updateProfile 
 } from 'firebase/auth';
+import type { User, Auth, AuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCLY3gExeJDCmPfVBD4-8hXHsYQhHgnKv8",
@@ -33,8 +31,7 @@ export {
     OAuthProvider,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    updateProfile,
-    type User,
-    type Auth,
-    type AuthProvider 
-}; 
+    updateProfile 
+};
+
+export type { User, Auth, AuthProvider }; 
