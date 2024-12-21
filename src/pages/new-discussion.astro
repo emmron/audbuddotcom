@@ -345,15 +345,15 @@ const categories = [
     // Form submission
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = form.querySelector('button[type="submit"]');
-        const defaultText = submitButton?.querySelector('.default-text');
-        const loadingText = submitButton?.querySelector('.loading-text');
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const defaultText = submitButton?.querySelector('.default-text') as HTMLElement;
+        const loadingText = submitButton?.querySelector('.loading-text') as HTMLElement;
 
         try {
             // Show loading state
-            if (submitButton) submitButton.disabled = true;
-            if (defaultText) defaultText.hidden = true;
-            if (loadingText) loadingText.hidden = false;
+            submitButton.disabled = true;
+            defaultText.hidden = true;
+            loadingText.hidden = false;
 
             const formData = new FormData(form);
             formData.set('tags', JSON.stringify(tags));
@@ -374,9 +374,9 @@ const categories = [
             alert('Failed to create discussion. Please try again.');
 
             // Reset button state
-            if (submitButton) submitButton.disabled = false;
-            if (defaultText) defaultText.hidden = false;
-            if (loadingText) loadingText.hidden = true;
+            submitButton.disabled = false;
+            defaultText.hidden = false;
+            loadingText.hidden = true;
         }
     });
 </script>
