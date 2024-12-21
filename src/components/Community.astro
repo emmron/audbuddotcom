@@ -61,724 +61,384 @@ const discussions: Discussion[] = [
         comments: []
     }
 ];
+
+const categories = [
+    { id: 'all', name: 'All Topics', icon: '📋' },
+    { id: 'treatment', name: 'Treatment & Methods', icon: '💊' },
+    { id: 'reviews', name: 'Strain Reviews', icon: '⭐' },
+    { id: 'research', name: 'Research & Studies', icon: '🔬' },
+    { id: 'questions', name: 'Questions & Support', icon: '❓' }
+];
+
+function getTimeAgo(date: Date): string {
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    return `${Math.floor(seconds / 86400)} days ago`;
+}
 ---
 
 <Header />
+
 <main class="community">
     <section class="community__hero">
-        <h1 class="community__title">Cannabis Community Forums</h1>
-        <p class="community__subtitle">Connect, share experiences, and learn from other medicinal cannabis patients</p>
-        <div class="community__search">
-            <div class="search-wrapper">
-                <input 
-                    type="search" 
-                    id="search-input"
-                    class="community__search-input" 
-                    placeholder="Search discussions..."
-                    aria-label="Search discussions"
-                />
-                <button 
-                    id="search-button"
-                    class="community__search-button"
-                    aria-label="Submit search"
-                >
-                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                    </svg>
-                </button>
-            </div>
+        <h1 class="community__title">Community Discussions</h1>
+        <p class="community__subtitle">Share experiences and learn from other patients</p>
+        
+        <div class="search-wrapper">
+            <input 
+                type="search" 
+                id="search-input"
+                class="search-input" 
+                placeholder="Search discussions..."
+                aria-label="Search discussions"
+            />
         </div>
     </section>
 
     <div class="community__layout">
-        <aside class="community__sidebar">
-            <nav class="categories" aria-label="Discussion categories">
-                <h2 class="categories__title">Categories</h2>
-                <ul class="categories__list" role="list">
-                    <li>
-                        <button class="category-btn active" data-category="all">
-                            <span class="category-icon">📋</span>
-                            All Discussions
-                            <span class="category-count" aria-label="post count">{discussions.length}</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button class="category-btn" data-category="treatment">
-                            <span class="category-icon">💊</span>
-                            Treatment & Methods
-                            <span class="category-count" aria-label="post count">
-                                {discussions.filter(d => d.category === 'treatment').length}
-                            </span>
-                        </button>
-                    </li>
-                    <li>
-                        <button class="category-btn" data-category="reviews">
-                            <span class="category-icon">⭐</span>
-                            Strain Reviews
-                            <span class="category-count" aria-label="post count">
-                                {discussions.filter(d => d.category === 'reviews').length}
-                            </span>
-                        </button>
-                    </li>
-                    <li>
-                        <button class="category-btn" data-category="questions">
-                            <span class="category-icon">❓</span>
-                            Questions & Support
-                            <span class="category-count" aria-label="post count">
-                                {discussions.filter(d => d.category === 'questions').length}
-                            </span>
-                        </button>
-                    </li>
-                    <li>
-                        <button class="category-btn" data-category="research">
-                            <span class="category-icon">🔬</span>
-                            Research & Studies
-                            <span class="category-count" aria-label="post count">
-                                {discussions.filter(d => d.category === 'research').length}
-                            </span>
-                        </button>
-                    </li>
-                    <li>
-                        <button class="category-btn" data-category="general">
-                            <span class="category-icon">💭</span>
-                            General Discussion
-                            <span class="category-count" aria-label="post count">
-                                {discussions.filter(d => d.category === 'general').length}
-                            </span>
-                        </button>
-                    </li>
+        <aside class="sidebar">
+            <nav class="categories">
+                <h2>Categories</h2>
+                <ul>
+                    {categories.map(cat => (
+                        <li>
+                            <button class="category-btn" data-category={cat.id}>
+                                <span class="category-icon">{cat.icon}</span>
+                                <span>{cat.name}</span>
+                                <span class="post-count">
+                                    {cat.id === 'all' 
+                                        ? discussions.length 
+                                        : discussions.filter(d => d.category === cat.id).length}
+                                </span>
+                            </button>
+                        </li>
+                    ))}
                 </ul>
             </nav>
 
-            <section class="trending-tags">
-                <h2 class="trending-tags__title">Trending Tags</h2>
-                <div class="tag-cloud" id="tag-cloud">
-                    <!-- Tags will be dynamically inserted here -->
-                </div>
-            </section>
+            <button class="new-post-btn">
+                <span class="icon">✏️</span>
+                Start New Discussion
+            </button>
         </aside>
 
-        <section class="community__main">
-            <div class="community__header">
-                <div class="community__controls">
-                    <div class="community__view-options">
-                        <button class="view-btn active" data-view="grid" aria-label="Grid view">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zM3 14h7v7H3z"/></svg>
-                        </button>
-                        <button class="view-btn" data-view="list" aria-label="List view">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M3 13h18v-2H3zm0 5h18v-2H3zm0-10h18V6H3z"/></svg>
-                        </button>
-                    </div>
-                    <div class="community__sort">
-                        <select id="sort-select" class="sort-select" aria-label="Sort discussions">
-                            <option value="recent">Most Recent</option>
-                            <option value="popular">Most Popular</option>
-                            <option value="trending">Trending</option>
-                            <option value="commented">Most Discussed</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button 
-                    id="new-discussion-btn" 
-                    class="btn btn--primary"
-                    aria-label="Create new discussion"
-                >
-                    <svg class="btn-icon" viewBox="0 0 24 24">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                    </svg>
-                    New Discussion
-                </button>
+        <section class="discussions">
+            <div class="discussions__header">
+                <select class="sort-select">
+                    <option value="recent">Most Recent</option>
+                    <option value="popular">Most Popular</option>
+                    <option value="commented">Most Discussed</option>
+                </select>
             </div>
-            
-            <div id="discussion-feed" class="discussion-feed">
+
+            <div class="discussions__list">
                 {discussions.map((discussion) => (
-                    <article class="discussion-card" data-discussion-id={discussion.id}>
-                        <header class="discussion-card__header">
+                    <article class="discussion-card">
+                        <div class="discussion-card__main">
                             <div class="discussion-card__meta">
-                                <span class="discussion-card__category">{discussion.category}</span>
-                                <span class="discussion-card__time">
-                                    {new Date(discussion.created_at).toLocaleDateString()}
-                                </span>
+                                <span class="category-tag">{discussion.category}</span>
+                                <span class="time">{getTimeAgo(discussion.created_at)}</span>
                             </div>
-                            <h3 class="discussion-card__title">{discussion.title}</h3>
+                            
+                            <h3 class="discussion-card__title">
+                                <a href={`/discussion/${discussion.id}`}>{discussion.title}</a>
+                            </h3>
+                            
+                            <p class="discussion-card__preview">{discussion.content}</p>
+                            
                             <div class="discussion-card__author">
                                 <span class="avatar">👤</span>
-                                {discussion.author}
+                                <span class="name">{discussion.author}</span>
                             </div>
-                        </header>
-                        
-                        <div class="discussion-card__content">
-                            <p>{discussion.content}</p>
                         </div>
-                        
-                        <footer class="discussion-card__footer">
-                            <div class="discussion-card__actions">
-                                <button class="discussion-card__action" data-action="like">
-                                    ❤️ {discussion.likes}
-                                </button>
-                                <button class="discussion-card__action" data-action="comment">
-                                    💬 {discussion.comments.length}
-                                </button>
-                            </div>
-                        </footer>
 
-                        {discussion.comments.length > 0 && (
-                            <div class="comments">
-                                {discussion.comments.map((comment) => (
-                                    <div class="comment">
-                                        <div class="comment__meta">
-                                            <span class="comment__author">{comment.author}</span>
-                                            <span class="comment__time">
-                                                {new Date(comment.created_at).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                        <p>{comment.content}</p>
-                                        <button class="comment__action" data-action="like">
-                                            ❤️ {comment.likes}
-                                        </button>
-                                    </div>
-                                ))}
+                        <div class="discussion-card__stats">
+                            <div class="stat">
+                                <span class="icon">❤️</span>
+                                <span class="count">{discussion.likes}</span>
                             </div>
-                        )}
+                            <div class="stat">
+                                <span class="icon">💬</span>
+                                <span class="count">{discussion.comments.length}</span>
+                            </div>
+                        </div>
                     </article>
                 ))}
             </div>
-
-            <div class="pagination" role="navigation" aria-label="Pagination">
-                <button class="pagination__btn" data-action="prev" disabled>
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                    Previous
-                </button>
-                <div class="pagination__info">
-                    Page <span id="current-page">1</span> of <span id="total-pages">1</span>
-                </div>
-                <button class="pagination__btn" data-action="next" disabled>
-                    Next
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
-                </button>
-            </div>
         </section>
     </div>
-
-    <dialog id="discussion-modal" class="modal" aria-labelledby="modal-title">
-        <div class="modal__content">
-            <header class="modal__header">
-                <h2 id="modal-title" class="modal__title">Start a New Discussion</h2>
-                <button class="modal__close" aria-label="Close modal">×</button>
-            </header>
-
-            <form id="discussion-form" class="discussion-form">
-                <div class="form__field">
-                    <label for="author" class="form__label">Display Name</label>
-                    <input 
-                        type="text" 
-                        id="author"
-                        name="author"
-                        class="form__input"
-                        placeholder="Anonymous"
-                        maxlength="30"
-                        autocomplete="nickname"
-                    >
-                    <div class="form__hint">This name will be visible to other users</div>
-                </div>
-
-                <div class="form__field">
-                    <label for="title" class="form__label">Title</label>
-                    <input 
-                        type="text"
-                        id="title"
-                        name="title" 
-                        class="form__input"
-                        required
-                        minlength="5"
-                        maxlength="100"
-                        autocomplete="off"
-                        aria-describedby="title-hint"
-                    >
-                    <div id="title-hint" class="form__hint">
-                        <span id="title-count">0</span>/100 characters
-                    </div>
-                </div>
-
-                <div class="form__field">
-                    <label for="category" class="form__label">Category</label>
-                    <select 
-                        id="category" 
-                        name="category" 
-                        class="form__select" 
-                        required
-                        aria-describedby="category-hint"
-                    >
-                        <option value="">Select a category</option>
-                        <option value="treatment">Treatment & Methods</option>
-                        <option value="reviews">Strain Reviews</option>
-                        <option value="questions">Questions & Support</option>
-                        <option value="research">Research & Studies</option>
-                        <option value="general">General Discussion</option>
-                    </select>
-                    <div id="category-hint" class="form__hint">Choose the most relevant category</div>
-                </div>
-
-                <div class="form__field">
-                    <label for="tags" class="form__label">Tags</label>
-                    <div class="tag-input-wrapper">
-                        <input 
-                            type="text"
-                            id="tags"
-                            name="tags"
-                            class="form__input tag-input"
-                            placeholder="Add up to 5 tags..."
-                            aria-describedby="tags-hint"
-                        >
-                        <div id="tags-container" class="tags-container"></div>
-                    </div>
-                    <div id="tags-hint" class="form__hint">Separate tags with commas</div>
-                </div>
-
-                <div class="form__field">
-                    <label for="content" class="form__label">Content</label>
-                    <div class="rich-editor">
-                        <div class="rich-editor__toolbar" role="toolbar" aria-label="Formatting options">
-                            <button type="button" class="editor-btn" data-format="bold" aria-label="Bold">
-                                <svg class="icon" viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
-                            </button>
-                            <button type="button" class="editor-btn" data-format="italic" aria-label="Italic">
-                                <svg class="icon" viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
-                            </button>
-                            <button type="button" class="editor-btn" data-format="link" aria-label="Add link">
-                                <svg class="icon" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-                            </button>
-                            <button type="button" class="editor-btn" data-format="quote" aria-label="Quote">
-                                <svg class="icon" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
-                            </button>
-                        </div>
-                        <textarea 
-                            id="content"
-                            name="content"
-                            class="form__textarea rich-editor__content"
-                            required
-                            minlength="20"
-                            maxlength="2000"
-                            rows="5"
-                            aria-describedby="content-hint"
-                        ></textarea>
-                        <div id="content-hint" class="form__hint">
-                            <span id="content-count">0</span>/2000 characters
-                        </div>
-                    </div>
-                </div>
-
-                <footer class="form__actions">
-                    <button type="button" class="btn btn--text" data-action="cancel">Cancel</button>
-                    <button type="submit" class="btn btn--primary">
-                        <span class="btn__text">Post Discussion</span>
-                        <span class="btn__loading" hidden>
-                            <span class="spinner spinner--small" aria-hidden="true"></span>
-                            Posting...
-                        </span>
-                    </button>
-                </footer>
-            </form>
-        </div>
-    </dialog>
 </main>
 
 <style>
-    /* Core Layout */
     .community {
-        max-width: min(95%, 1400px);
+        max-width: 1200px;
         margin: 0 auto;
-        padding: clamp(1rem, 3vw, 2rem);
-        background: linear-gradient(180deg, 
-            var(--color-primary-50/0.3),
-            transparent 50%,
-            var(--color-primary-50/0.1));
-        min-height: 100vh;
+        padding: 2rem;
     }
 
-    /* Enhanced Hero Section */
     .community__hero {
-        position: relative;
         text-align: center;
-        padding: clamp(4rem, 12vw, 8rem) clamp(1rem, 3vw, 2rem);
-        margin-bottom: clamp(3rem, 8vw, 5rem);
-        background: linear-gradient(180deg,
-            var(--color-primary-50) 0%,
-            var(--color-primary-50/0.5) 50%,
-            transparent 100%);
-        border-radius: var(--radius-xl);
-        box-shadow: 
-            0 1px 0 0 var(--color-primary-100/0.5),
-            0 20px 40px -20px var(--color-primary-900/0.1);
-        overflow: hidden;
+        padding: 3rem 1rem;
+        margin-bottom: 2rem;
+        background: linear-gradient(to right, #4f46e5, #6366f1);
+        border-radius: 1rem;
+        color: white;
     }
 
     .community__title {
-        font-size: clamp(2.5rem, 7vw, 4rem);
-        font-weight: 900;
-        color: var(--color-gray-900);
-        text-shadow: 0 2px 4px var(--color-primary-900/0.1);
-        margin-bottom: clamp(1rem, 3vw, 2rem);
-        line-height: 1.1;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
     }
 
     .community__subtitle {
-        font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-        color: var(--color-gray-700);
-        max-width: min(90%, 600px);
-        margin: 0 auto clamp(2rem, 5vw, 3rem);
-        line-height: 1.6;
+        font-size: 1.2rem;
+        opacity: 0.9;
     }
 
-    /* Enhanced Search */
     .search-wrapper {
-        position: relative;
-        max-width: min(90%, 600px);
-        margin: 0 auto;
+        max-width: 600px;
+        margin: 2rem auto 0;
     }
 
-    .community__search-input {
+    .search-input {
         width: 100%;
-        padding: 1rem 3.5rem 1rem 1.5rem;
-        font-size: 1.125rem;
-        color: var(--color-gray-900);
-        background: white;
-        border: 2px solid var(--color-gray-200);
-        border-radius: var(--radius-full);
-        box-shadow: 
-            0 2px 4px var(--color-gray-950/0.04),
-            0 4px 8px var(--color-gray-950/0.04);
-        transition: all 0.2s ease;
-    }
-
-    .community__search-input:hover {
-        border-color: var(--color-gray-300);
-    }
-
-    .community__search-input:focus {
-        outline: none;
-        border-color: var(--color-primary-500);
-        box-shadow: 
-            0 0 0 4px var(--color-primary-100),
-            0 4px 8px var(--color-gray-950/0.04);
-    }
-
-    .community__search-button {
-        position: absolute;
-        right: 0.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2.5rem;
-        height: 2.5rem;
-        display: grid;
-        place-items: center;
-        color: white;
-        background: var(--color-primary-500);
+        padding: 1rem 1.5rem;
         border: none;
         border-radius: 9999px;
-        transition: all 0.2s ease;
+        background: white;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .community__search-button:hover {
-        background: var(--color-primary-600);
-        transform: translateY(-50%) scale(1.05);
-    }
-
-    .community__search-button:active {
-        transform: translateY(-50%) scale(0.95);
-    }
-
-    /* Enhanced Layout */
     .community__layout {
         display: grid;
-        grid-template-columns: minmax(250px, 300px) 1fr;
-        gap: clamp(1.5rem, 4vw, 3rem);
-        margin-top: clamp(2rem, 5vw, 4rem);
-        padding: 1.5rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.9));
-        border-radius: var(--radius-xl);
-        box-shadow: 
-            0 6px 10px rgba(0, 0, 0, 0.1),
-            0 12px 18px rgba(0, 0, 0, 0.1);
-        transition: all 0.4s ease;
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+        align-items: start;
     }
 
-    .community__layout:hover {
-        box-shadow: 
-            0 8px 12px rgba(0, 0, 0, 0.2),
-            0 14px 20px rgba(0, 0, 0, 0.2);
-        transform: scale(1.03);
-        background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(235, 235, 235, 1));
-    }
-
-    /* Enhanced Sidebar */
-    .community__sidebar {
+    .sidebar {
         position: sticky;
-        top: 1rem;
-        height: fit-content;
+        top: 2rem;
     }
 
     .categories {
         background: white;
-        border-radius: var(--radius-lg);
-        padding: 1.25rem;
-        box-shadow: 
-            0 1px 3px var(--color-gray-950/0.1),
-            0 4px 8px var(--color-gray-950/0.05);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .categories__title {
-        font-size: 1.25rem;
+    .categories h2 {
+        font-size: 1.2rem;
         font-weight: 600;
-        color: var(--color-gray-900);
-        padding-bottom: 0.75rem;
         margin-bottom: 1rem;
-        border-bottom: 2px solid var(--color-gray-100);
+        color: #1f2937;
     }
 
     .category-btn {
         width: 100%;
         display: flex;
         align-items: center;
-        padding: 0.75rem 1rem;
-        color: var(--color-gray-700);
-        background: transparent;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: none;
         border: none;
-        border-radius: var(--radius-md);
-        font-size: 1rem;
-        text-align: left;
-        transition: all 0.2s ease;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        color: #4b5563;
+        transition: all 0.2s;
     }
 
     .category-btn:hover {
-        color: var(--color-gray-900);
-        background: var(--color-gray-50);
+        background: #f3f4f6;
+        color: #1f2937;
     }
 
-    .category-btn.active {
-        color: var(--color-primary-700);
-        background: var(--color-primary-50);
-        font-weight: 500;
-    }
-
-    .category-count {
+    .post-count {
         margin-left: auto;
-        font-size: 0.875rem;
-        color: var(--color-gray-600);
-        background: var(--color-gray-100);
+        background: #e5e7eb;
         padding: 0.25rem 0.75rem;
-        border-radius: var(--radius-full);
+        border-radius: 9999px;
+        font-size: 0.875rem;
     }
 
-    /* Enhanced Main Content */
-    .community__main {
-        background: white;
-        border-radius: var(--radius-lg);
-        padding: clamp(1.25rem, 3vw, 1.5rem);
-        box-shadow: 
-            0 1px 3px var(--color-gray-950/0.1),
-            0 4px 8px var(--color-gray-950/0.05);
-    }
-
-    .community__header {
+    .new-post-btn {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 500;
         display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        justify-content: space-between;
         align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .new-post-btn:hover {
+        background: #4338ca;
+        transform: translateY(-1px);
+    }
+
+    .discussions__header {
         margin-bottom: 1.5rem;
     }
 
     .sort-select {
-        min-width: 200px;
         padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        color: var(--color-gray-700);
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
         background: white;
-        border: 2px solid var(--color-gray-200);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .sort-select:hover {
-        border-color: var(--color-gray-300);
-    }
-
-    .sort-select:focus {
-        outline: none;
-        border-color: var(--color-primary-500);
-        box-shadow: 0 0 0 3px var(--color-primary-100);
-    }
-
-    /* Enhanced Discussion Cards */
-    .discussion-feed {
-        display: grid;
-        gap: 1rem;
+        color: #4b5563;
     }
 
     .discussion-card {
-        padding: 1.5rem;
         background: white;
-        border: 1px solid var(--color-gray-200);
-        border-radius: var(--radius-lg);
-        transition: all 0.2s ease;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
     }
 
     .discussion-card:hover {
-        border-color: var(--color-primary-200);
-        box-shadow: 
-            0 4px 12px var(--color-gray-950/0.05),
-            0 8px 24px var(--color-gray-950/0.05);
         transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .discussion-card__main {
+        flex: 1;
+    }
+
+    .discussion-card__meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .category-tag {
+        background: #f3f4f6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        color: #4b5563;
+    }
+
+    .time {
+        color: #6b7280;
+        font-size: 0.875rem;
     }
 
     .discussion-card__title {
         font-size: 1.25rem;
         font-weight: 600;
-        color: var(--color-gray-900);
-        margin-bottom: 0.5rem;
-        line-height: 1.4;
+        margin-bottom: 0.75rem;
     }
 
-    .discussion-card__content {
-        color: var(--color-gray-600);
-        line-height: 1.6;
+    .discussion-card__title a {
+        color: #1f2937;
+        text-decoration: none;
+    }
+
+    .discussion-card__title a:hover {
+        color: #4f46e5;
+    }
+
+    .discussion-card__preview {
+        color: #4b5563;
         margin-bottom: 1rem;
+        line-height: 1.5;
     }
 
-    .discussion-card__footer {
+    .discussion-card__author {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding-top: 1rem;
-        border-top: 1px solid var(--color-gray-100);
+        gap: 0.5rem;
+        color: #6b7280;
+        font-size: 0.875rem;
     }
 
-    /* Enhanced Form Elements */
-    .form__field {
-        margin-bottom: 1.5rem;
+    .discussion-card__stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-left: 1rem;
+        border-left: 1px solid #e5e7eb;
     }
 
-    .form__label {
-        display: block;
-        font-weight: 500;
-        color: var(--color-gray-700);
-        margin-bottom: 0.5rem;
+    .stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280;
     }
 
-    .form__input,
-    .form__textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        color: var(--color-gray-900);
-        background: white;
-        border: 2px solid var(--color-gray-200);
-        border-radius: var(--radius-md);
-        transition: all 0.2s ease;
-    }
-
-    .form__input:hover,
-    .form__textarea:hover {
-        border-color: var(--color-gray-300);
-    }
-
-    .form__input:focus,
-    .form__textarea:focus {
-        outline: none;
-        border-color: var(--color-primary-500);
-        box-shadow: 0 0 0 3px var(--color-primary-100);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1024px) {
+    @media (max-width: 768px) {
         .community__layout {
             grid-template-columns: 1fr;
         }
 
-        .community__sidebar {
+        .sidebar {
             position: static;
-            margin-bottom: 1.5rem;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .community__header {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .sort-select {
-            width: 100%;
         }
 
         .discussion-card {
-            padding: 1rem;
+            flex-direction: column;
         }
-    }
 
-    /* Utilities */
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        border: 0;
-    }
-
-    .spinner {
-        width: 2rem;
-        height: 2rem;
-        border: 3px solid var(--color-gray-200);
-        border-top-color: var(--color-primary-500);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    .spinner--small {
-        width: 1rem;
-        height: 1rem;
-        border-width: 2px;
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
+        .discussion-card__stats {
+            flex-direction: row;
+            justify-content: flex-start;
+            padding: 1rem 0 0;
+            border-left: none;
+            border-top: 1px solid #e5e7eb;
         }
     }
 </style>
 
 <script>
-    // Simplified client-side functionality
+    // Client-side interactivity
     document.addEventListener('DOMContentLoaded', () => {
-        const discussionFeed = document.getElementById('discussion-feed');
-        const searchInput = document.getElementById('search-input');
+        const searchInput = document.querySelector('.search-input');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const sortSelect = document.querySelector('.sort-select');
+        const discussionCards = document.querySelectorAll('.discussion-card');
 
-        // Handle search
+        // Search functionality
         searchInput?.addEventListener('input', (e) => {
             const query = (e.target as HTMLInputElement).value.toLowerCase();
-            const discussions = document.querySelectorAll('.discussion-card');
-
-            discussions.forEach(discussion => {
-                const title = discussion.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
-                const content = discussion.querySelector('.discussion-card__content')?.textContent?.toLowerCase() || '';
-                const isMatch = title.includes(query) || content.includes(query);
-                (discussion as HTMLElement).style.display = isMatch ? 'block' : 'none';
+            discussionCards.forEach(card => {
+                const title = card.querySelector('.discussion-card__title')?.textContent?.toLowerCase() || '';
+                const content = card.querySelector('.discussion-card__preview')?.textContent?.toLowerCase() || '';
+                const isVisible = title.includes(query) || content.includes(query);
+                (card as HTMLElement).style.display = isVisible ? 'flex' : 'none';
             });
         });
 
-        // Handle likes
-        discussionFeed?.addEventListener('click', (e) => {
-            const target = e.target as HTMLElement;
-            if (target.matches('[data-action="like"]')) {
-                const currentLikes = parseInt(target.textContent?.split(' ')[1] || '0');
-                target.textContent = `❤️ ${currentLikes + 1}`;
-            }
+        // Category filtering
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.getAttribute('data-category');
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                discussionCards.forEach(card => {
+                    const cardCategory = card.querySelector('.category-tag')?.textContent?.toLowerCase();
+                    const shouldShow = category === 'all' || cardCategory === category;
+                    (card as HTMLElement).style.display = shouldShow ? 'flex' : 'none';
+                });
+            });
         });
     });
 </script>
