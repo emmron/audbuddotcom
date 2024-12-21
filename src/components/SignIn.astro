@@ -1,5 +1,5 @@
 ---
-import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase.js';
+import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase.ts';
 ---
 
 <section id="sign-in">
@@ -71,7 +71,7 @@ import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../fir
 		signInWithPopup, 
 		OAuthProvider,
 		type User 
-	} from '../firebase.js';
+	} from '../firebase.ts';
 
 	document.getElementById('google-sign-in')?.addEventListener('click', async () => {
 		try {
