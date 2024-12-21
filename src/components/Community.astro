@@ -3,653 +3,587 @@ import Header from './Header.astro';
 ---
 
 <Header />
-<main class="community-container">
-    <section class="hero">
-        <h1>Cannabis Community</h1>
-        <p>Connect with other medicinal cannabis patients and share experiences</p>
-        <div class="search-bar">
-            <input type="search" id="search-input" placeholder="Search discussions..." />
-            <button id="search-button">Search</button>
+<main class="community">
+    <section class="community__hero">
+        <h1 class="community__title">Cannabis Community</h1>
+        <p class="community__subtitle">Connect with other medicinal cannabis patients and share experiences</p>
+        <div class="community__search">
+            <input 
+                type="search" 
+                id="search-input"
+                class="community__search-input" 
+                placeholder="Search discussions..."
+                aria-label="Search discussions"
+            />
+            <button 
+                id="search-button"
+                class="community__search-button"
+                aria-label="Submit search"
+            >
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </button>
         </div>
     </section>
 
-    <div class="content-grid">
-        <section class="discussions">
-            <div class="section-header">
-                <h2>Popular Discussions</h2>
-                <button id="new-discussion-btn" class="primary-button">Start Discussion</button>
+    <div class="community__content">
+        <section class="community__discussions">
+            <div class="community__header">
+                <h2 class="community__section-title">Popular Discussions</h2>
+                <button 
+                    id="new-discussion-btn" 
+                    class="btn btn--primary"
+                    aria-label="Create new discussion"
+                >
+                    New Discussion
+                </button>
             </div>
-            <div id="discussion-cards" class="discussion-cards">
-                <div class="loading">Loading discussions...</div>
-            </div>
+            
+            <div id="discussion-feed" class="discussion-feed"></div>
         </section>
 
-        <div id="new-discussion-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>Start a New Discussion</h2>
-                <form id="new-discussion-form">
-                    <div class="form-group">
-                        <label for="author-name">Your Name</label>
-                        <input type="text" id="author-name" placeholder="Anonymous" maxlength="30">
+        <dialog id="discussion-modal" class="modal">
+            <div class="modal__content">
+                <header class="modal__header">
+                    <h2 class="modal__title">Start a New Discussion</h2>
+                    <button class="modal__close" aria-label="Close modal">×</button>
+                </header>
+
+                <form id="discussion-form" class="discussion-form">
+                    <div class="form__field">
+                        <label for="author" class="form__label">Display Name</label>
+                        <input 
+                            type="text" 
+                            id="author"
+                            class="form__input"
+                            placeholder="Anonymous"
+                            maxlength="30"
+                            autocomplete="nickname"
+                        >
                     </div>
-                    <div class="form-group">
-                        <label for="discussion-title">Title</label>
-                        <input type="text" id="discussion-title" required minlength="5" maxlength="100">
+
+                    <div class="form__field">
+                        <label for="title" class="form__label">Title</label>
+                        <input 
+                            type="text"
+                            id="title" 
+                            class="form__input"
+                            required
+                            minlength="5"
+                            maxlength="100"
+                            autocomplete="off"
+                        >
                     </div>
-                    <div class="form-group">
-                        <label for="discussion-category">Category</label>
-                        <select id="discussion-category" required>
-                            <option value="treatment">Treatment</option>
-                            <option value="reviews">Reviews</option>
-                            <option value="questions">Questions</option>
-                            <option value="general">General</option>
+
+                    <div class="form__field">
+                        <label for="category" class="form__label">Category</label>
+                        <select id="category" class="form__select" required>
+                            <option value="treatment">Treatment & Methods</option>
+                            <option value="reviews">Strain Reviews</option>
+                            <option value="questions">Questions & Support</option>
+                            <option value="research">Research & Studies</option>
+                            <option value="general">General Discussion</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="discussion-content">Content</label>
-                        <textarea id="discussion-content" required minlength="20" maxlength="2000"></textarea>
+
+                    <div class="form__field">
+                        <label for="content" class="form__label">Content</label>
+                        <textarea 
+                            id="content"
+                            class="form__textarea"
+                            required
+                            minlength="20"
+                            maxlength="2000"
+                            rows="5"
+                        ></textarea>
                     </div>
-                    <div class="button-group">
-                        <button type="button" id="cancel-discussion" class="secondary-button">Cancel</button>
-                        <button type="submit" class="primary-button">Post Discussion</button>
-                    </div>
+
+                    <footer class="form__actions">
+                        <button type="button" class="btn btn--text" data-action="cancel">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Post Discussion</button>
+                    </footer>
                 </form>
             </div>
-        </div>
+        </dialog>
     </div>
 </main>
 
 <style>
-    .community-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 1rem;
-    }
-
-    .hero {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .hero h1 {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero p {
-        color: #666;
-        margin-bottom: 1.5rem;
-    }
-
-    .search-bar {
-        display: flex;
-        gap: 0.5rem;
-        max-width: 500px;
-        margin: 0 auto;
-    }
-
-    .search-bar input {
-        flex: 1;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .search-bar button {
-        padding: 0.5rem 1rem;
-        background: #22c55e;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
+    /* CSS Custom Properties */
     :root {
-        --primary-color: #22c55e;
-        --primary-dark: #16a34a;
-        --primary-gradient: linear-gradient(135deg, #22c55e, #16a34a);
-        --secondary-color: #6366f1;
-        --secondary-dark: #4f46e5;
-        --text-primary: #0f172a;
-        --text-secondary: #475569;
-        --background-light: #ffffff;
-        --background-alt: #f8fafc;
-        --focus-outline: 3px solid #22c55e;
-        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        --shadow-sm: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
-        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06);
-        --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
-        --shadow-glow: 0 0 15px rgba(34, 197, 94, 0.3);
-        --thread-border: #e2e8f0;
-        --thread-bg: #ffffff;
-        --thread-hover: #f8fafc;
+        /* Colors */
+        --color-primary-50: #ecfdf5;
+        --color-primary-100: #d1fae5;
+        --color-primary-200: #a7f3d0;
+        --color-primary-300: #6ee7b7;
+        --color-primary-400: #34d399;
+        --color-primary-500: #10b981;
+        --color-primary-600: #059669;
+        --color-primary-700: #047857;
+        --color-primary-800: #065f46;
+        --color-primary-900: #064e3b;
+        
+        --color-gray-50: #f9fafb;
+        --color-gray-100: #f3f4f6;
+        --color-gray-200: #e5e7eb;
+        --color-gray-300: #d1d5db;
+        --color-gray-400: #9ca3af;
+        --color-gray-500: #6b7280;
+        --color-gray-600: #4b5563;
+        --color-gray-700: #374151;
+        --color-gray-800: #1f2937;
+        --color-gray-900: #111827;
+
+        /* Spacing */
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --space-12: 3rem;
+        --space-16: 4rem;
+
+        /* Typography */
+        --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --line-height-normal: 1.5;
+        --line-height-tight: 1.25;
+
+        /* Borders */
+        --radius-sm: 0.25rem;
+        --radius-md: 0.375rem;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.75rem;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+        /* Transitions */
+        --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .community-container {
-        padding: 2rem;
+    /* Base Styles */
+    .community {
         max-width: 1200px;
         margin: 0 auto;
-        min-height: calc(100vh - 4rem);
+        padding: var(--space-4);
     }
 
-    .thread-container {
-        background: var(--thread-bg);
-        border-radius: 16px;
-        border: 1px solid var(--thread-border);
-        margin-bottom: 1.5rem;
-        transition: var(--transition-smooth);
+    .community__hero {
+        text-align: center;
+        margin-bottom: var(--space-12);
     }
 
-    .thread-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--thread-border);
+    .community__title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--color-gray-900);
+        margin-bottom: var(--space-4);
+    }
+
+    .community__subtitle {
+        font-size: 1.125rem;
+        color: var(--color-gray-600);
+        margin-bottom: var(--space-8);
+    }
+
+    .community__search {
+        display: flex;
+        gap: var(--space-2);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .community__search-input {
+        flex: 1;
+        padding: var(--space-3) var(--space-4);
+        border: 2px solid var(--color-gray-200);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        transition: var(--transition-base);
+    }
+
+    .community__search-input:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 3px var(--color-primary-100);
+    }
+
+    .community__search-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        background: var(--color-primary-500);
+        border: none;
+        border-radius: var(--radius-lg);
+        color: white;
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .community__search-button:hover {
+        background: var(--color-primary-600);
+    }
+
+    .community__search-button .icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        fill: currentColor;
+    }
+
+    .community__content {
+        margin-top: var(--space-8);
+    }
+
+    .community__header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: var(--space-6);
     }
 
-    .thread-title {
+    .community__section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-gray-900);
+    }
+
+    /* Discussion Feed */
+    .discussion-feed {
+        display: grid;
+        gap: var(--space-4);
+    }
+
+    .discussion-card {
+        background: white;
+        border: 1px solid var(--color-gray-200);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        transition: var(--transition-base);
+    }
+
+    .discussion-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        transition: var(--transition-base);
+        cursor: pointer;
+    }
+
+    .btn--primary {
+        background: var(--color-primary-500);
+        color: white;
+        border: none;
+    }
+
+    .btn--primary:hover {
+        background: var(--color-primary-600);
+    }
+
+    .btn--text {
+        background: transparent;
+        color: var(--color-gray-700);
+        border: none;
+    }
+
+    .btn--text:hover {
+        background: var(--color-gray-100);
+    }
+
+    /* Modal */
+    .modal {
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: 0;
+        max-width: 600px;
+        width: 90%;
+        background: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .modal::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal__content {
+        padding: var(--space-6);
+    }
+
+    .modal__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-6);
+    }
+
+    .modal__title {
         font-size: 1.25rem;
         font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
+        color: var(--color-gray-900);
     }
 
-    .thread-meta {
-        display: flex;
-        gap: 1rem;
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-    }
-
-    .thread-content {
-        padding: 1.5rem;
-        line-height: 1.6;
-    }
-
-    .thread-footer {
-        padding: 1rem 1.5rem;
-        background: var(--thread-hover);
-        border-top: 1px solid var(--thread-border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .thread-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .thread-button {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        background: transparent;
-        border: 1px solid var(--thread-border);
+    .modal__close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--color-gray-500);
         cursor: pointer;
-        transition: var(--transition-smooth);
+        padding: var(--space-2);
+        margin: calc(var(--space-2) * -1);
+        border-radius: var(--radius-md);
+        transition: var(--transition-base);
     }
 
-    .thread-button:hover {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
+    .modal__close:hover {
+        background: var(--color-gray-100);
+        color: var(--color-gray-900);
     }
 
-    .comments-section {
-        padding: 1.5rem;
-        background: var(--thread-hover);
-        border-top: 1px solid var(--thread-border);
+    /* Form */
+    .form__field {
+        margin-bottom: var(--space-4);
     }
 
-    .comment {
-        padding: 1.5rem;
-        border-left: 3px solid var(--primary-color);
-        background: var(--thread-bg);
-        margin-bottom: 1rem;
-        border-radius: 0 8px 8px 0;
-        transition: var(--transition-smooth);
+    .form__label {
+        display: block;
+        font-weight: 500;
+        color: var(--color-gray-700);
+        margin-bottom: var(--space-2);
     }
 
-    .comment:hover {
-        transform: translateX(8px);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .comment-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-    }
-
-    .comment-author {
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .comment-timestamp {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-    }
-
-    .comment-content {
-        line-height: 1.6;
-        color: var(--text-primary);
-    }
-
-    .comment-footer {
-        margin-top: 1rem;
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .nested-comments {
-        margin-left: 2rem;
-        padding-left: 1rem;
-        border-left: 2px solid var(--thread-border);
-    }
-
-    .reply-form {
-        margin-top: 1rem;
-        padding: 1rem;
-        background: var(--thread-hover);
-        border-radius: 8px;
-    }
-
-    .reply-input {
+    .form__input,
+    .form__select,
+    .form__textarea {
         width: 100%;
-        padding: 1rem;
-        border: 1px solid var(--thread-border);
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        resize: vertical;
+        padding: var(--space-3);
+        border: 2px solid var(--color-gray-200);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: var(--transition-base);
     }
 
-    /* Preserve existing styles... */
-    /* Add all the previous styles here */
+    .form__input:focus,
+    .form__select:focus,
+    .form__textarea:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 3px var(--color-primary-100);
+    }
+
+    .form__textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+    }
 
     @media (max-width: 768px) {
-        .community-container {
-            padding: 1rem;
+        .community__title {
+            font-size: 2rem;
         }
 
-        .thread-header {
+        .community__header {
             flex-direction: column;
-            gap: 1rem;
+            gap: var(--space-4);
+            align-items: flex-start;
         }
 
-        .thread-meta {
-            flex-wrap: wrap;
+        .form__actions {
+            flex-direction: column-reverse;
         }
 
-        .nested-comments {
-            margin-left: 1rem;
+        .btn {
+            width: 100%;
         }
     }
 </style>
 
 <script>
-    interface Discussion {
-        id: string;
-        title: string;
-        category: string;
-        content: string;
-        authorName: string;
-        createdAt: Date;
-        likes: number;
-        comments: Comment[];
-    }
+    class DiscussionManager {
+        private discussions: Map<string, Discussion> = new Map();
+        private discussionFeed: HTMLElement | null;
+        private modal: HTMLDialogElement | null;
+        private form: HTMLFormElement | null;
+        private searchInput: HTMLInputElement | null;
 
-    interface Comment {
-        id: string;
-        authorName: string;
-        content: string;
-        createdAt: Date;
-        likes: number;
-    }
-
-    let discussions: Discussion[] = [];
-    let filteredDiscussions: Discussion[] = [];
-    
-    const discussionCards = document.getElementById('discussion-cards');
-    const newDiscussionBtn = document.getElementById('new-discussion-btn');
-    const modal = document.getElementById('new-discussion-modal');
-    const form = document.getElementById('new-discussion-form') as HTMLFormElement | null;
-    const cancelBtn = document.getElementById('cancel-discussion');
-    const searchInput = document.getElementById('search-input') as HTMLInputElement;
-    const searchButton = document.getElementById('search-button');
-
-    // Search functionality
-    function searchDiscussions(query: string) {
-        if (!query.trim()) {
-            filteredDiscussions = [...discussions];
-            renderDiscussions(filteredDiscussions);
-            return;
+        constructor() {
+            this.discussionFeed = document.getElementById('discussion-feed');
+            this.modal = document.getElementById('discussion-modal') as HTMLDialogElement;
+            this.form = document.getElementById('discussion-form') as HTMLFormElement;
+            this.searchInput = document.getElementById('search-input') as HTMLInputElement;
+            
+            this.init();
         }
 
-        const searchTerms = query.toLowerCase().trim().split(' ');
-        
-        filteredDiscussions = discussions.filter(discussion => {
-            const searchableText = `
-                ${discussion.title.toLowerCase()} 
-                ${discussion.content.toLowerCase()} 
-                ${discussion.category.toLowerCase()} 
-                ${discussion.authorName.toLowerCase()}
-                ${discussion.comments.map(c => `${c.content.toLowerCase()} ${c.authorName.toLowerCase()}`).join(' ')}
-            `;
-
-            return searchTerms.every(term => searchableText.includes(term));
-        });
-
-        renderDiscussions(filteredDiscussions);
-    }
-
-    searchInput?.addEventListener('input', (e) => {
-        const query = (e.target as HTMLInputElement).value;
-        searchDiscussions(query);
-    });
-
-    searchButton?.addEventListener('click', () => {
-        searchDiscussions(searchInput?.value || '');
-    });
-
-    // Error handling utility
-    const handleError = (error: unknown, context: string) => {
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        console.error(`${context}:`, errorMessage);
-        const errorAlert = document.createElement('div');
-        errorAlert.setAttribute('role', 'alert');
-        errorAlert.className = 'error';
-        errorAlert.textContent = 'An error occurred. Please try again.';
-        document.body.appendChild(errorAlert);
-        setTimeout(() => errorAlert.remove(), 5000);
-    };
-
-    // Modal handlers
-    newDiscussionBtn?.addEventListener('click', () => {
-        try {
-            modal?.classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('discussion-title')?.focus();
-            }, 100);
-        } catch (error) {
-            handleError(error, 'Error showing modal');
+        private init(): void {
+            this.loadDiscussions();
+            this.setupEventListeners();
+            this.renderDiscussions();
         }
-    });
 
-    cancelBtn?.addEventListener('click', () => {
-        try {
-            modal?.classList.add('hidden');
-            newDiscussionBtn?.focus();
-        } catch (error) {
-            handleError(error, 'Error hiding modal');
-        }
-    });
+        private setupEventListeners(): void {
+            // Modal controls
+            document.getElementById('new-discussion-btn')?.addEventListener('click', 
+                () => this.modal?.showModal()
+            );
 
-    // Form submission handler
-    form?.addEventListener('submit', async (e) => {
-        e.preventDefault();
+            this.modal?.querySelector('.modal__close')?.addEventListener('click',
+                () => this.modal?.close()
+            );
 
-        try {
-            const formElements = {
-                authorName: document.getElementById('author-name') as HTMLInputElement,
-                title: document.getElementById('discussion-title') as HTMLInputElement,
-                category: document.getElementById('discussion-category') as HTMLSelectElement,
-                content: document.getElementById('discussion-content') as HTMLTextAreaElement
-            };
+            // Form submission
+            this.form?.addEventListener('submit', (e) => this.handleSubmit(e));
 
-            if (Object.values(formElements).some(el => !el)) {
-                throw new Error('Required form elements not found');
-            }
+            // Search
+            this.searchInput?.addEventListener('input', (e) => {
+                const query = (e.target as HTMLInputElement).value.toLowerCase();
+                this.renderDiscussions(query);
+            });
 
-            const validations = [
-                {
-                    condition: formElements.title.value.trim().length < 5,
-                    message: 'Title must be at least 5 characters long'
-                },
-                {
-                    condition: formElements.content.value.trim().length < 20,
-                    message: 'Content must be at least 20 characters long'
+            // Discussion interactions
+            this.discussionFeed?.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement;
+                const discussionId = target.closest('[data-discussion-id]')?.getAttribute('data-discussion-id');
+
+                if (!discussionId) return;
+
+                if (target.matches('[data-action="like"]')) {
+                    this.handleLike(discussionId);
+                } else if (target.matches('[data-action="comment"]')) {
+                    this.handleComment(discussionId);
                 }
-            ];
+            });
+        }
 
-            const failedValidation = validations.find(v => v.condition);
-            if (failedValidation) {
-                throw new Error(failedValidation.message);
+        private loadDiscussions(): void {
+            const saved = localStorage.getItem('discussions');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                Object.entries(parsed).forEach(([id, discussion]) => {
+                    this.discussions.set(id, {
+                        ...discussion as Discussion,
+                        createdAt: new Date((discussion as Discussion).createdAt)
+                    });
+                });
             }
+        }
 
-            const newDiscussion: Discussion = {
+        private saveDiscussions(): void {
+            const discussionsObj = Object.fromEntries(this.discussions);
+            localStorage.setItem('discussions', JSON.stringify(discussionsObj));
+        }
+
+        private renderDiscussions(searchQuery: string = ''): void {
+            if (!this.discussionFeed) return;
+
+            const discussions = Array.from(this.discussions.values())
+                .filter(d => {
+                    if (!searchQuery) return true;
+                    return d.title.toLowerCase().includes(searchQuery) || 
+                           d.content.toLowerCase().includes(searchQuery);
+                })
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+            this.discussionFeed.innerHTML = discussions.length ? discussions.map(d => this.createDiscussionCard(d)).join('') 
+                : '<div class="empty-state">No discussions found</div>';
+        }
+
+        private createDiscussionCard(discussion: Discussion): string {
+            const timeAgo = this.getTimeAgo(discussion.createdAt);
+            
+            return `
+                <article class="discussion-card" data-discussion-id="${discussion.id}">
+                    <header class="discussion-card__header">
+                        <div class="discussion-card__meta">
+                            <span class="discussion-card__category">${discussion.category}</span>
+                            <span class="discussion-card__time">${timeAgo}</span>
+                        </div>
+                        <h3 class="discussion-card__title">${discussion.title}</h3>
+                    </header>
+                    
+                    <div class="discussion-card__content">
+                        <p>${discussion.content}</p>
+                    </div>
+                    
+                    <footer class="discussion-card__footer">
+                        <div class="discussion-card__author">
+                            <span class="avatar">👤</span>
+                            ${discussion.author}
+                        </div>
+                        
+                        <div class="discussion-card__actions">
+                            <button class="discussion-card__action" data-action="like">
+                                ❤️ ${discussion.likes}
+                            </button>
+                            <button class="discussion-card__action" data-action="comment">
+                                💬 ${discussion.comments.length}
+                            </button>
+                        </div>
+                    </footer>
+                </article>
+            `;
+        }
+
+        private async handleSubmit(e: Event): Promise<void> {
+            e.preventDefault();
+            
+            const form = e.target as HTMLFormElement;
+            const formData = new FormData(form);
+            
+            const discussion: Discussion = {
                 id: crypto.randomUUID(),
-                title: formElements.title.value.trim(),
-                category: formElements.category.value,
-                content: formElements.content.value.trim(),
-                authorName: formElements.authorName.value.trim() || 'Anonymous',
+                title: formData.get('title') as string,
+                content: formData.get('content') as string,
+                category: formData.get('category') as string,
+                author: formData.get('author') as string || 'Anonymous',
                 createdAt: new Date(),
                 likes: 0,
                 comments: []
             };
 
-            discussions.unshift(newDiscussion);
-            localStorage.setItem('discussions', JSON.stringify(discussions));
-
-            modal?.classList.add('hidden');
+            this.discussions.set(discussion.id, discussion);
+            this.saveDiscussions();
+            this.renderDiscussions();
+            
+            this.modal?.close();
             form.reset();
-            
-            const successMsg = document.createElement('div');
-            successMsg.setAttribute('role', 'alert');
-            successMsg.setAttribute('aria-live', 'polite');
-            successMsg.className = 'success-message';
-            successMsg.textContent = 'Discussion posted successfully!';
-            document.body.appendChild(successMsg);
-
-            setTimeout(() => {
-                successMsg.remove();
-                filteredDiscussions = [...discussions];
-                renderDiscussions(filteredDiscussions);
-            }, 3000);
-
-        } catch (error) {
-            handleError(error, 'Error posting discussion');
         }
-    });
 
-    // Load saved discussions
-    try {
-        const savedDiscussions = localStorage.getItem('discussions');
-        if (savedDiscussions) {
-            const parsed = JSON.parse(savedDiscussions);
-            discussions = parsed.map((d: any) => ({
-                ...d,
-                createdAt: new Date(d.createdAt),
-                comments: d.comments?.map((c: any) => ({
-                    ...c,
-                    createdAt: new Date(c.createdAt)
-                })) || []
-            }));
-        } else {
-            discussions = [
-                {
-                    id: crypto.randomUUID(),
-                    title: 'Welcome to the Community',
-                    category: 'general',
-                    content: 'This is our first community post. Feel free to share your experiences and ask questions!',
-                    authorName: 'Admin',
-                    createdAt: new Date(Date.now() - 86400000),
-                    likes: 5,
-                    comments: [
-                        {
-                            id: crypto.randomUUID(),
-                            authorName: 'Moderator',
-                            content: 'Welcome everyone! Looking forward to great discussions.',
-                            createdAt: new Date(Date.now() - 82800000),
-                            likes: 3
-                        }
-                    ]
-                }
-            ];
-        }
-        filteredDiscussions = [...discussions];
-    } catch (error) {
-        handleError(error, 'Error loading saved discussions');
-    }
-
-    function highlightSearchTerms(text: string, searchQuery: string): string {
-        if (!searchQuery.trim()) return text;
-        
-        const terms = searchQuery.toLowerCase().trim().split(' ');
-        let highlightedText = text;
-        
-        terms.forEach(term => {
-            const regex = new RegExp(`(${term})`, 'gi');
-            highlightedText = highlightedText.replace(regex, '<span class="highlight">$1</span>');
-        });
-        
-        return highlightedText;
-    }
-
-    function renderDiscussions(discussionsToRender: Discussion[]) {
-        if (!discussionCards) return;
-
-        try {
-            discussionCards.innerHTML = '';
-            
-            if (discussionsToRender.length === 0) {
-                discussionCards.innerHTML = `
-                    <div class="no-results">
-                        <p>No discussions found. Try different search terms or start a new discussion!</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            discussionsToRender.forEach((data) => {
-                const timeAgo = getTimeAgo(data.createdAt);
-                const searchQuery = searchInput?.value || '';
-                
-                const highlightedTitle = highlightSearchTerms(data.title, searchQuery);
-                const highlightedContent = highlightSearchTerms(
-                    data.content.length > 150 ? `${data.content.substring(0, 150)}...` : data.content,
-                    searchQuery
-                );
-
-                const commentsHTML = data.comments.map(comment => `
-                    <div class="comment" data-comment-id="${comment.id}">
-                        <div class="comment-header">
-                            <span class="comment-author">👤 ${comment.authorName}</span>
-                            <span class="comment-date">${getTimeAgo(comment.createdAt)}</span>
-                        </div>
-                        <p class="comment-content">${highlightSearchTerms(comment.content, searchQuery)}</p>
-                        <div class="comment-actions">
-                            <button class="like-button" aria-label="Like comment">❤️ ${comment.likes}</button>
-                        </div>
-                    </div>
-                `).join('');
-
-                discussionCards.innerHTML += `
-                    <article class="card" data-id="${data.id}" tabindex="0">
-                        <div class="card-header">
-                            <span class="tag" role="status">${data.category}</span>
-                            <span class="date" aria-label="Posted ${timeAgo}">${timeAgo}</span>
-                        </div>
-                        <h3>${highlightedTitle}</h3>
-                        <p>${highlightedContent}</p>
-                        <div class="stats" role="group" aria-label="Post statistics">
-                            <span aria-label="Author: ${data.authorName}">👤 ${data.authorName}</span>
-                            <button class="like-button" aria-label="Like discussion">❤️ ${data.likes}</button>
-                            <button class="comment-button" aria-label="Show comments">💬 ${data.comments.length}</button>
-                        </div>
-                        <div class="comments-section">
-                            ${commentsHTML}
-                            <form class="comment-form">
-                                <input type="text" placeholder="Add a comment..." required>
-                                <button type="submit">Post</button>
-                            </form>
-                        </div>
-                    </article>
-                `;
-            });
-
-            attachInteractionHandlers();
-
-        } catch (error) {
-            handleError(error, 'Error rendering discussions');
-        }
-    }
-
-    function attachInteractionHandlers() {
-        const likeButtons = document.querySelectorAll('.like-button');
-        const commentForms = document.querySelectorAll('.comment-form');
-
-        likeButtons.forEach(button => {
-            button.addEventListener('click', handleLike);
-        });
-
-        commentForms.forEach(form => {
-            form.addEventListener('submit', handleNewComment);
-        });
-    }
-
-    function handleLike(e: Event) {
-        const button = e.currentTarget as HTMLButtonElement;
-        const card = button.closest('.card') as HTMLElement;
-        const comment = button.closest('.comment') as HTMLElement;
-        const discussionId = card?.dataset?.id;
-        const commentId = comment?.dataset?.commentId;
-
-        if (discussionId) {
-            const discussion = discussions.find(d => d.id === discussionId);
+        private handleLike(id: string): void {
+            const discussion = this.discussions.get(id);
             if (discussion) {
-                if (commentId) {
-                    const comment = discussion.comments.find(c => c.id === commentId);
-                    if (comment) comment.likes++;
-                } else {
-                    discussion.likes++;
-                }
-                localStorage.setItem('discussions', JSON.stringify(discussions));
-                filteredDiscussions = [...discussions];
-                renderDiscussions(filteredDiscussions);
+                discussion.likes++;
+                this.discussions.set(id, discussion);
+                this.saveDiscussions();
+                this.renderDiscussions();
             }
         }
-    }
 
-    function handleNewComment(e: Event) {
-        e.preventDefault();
-        const form = e.currentTarget as HTMLFormElement;
-        const card = form.closest('.card') as HTMLElement;
-        const discussionId = card?.dataset?.id;
-        const input = form.querySelector('input') as HTMLInputElement;
-
-        if (discussionId && input?.value.trim()) {
-            const discussion = discussions.find(d => d.id === discussionId);
-            if (discussion) {
-                const newComment: Comment = {
-                    id: crypto.randomUUID(),
-                    authorName: 'Anonymous',
-                    content: input.value.trim(),
-                    createdAt: new Date(),
-                    likes: 0
-                };
-                discussion.comments.push(newComment);
-                localStorage.setItem('discussions', JSON.stringify(discussions));
-                filteredDiscussions = [...discussions];
-                renderDiscussions(filteredDiscussions);
-            }
+        private handleComment(id: string): void {
+            // Implement comment functionality
         }
-    }
 
-    function getTimeAgo(date: Date): string {
-        try {
-            const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+        private getTimeAgo(date: Date): string {
+            const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
             
             const intervals = [
                 { seconds: 31536000, label: 'year' },
@@ -662,21 +596,34 @@ import Header from './Header.astro';
 
             for (const interval of intervals) {
                 const count = Math.floor(seconds / interval.seconds);
-                if (count > 1) {
-                    return `${count} ${interval.label}s ago`;
-                }
-                if (count === 1) {
-                    return `1 ${interval.label} ago`;
+                if (count > 0) {
+                    return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
                 }
             }
 
             return 'just now';
-        } catch (error) {
-            handleError(error, 'Error calculating time');
-            return 'some time ago';
         }
     }
 
-    // Initial render
-    renderDiscussions(filteredDiscussions);
+    interface Discussion {
+        id: string;
+        title: string;
+        content: string;
+        category: string;
+        author: string;
+        createdAt: Date;
+        likes: number;
+        comments: Comment[];
+    }
+
+    interface Comment {
+        id: string;
+        author: string;
+        content: string;
+        createdAt: Date;
+        likes: number;
+    }
+
+    // Initialize
+    new DiscussionManager();
 </script>
