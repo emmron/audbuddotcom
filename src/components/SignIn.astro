@@ -305,26 +305,78 @@
 	// Email/Password Sign In
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
+		
+		if (!form || !errorMessage || !successMessage) {
+			console.error('Required DOM elements not found');
+			return;
+		}
+
 		setLoading(true);
 
 		const emailInput = document.getElementById('email') as HTMLInputElement;
 		const passwordInput = document.getElementById('password') as HTMLInputElement;
-		const email = emailInput?.value.trim();
-		const password = passwordInput?.value;
 
+		if (!emailInput || !passwordInput) {
+			showMessage(errorMessage, 'Form inputs not found');
+			setLoading(false);
+			return;
+		}
+
+		const email = emailInput.value.trim();
+		const password = passwordInput.value;
+
+		// Enhanced validation
 		if (!email || !password) {
 			showMessage(errorMessage, 'Please fill in all fields');
 			setLoading(false);
 			return;
 		}
 
+		// Email format validation
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			showMessage(errorMessage, 'Please enter a valid email address');
+			setLoading(false);
+			return;
+		}
+
+		// Password length check
+		if (password.length < 6) {
+			showMessage(errorMessage, 'Password must be at least 6 characters');
+			setLoading(false);
+			return;
+		}
+
 		try {
-			await signInWithEmailAndPassword(auth, email, password);
+			const currentAuth = auth;
+			if (!currentAuth) {
+				throw new Error('Authentication not initialized');
+			}
+
+			const userCredential = await signInWithEmailAndPassword(currentAuth, email, password);
+			const user = userCredential.user;
+			
+			if (!user) {
+				throw new Error('No user data returned');
+			}
+
 			showMessage(successMessage, 'Successfully signed in!');
 			
 			// Clear form and redirect
 			emailInput.value = passwordInput.value = '';
-			setTimeout(() => window.location.href = '/dashboard', 1500);
+			
+			// Ensure redirect only happens if still signed in
+			const redirectTimeout = setTimeout(() => {
+				const unsubscribe = onAuthStateChanged(currentAuth, (currentUser) => {
+					if (currentUser) {
+						window.location.href = '/dashboard';
+					}
+					unsubscribe(); // Clean up listener
+				});
+			}, 1500);
+
+			// Cleanup timeout if component unmounts
+			return () => clearTimeout(redirectTimeout);
 
 		} catch (error: any) {
 			console.error('Email sign in error:', error);
@@ -333,7 +385,9 @@
 				'auth/user-disabled': 'This account has been disabled',
 				'auth/user-not-found': 'No account found with this email',
 				'auth/too-many-requests': 'Too many failed attempts. Please try again later',
-				'auth/network-request-failed': 'Network error. Please check your connection'
+				'auth/network-request-failed': 'Network error. Please check your connection',
+				'auth/invalid-email': 'Invalid email format',
+				'auth/wrong-password': 'Incorrect password'
 			};
 			showMessage(errorMessage, errorMessages[error.code] || 'Failed to sign in');
 		} finally {
@@ -344,6 +398,14 @@
 	// Handle OAuth sign in (Google & Apple)
 	async function handleOAuthSignIn(providerId: 'google.com' | 'apple.com') {
 		setLoading(true);
+		
+		const currentAuth = auth;
+		if (!currentAuth) {
+			showMessage(errorMessage, 'Authentication not initialized');
+			setLoading(false);
+			return;
+		}
+
 		try {
 			const provider = providerId === 'google.com' 
 				? new GoogleAuthProvider()
@@ -351,15 +413,34 @@
 
 			// Add appropriate scopes
 			provider.addScope('email');
-			provider.addScope(providerId === 'google.com' ? 'profile' : 'name');
+			if (providerId === 'google.com') {
+				provider.addScope('profile');
+				provider.setCustomParameters({
+					prompt: 'select_account'
+				});
+			} else {
+				provider.addScope('name');
+			}
 			
-			const result = await signInWithPopup(auth, provider);
-			if (!result.user) {
+			const result = await signInWithPopup(currentAuth, provider);
+			const user = result.user;
+			
+			if (!user) {
 				throw new Error('No user data returned');
 			}
 			
 			showMessage(successMessage, `Successfully signed in with ${providerId === 'google.com' ? 'Google' : 'Apple'}!`);
-			setTimeout(() => window.location.href = '/dashboard', 1500);
+			
+			const redirectTimeout = setTimeout(() => {
+				const unsubscribe = onAuthStateChanged(currentAuth, (currentUser) => {
+					if (currentUser) {
+						window.location.href = '/dashboard';
+					}
+					unsubscribe(); // Clean up listener
+				});
+			}, 1500);
+
+			return () => clearTimeout(redirectTimeout);
 			
 		} catch (error: any) {
 			console.error(`${providerId} sign in error:`, error);
@@ -368,7 +449,9 @@
 				'auth/popup-blocked': `Please enable popups to sign in with ${providerId === 'google.com' ? 'Google' : 'Apple'}`,
 				'auth/account-exists-with-different-credential': 'An account already exists with this email',
 				'auth/network-request-failed': 'Network error. Please check your connection',
-				'auth/invalid-oauth-provider': 'OAuth provider is not configured correctly'
+				'auth/invalid-oauth-provider': 'OAuth provider is not configured correctly',
+				'auth/operation-not-allowed': 'This sign in method is not enabled',
+				'auth/user-disabled': 'This account has been disabled'
 			};
 			showMessage(errorMessage, errorMessages[error.code] || `Failed to sign in with ${providerId === 'google.com' ? 'Google' : 'Apple'}`);
 		} finally {
@@ -376,7 +459,10 @@
 		}
 	}
 
-	// Add click handlers for OAuth buttons
-	document.getElementById('google-sign-in')?.addEventListener('click', () => handleOAuthSignIn('google.com'));
-	document.getElementById('apple-sign-in')?.addEventListener('click', () => handleOAuthSignIn('apple.com'));
+	// Add click handlers for OAuth buttons with error boundaries
+	const googleButton = document.getElementById('google-sign-in');
+	const appleButton = document.getElementById('apple-sign-in');
+
+	googleButton?.addEventListener('click', () => handleOAuthSignIn('google.com'));
+	appleButton?.addEventListener('click', () => handleOAuthSignIn('apple.com'));
 </script>

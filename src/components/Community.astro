@@ -61,41 +61,47 @@ import Header from './Header.astro';
 </main>
 
 <style>
-    /* Base styles with increased accessibility */
+    /* Modern color palette with enhanced accessibility */
     :root {
-        --primary-color: #4caf50;
-        --primary-dark: #388e3c;
-        --text-primary: #1a1a1a;
-        --text-secondary: #4a4a4a;
+        --primary-color: #22c55e;
+        --primary-dark: #16a34a;
+        --primary-gradient: linear-gradient(135deg, #22c55e, #16a34a);
+        --secondary-color: #6366f1;
+        --secondary-dark: #4f46e5;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
         --background-light: #ffffff;
-        --focus-outline: 3px solid #4caf50;
+        --background-alt: #f8fafc;
+        --focus-outline: 3px solid #22c55e;
         --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06);
+        --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+        --shadow-glow: 0 0 15px rgba(34, 197, 94, 0.3);
     }
 
-    /* High contrast mode support */
     @media (prefers-contrast: high) {
         :root {
-            --primary-color: #006400;
-            --primary-dark: #004d00;
+            --primary-color: #15803d;
+            --primary-dark: #166534;
             --text-primary: #000000;
-            --text-secondary: #1a1a1a;
+            --text-secondary: #1f2937;
         }
     }
 
     .community-container {
-        padding: 2rem;
+        padding: 3rem;
         max-width: 1200px;
         margin: 0 auto;
         min-height: calc(100vh - 4rem);
+        background: var(--background-light);
     }
 
-    /* Enhanced focus states for keyboard navigation */
     *:focus {
         outline: var(--focus-outline);
         outline-offset: 2px;
     }
 
-    /* Reduced motion preference support */
     @media (prefers-reduced-motion: reduce) {
         * {
             animation: none !important;
@@ -105,176 +111,245 @@ import Header from './Header.astro';
 
     .hero {
         text-align: center;
-        padding: 4rem 2rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.92));
-        border-radius: 20px;
-        margin-bottom: 3rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 6rem 2rem;
+        background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+        border-radius: 32px;
+        margin-bottom: 4rem;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at top right, rgba(34,197,94,0.1), transparent 60%),
+                    radial-gradient(circle at bottom left, rgba(99,102,241,0.1), transparent 60%);
+        z-index: 0;
     }
 
     .hero h1 {
-        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-size: clamp(3rem, 7vw, 4.5rem);
         color: var(--text-primary);
-        margin-bottom: 1rem;
-        font-weight: 800;
-        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .hero p {
-        font-size: clamp(1.1rem, 2vw, 1.4rem);
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
         color: var(--text-secondary);
-        max-width: 600px;
+        max-width: 700px;
         margin: 0 auto;
-        line-height: 1.6;
+        line-height: 1.7;
+        font-weight: 400;
+        position: relative;
     }
 
     .search-bar {
-        margin: 2.5rem auto 0;
+        margin: 3rem auto 0;
         display: flex;
         justify-content: center;
-        gap: 1rem;
-        max-width: 700px;
-        padding: 0 1rem;
+        gap: 1.25rem;
+        max-width: 800px;
+        padding: 0 1.5rem;
+        position: relative;
     }
 
     .search-bar input {
-        padding: 1rem 1.5rem;
+        padding: 1.4rem 2rem;
         width: 100%;
-        border: 2px solid rgba(0, 0, 0, 0.1);
-        border-radius: 30px;
-        font-size: 1.1rem;
+        border: 2px solid rgba(0, 0, 0, 0.06);
+        border-radius: 100px;
+        font-size: 1.15rem;
         transition: var(--transition-smooth);
-        background-color: var(--background-light);
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
     }
 
     .search-bar input:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        box-shadow: var(--shadow-glow);
+        transform: translateY(-1px);
     }
 
-    /* ARIA-friendly button styles */
     button {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         font-weight: 600;
-        padding: 1rem 2rem;
+        padding: 1.4rem 2.8rem;
         cursor: pointer;
         border: none;
-        border-radius: 30px;
-        background: var(--primary-color);
+        border-radius: 100px;
+        background: var(--primary-gradient);
         color: white;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
+        transition: var(--transition-smooth);
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg), var(--shadow-glow);
+    }
+
+    button:hover::before {
+        opacity: 0.8;
+    }
+
+    button:active {
+        transform: translateY(1px);
+    }
+
+    .card {
+        background: var(--background-light);
+        padding: 2.5rem;
+        border-radius: 24px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0,0,0,0.04);
         transition: var(--transition-smooth);
         position: relative;
         overflow: hidden;
     }
 
-    button:hover {
-        background: var(--primary-dark);
-    }
-
-    button:focus-visible {
-        outline: var(--focus-outline);
-        outline-offset: 2px;
-    }
-
-    /* Improved card accessibility */
-    .card {
-        background: var(--background-light);
-        padding: 2rem;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-        margin-bottom: 1.5rem;
-        border: 2px solid transparent;
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        opacity: 0;
         transition: var(--transition-smooth);
     }
 
     .card:hover,
     .card:focus-within {
-        border-color: var(--primary-color);
         transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
     }
 
-    /* Form accessibility improvements */
+    .card:hover::before,
+    .card:focus-within::before {
+        opacity: 1;
+    }
+
     .input-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
 
     .input-group label {
         display: block;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         font-size: 1.1rem;
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text-primary);
+        letter-spacing: -0.01em;
     }
 
     .input-group input,
     .input-group select,
     .input-group textarea {
         width: 100%;
-        padding: 1rem;
-        border: 2px solid rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        font-size: 1rem;
+        padding: 1.2rem;
+        border: 2px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        font-size: 1.1rem;
         line-height: 1.5;
         transition: var(--transition-smooth);
+        background-color: var(--background-alt);
     }
 
     .input-group input:focus,
     .input-group select:focus,
     .input-group textarea:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        box-shadow: var(--shadow-glow);
+        background-color: var(--background-light);
     }
 
-    /* Error states */
     .error {
-        color: #dc3545;
+        color: #ef4444;
         font-size: 1rem;
-        margin-top: 0.5rem;
-        padding: 0.5rem;
-        border-radius: 4px;
-        background-color: rgba(220, 53, 69, 0.1);
+        margin-top: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
-    /* Loading state with better visibility */
     .loading {
         text-align: center;
-        padding: 2rem;
+        padding: 3rem;
         color: var(--text-secondary);
         font-size: 1.2rem;
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 8px;
+        background: var(--background-alt);
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
     }
 
-    /* Modal accessibility improvements */
     .modal {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 1000;
-        padding: 1rem;
+        padding: 1.5rem;
     }
 
     .modal-content {
         background: var(--background-light);
-        padding: 2.5rem;
-        border-radius: 16px;
+        padding: 3rem;
+        border-radius: 24px;
         width: 100%;
-        max-width: 600px;
+        max-width: 650px;
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Responsive improvements */
     @media (max-width: 768px) {
         .community-container {
-            padding: 1rem;
+            padding: 1.5rem;
+        }
+
+        .hero {
+            padding: 4rem 1.5rem;
         }
 
         .content-grid {
@@ -287,17 +362,16 @@ import Header from './Header.astro';
         }
 
         .modal-content {
-            padding: 1.5rem;
+            padding: 2rem;
             margin: 1rem;
         }
 
         button {
             width: 100%;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
     }
 
-    /* Screen reader only text */
     .sr-only {
         position: absolute;
         width: 1px;
@@ -372,74 +446,115 @@ import Header from './Header.astro';
     });
 
     // Handle form submission with proper validation and error handling
+    // Update Discussion type to include comments
+    type Comment = {
+        id: string;
+        authorName: string;
+        content: string;
+        createdAt: Date;
+        likes: number;
+    };
+
+    // Add comments to Discussion type
+    interface Discussion {
+        id: string;
+        title: string;
+        category: string;
+        content: string;
+        authorName: string;
+        createdAt: Date;
+        likes: number;
+        comments: Comment[];
+    }
+
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         try {
-            const authorNameInput = document.getElementById('author-name') as HTMLInputElement;
-            const titleInput = document.getElementById('discussion-title') as HTMLInputElement;
-            const categoryInput = document.getElementById('discussion-category') as HTMLSelectElement;
-            const contentInput = document.getElementById('discussion-content') as HTMLTextAreaElement;
+            // Get form elements with type safety
+            const formElements = {
+                authorName: document.getElementById('author-name') as HTMLInputElement,
+                title: document.getElementById('discussion-title') as HTMLInputElement,
+                category: document.getElementById('discussion-category') as HTMLSelectElement,
+                content: document.getElementById('discussion-content') as HTMLTextAreaElement
+            };
 
-            if (!authorNameInput || !titleInput || !categoryInput || !contentInput) {
+            // Validate all form elements exist
+            if (Object.values(formElements).some(el => !el)) {
                 throw new Error('Required form elements not found');
             }
 
-            // Input validation
-            if (titleInput.value.trim().length < 5) {
-                throw new Error('Title must be at least 5 characters long');
+            // Input validation with descriptive errors
+            const validations = [
+                {
+                    condition: formElements.title.value.trim().length < 5,
+                    message: 'Title must be at least 5 characters long'
+                },
+                {
+                    condition: formElements.content.value.trim().length < 20,
+                    message: 'Content must be at least 20 characters long'
+                }
+            ];
+
+            const failedValidation = validations.find(v => v.condition);
+            if (failedValidation) {
+                throw new Error(failedValidation.message);
             }
 
-            if (contentInput.value.trim().length < 10) {
-                throw new Error('Content must be at least 10 characters long');
-            }
-
+            // Create new discussion with sanitized inputs
             const newDiscussion: Discussion = {
                 id: crypto.randomUUID(),
-                title: titleInput.value.trim(),
-                category: categoryInput.value,
-                content: contentInput.value.trim(),
-                authorName: authorNameInput.value.trim() || 'Anonymous',
+                title: formElements.title.value.trim(),
+                category: formElements.category.value,
+                content: formElements.content.value.trim(),
+                authorName: formElements.authorName.value.trim() || 'Anonymous',
                 createdAt: new Date(),
                 likes: 0,
-                comments: 0
+                comments: [] // Initialize empty comments array
             };
 
-            // Add to local array
+            // Update discussions array and localStorage atomically
             discussions.unshift(newDiscussion);
-
-            // Save to localStorage for persistence
             localStorage.setItem('discussions', JSON.stringify(discussions));
 
+            // Reset UI state
             modal?.classList.add('hidden');
             form.reset();
             
-            // Success message
+            // Show success message with ARIA support
             const successMsg = document.createElement('div');
             successMsg.setAttribute('role', 'alert');
+            successMsg.setAttribute('aria-live', 'polite');
             successMsg.className = 'success-message';
-            successMsg.textContent = 'Discussion posted successfully';
+            successMsg.textContent = 'Discussion posted successfully!';
             document.body.appendChild(successMsg);
-            setTimeout(() => successMsg.remove(), 3000);
 
-            renderDiscussions();
+            // Cleanup success message after animation
+            setTimeout(() => {
+                successMsg.remove();
+                renderDiscussions();
+            }, 3000);
 
         } catch (error) {
             handleError(error, 'Error posting discussion');
         }
     });
 
-    // Load saved discussions from localStorage
+    // Load saved discussions from localStorage with proper type handling
     try {
         const savedDiscussions = localStorage.getItem('discussions');
         if (savedDiscussions) {
             const parsed = JSON.parse(savedDiscussions);
             discussions = parsed.map((d: any) => ({
                 ...d,
-                createdAt: new Date(d.createdAt)
+                createdAt: new Date(d.createdAt),
+                comments: d.comments?.map((c: any) => ({
+                    ...c,
+                    createdAt: new Date(c.createdAt)
+                })) || []
             }));
         } else {
-            // Initial mock data if no saved discussions
+            // Initial mock data with comments
             discussions = [
                 {
                     id: crypto.randomUUID(),
@@ -449,7 +564,15 @@ import Header from './Header.astro';
                     authorName: 'Admin',
                     createdAt: new Date(Date.now() - 86400000),
                     likes: 5,
-                    comments: 2
+                    comments: [
+                        {
+                            id: crypto.randomUUID(),
+                            authorName: 'Moderator',
+                            content: 'Welcome everyone! Looking forward to great discussions.',
+                            createdAt: new Date(Date.now() - 82800000),
+                            likes: 3
+                        }
+                    ]
                 }
             ];
         }
@@ -457,7 +580,7 @@ import Header from './Header.astro';
         handleError(error, 'Error loading saved discussions');
     }
 
-    // Render discussions with error handling
+    // Enhanced rendering with comments support
     function renderDiscussions() {
         if (!discussionCards) return;
 
@@ -479,6 +602,19 @@ import Header from './Header.astro';
                     ? `${data.content.substring(0, 150)}...` 
                     : data.content;
 
+                const commentsHTML = data.comments.map(comment => `
+                    <div class="comment" data-comment-id="${comment.id}">
+                        <div class="comment-header">
+                            <span class="comment-author">👤 ${comment.authorName}</span>
+                            <span class="comment-date">${getTimeAgo(comment.createdAt)}</span>
+                        </div>
+                        <p class="comment-content">${comment.content}</p>
+                        <div class="comment-actions">
+                            <button class="like-button" aria-label="Like comment">❤️ ${comment.likes}</button>
+                        </div>
+                    </div>
+                `).join('');
+
                 discussionCards.innerHTML += `
                     <article class="card" data-id="${data.id}" tabindex="0">
                         <div class="card-header">
@@ -489,14 +625,82 @@ import Header from './Header.astro';
                         <p>${truncatedContent}</p>
                         <div class="stats" role="group" aria-label="Post statistics">
                             <span aria-label="Author: ${data.authorName}">👤 ${data.authorName}</span>
-                            <span aria-label="${data.likes} likes">❤️ ${data.likes}</span>
-                            <span aria-label="${data.comments} comments">💬 ${data.comments}</span>
+                            <button class="like-button" aria-label="Like discussion">❤️ ${data.likes}</button>
+                            <button class="comment-button" aria-label="Show comments">💬 ${data.comments.length}</button>
+                        </div>
+                        <div class="comments-section">
+                            ${commentsHTML}
+                            <form class="comment-form">
+                                <input type="text" placeholder="Add a comment..." required>
+                                <button type="submit">Post</button>
+                            </form>
                         </div>
                     </article>
                 `;
             });
+
+            // Add event listeners for likes and comments
+            attachInteractionHandlers();
+
         } catch (error) {
             handleError(error, 'Error rendering discussions');
+        }
+    }
+
+    // Handle likes and comments
+    function attachInteractionHandlers() {
+        const likeButtons = document.querySelectorAll('.like-button');
+        const commentForms = document.querySelectorAll('.comment-form');
+
+        likeButtons.forEach(button => {
+            button.addEventListener('click', handleLike);
+        });
+
+        commentForms.forEach(form => {
+            form.addEventListener('submit', handleNewComment);
+        });
+    }
+
+    function handleLike(e: Event) {
+        const button = e.currentTarget as HTMLButtonElement;
+        const discussionId = button.closest('.card')?.dataset.id;
+        const commentId = button.closest('.comment')?.dataset.commentId;
+
+        if (discussionId) {
+            const discussion = discussions.find(d => d.id === discussionId);
+            if (discussion) {
+                if (commentId) {
+                    const comment = discussion.comments.find(c => c.id === commentId);
+                    if (comment) comment.likes++;
+                } else {
+                    discussion.likes++;
+                }
+                localStorage.setItem('discussions', JSON.stringify(discussions));
+                renderDiscussions();
+            }
+        }
+    }
+
+    function handleNewComment(e: Event) {
+        e.preventDefault();
+        const form = e.currentTarget as HTMLFormElement;
+        const discussionId = form.closest('.card')?.dataset.id;
+        const input = form.querySelector('input') as HTMLInputElement;
+
+        if (discussionId && input?.value.trim()) {
+            const discussion = discussions.find(d => d.id === discussionId);
+            if (discussion) {
+                const newComment: Comment = {
+                    id: crypto.randomUUID(),
+                    authorName: 'Anonymous',
+                    content: input.value.trim(),
+                    createdAt: new Date(),
+                    likes: 0
+                };
+                discussion.comments.push(newComment);
+                localStorage.setItem('discussions', JSON.stringify(discussions));
+                renderDiscussions();
+            }
         }
     }
 
