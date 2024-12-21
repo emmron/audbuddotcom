@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "astro": "^5.1.1",
-    "@auth/core": "^0.18.0",
-    "@auth/astro": "^0.4.0"
+    "@authjs/core": "^0.18.0",
+    "auth-astro": "^4.1.0",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
