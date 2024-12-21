@@ -1,0 +1,95 @@
+---
+import { auth, GoogleAuthProvider, signInWithPopup, OAuthProvider } from '../firebase.js';
+---
+
+<section id="sign-up">
+	<h2>Sign Up</h2>
+	<form action="/api/signup" method="POST">
+		<label for="username">Username:</label>
+		<input type="text" id="username" name="username" required />
+		
+		<label for="email">Email:</label>
+		<input type="email" id="email" name="email" required />
+		
+		<label for="password">Password:</label>
+		<input type="password" id="password" name="password" required />
+		
+		<button type="submit">Sign Up</button>
+	</form>
+
+	<!-- Google Sign Up Button -->
+	<button id="google-sign-up" onclick="signUpWithGoogle()">Sign up with Google</button>
+
+	<!-- Apple Sign Up Button -->
+	<button id="apple-sign-up" onclick="signUpWithApple()">Sign up with Apple</button>
+</section>
+
+<style>
+	#sign-up {
+		padding: 20px;
+		background: rgba(255, 255, 255, 0.9);
+		border-radius: 10px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+		margin: 20px auto;
+		max-width: 400px;
+		text-align: center;
+	}
+
+	h2 {
+		color: #2c3e50;
+	}
+
+	label {
+		display: block;
+		margin: 10px 0 5px;
+		color: #34495e;
+	}
+
+	input {
+		width: 100%;
+		padding: 10px;
+		margin-bottom: 15px;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+	}
+
+	button {
+		padding: 10px 20px;
+		background: #4caf50;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	button:hover {
+		background: #388e3c;
+	}
+</style>
+
+<script>
+	function signUpWithGoogle() {
+		signInWithPopup(auth, new GoogleAuthProvider())
+			.then((result) => {
+				// Handle successful sign-up
+				const user = result.user;
+				console.log('User signed up with Google:', user);
+			})
+			.catch((error) => {
+				console.error('Error during Google sign-up:', error);
+			});
+	}
+
+	function signUpWithApple() {
+		const appleProvider = new OAuthProvider('apple.com');
+		signInWithPopup(auth, appleProvider)
+			.then((result) => {
+				// Handle successful sign-up
+				const user = result.user;
+				console.log('User signed up with Apple:', user);
+			})
+			.catch((error) => {
+				console.error('Error during Apple sign-up:', error);
+			});
+	}
+</script> 
