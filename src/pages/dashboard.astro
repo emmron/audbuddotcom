@@ -8,15 +8,15 @@ import Header from '../components/Header.astro';
     <main class="dashboard-container">
         <div class="welcome-section">
             <h1>Welcome to Your Dashboard</h1>
-            <p id="user-greeting">Loading...</p>
+            <p id="user-greeting">Welcome back, User!</p>
         </div>
 
         <div class="dashboard-grid">
             <section class="dashboard-card">
                 <h2>Your Profile</h2>
                 <div class="profile-info">
-                    <p>Email: <span id="user-email">Loading...</span></p>
-                    <p>Username: <span id="user-name">Loading...</span></p>
+                    <p>Email: <span id="user-email">user@example.com</span></p>
+                    <p>Username: <span id="user-name">User</span></p>
                     <button id="sign-out" class="danger-button">Sign Out</button>
                 </div>
             </section>
@@ -143,39 +143,9 @@ import Header from '../components/Header.astro';
 </style>
 
 <script>
-    import { auth, onAuthStateChanged, signOut, type User } from '../firebase';
-
-    // Check authentication state
-    onAuthStateChanged(auth, (user: User | null) => {
-        if (!user) {
-            // Redirect to sign in if not authenticated
-            window.location.href = '/signin';
-            return;
-        }
-
-        // Update UI with user info
-        const userGreeting = document.getElementById('user-greeting');
-        const userEmail = document.getElementById('user-email');
-        const userName = document.getElementById('user-name');
-
-        if (userGreeting) {
-            userGreeting.textContent = `Welcome back, ${user.displayName || 'User'}!`;
-        }
-        if (userEmail) {
-            userEmail.textContent = user.email || 'Not provided';
-        }
-        if (userName) {
-            userName.textContent = user.displayName || 'Not set';
-        }
-    });
-
-    // Handle sign out
-    document.getElementById('sign-out')?.addEventListener('click', async () => {
-        try {
-            await signOut(auth);
-            window.location.href = '/';
-        } catch (error) {
-            console.error('Error signing out:', error);
-        }
+    // Placeholder for sign out functionality
+    document.getElementById('sign-out')?.addEventListener('click', () => {
+        console.log('Sign out clicked');
+        window.location.href = '/';
     });
 </script> 
