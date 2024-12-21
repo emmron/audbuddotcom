@@ -325,51 +325,62 @@ function getTimeAgo(date: Date): string {
         width: 100%;
         margin-top: 1rem;
         padding: 1rem;
-        background: #4f46e5;
-        color: white;
+        background: linear-gradient(135deg, #4f46e5, #6b5bff);
+        color: #ffffff;
         border: none;
-        border-radius: 0.5rem;
+        border-radius: 0.75rem;
         cursor: pointer;
-        font-weight: 500;
+        font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        transition: all 0.2s;
+        transition: background 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .new-post-btn:hover {
-        background: #4338ca;
-        transform: translateY(-1px);
+        background: linear-gradient(135deg, #4338ca, #5a4bff);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
 
     .discussions__header {
         margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .sort-select {
         padding: 0.5rem 1rem;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #d1d5db;
         border-radius: 0.5rem;
-        background: white;
-        color: #4b5563;
+        background: #f9fafb;
+        color: #374151;
+        transition: border-color 0.2s ease;
+    }
+
+    .sort-select:focus {
+        border-color: #4f46e5;
+        outline: none;
     }
 
     .discussion-card {
-        background: white;
+        background: #ffffff;
         border-radius: 1rem;
         padding: 1.5rem;
         margin-bottom: 1rem;
         display: flex;
         gap: 1.5rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.2s;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         cursor: pointer;
     }
 
     .discussion-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .discussion-card__main {
@@ -380,30 +391,33 @@ function getTimeAgo(date: Date): string {
         display: flex;
         gap: 1rem;
         margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+        color: #6b7280;
     }
 
     .category-tag {
-        background: #f3f4f6;
+        background: #e5e7eb;
         padding: 0.25rem 0.75rem;
         border-radius: 9999px;
         font-size: 0.875rem;
-        color: #4b5563;
+        color: #374151;
     }
 
     .time {
-        color: #6b7280;
-        font-size: 0.875rem;
+        color: #9ca3af;
     }
 
     .discussion-card__title {
         font-size: 1.25rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 0.75rem;
+        color: #1f2937;
     }
 
     .discussion-card__title a {
-        color: #1f2937;
+        color: inherit;
         text-decoration: none;
+        transition: color 0.2s ease;
     }
 
     .discussion-card__title a:hover {
@@ -413,7 +427,7 @@ function getTimeAgo(date: Date): string {
     .discussion-card__preview {
         color: #4b5563;
         margin-bottom: 1rem;
-        line-height: 1.5;
+        line-height: 1.6;
     }
 
     .discussion-card__author {
@@ -438,6 +452,7 @@ function getTimeAgo(date: Date): string {
         gap: 0.5rem;
         color: #6b7280;
     }
+
     @media (max-width: 768px) {
         .community__layout {
             grid-template-columns: 1fr;
@@ -463,10 +478,9 @@ function getTimeAgo(date: Date): string {
             border-radius: 8px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-
         .discussion-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
 
         .discussion-card__stats {
@@ -475,12 +489,31 @@ function getTimeAgo(date: Date): string {
             padding: 1rem 0 0;
             border-left: none;
             border-top: 1px solid #e5e7eb;
+            background-color: #f0f4f8;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .discussion-card__stats:hover {
+            background-color: #e2e8f0;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 480px) {
+            .discussion-card__stats {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+                border-top: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
         }
     }
-
     @keyframes pulse {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
     }
 </style>
 
