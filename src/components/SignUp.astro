@@ -71,41 +71,47 @@ export default SignUp;
 <style>
 	#sign-up {
 		padding: 20px;
-		background: rgba(255, 255, 255, 0.9);
-		border-radius: 10px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+		background: rgba(255, 255, 255, 0.95);
+		border-radius: 12px;
+		box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
 		margin: 20px auto;
-		max-width: 400px;
+		max-width: 420px;
 		text-align: center;
 	}
 
 	h2 {
 		color: #2c3e50;
+		font-size: 1.75rem;
+		margin-bottom: 10px;
 	}
 
 	label {
 		display: block;
-		margin: 10px 0 5px;
+		margin: 12px 0 6px;
 		color: #34495e;
+		font-weight: 500;
 	}
 
 	input {
 		width: 100%;
-		padding: 10px;
-		margin-bottom: 15px;
+		padding: 12px;
+		margin-bottom: 16px;
 		border: 1px solid #ccc;
-		border-radius: 5px;
+		border-radius: 6px;
+		font-size: 1rem;
 	}
 
 	button {
-		padding: 10px 20px;
+		padding: 12px 24px;
 		background: #4caf50;
 		color: white;
 		border: none;
-		border-radius: 5px;
+		border-radius: 6px;
 		cursor: pointer;
 		width: 100%;
-		margin-bottom: 10px;
+		margin-bottom: 12px;
+		font-size: 1rem;
+		transition: background 0.3s ease;
 	}
 
 	button:disabled {
@@ -118,12 +124,13 @@ export default SignUp;
 	}
 
 	.error-message, .success-message {
-		padding: 10px;
+		padding: 12px;
 		border-radius: 8px;
-		margin: 10px 0;
+		margin: 12px 0;
 		text-align: center;
 		opacity: 1;
 		transition: opacity 0.3s ease;
+		font-size: 0.9rem;
 	}
 
 	.error-message {
@@ -139,12 +146,14 @@ export default SignUp;
 	}
 
 	.auth-footer {
-		margin-top: 20px;
+		margin-top: 24px;
+		font-size: 0.9rem;
 	}
 
 	.auth-footer a {
 		color: #4caf50;
 		text-decoration: none;
+		font-weight: 500;
 	}
 
 	.auth-footer a:hover {
