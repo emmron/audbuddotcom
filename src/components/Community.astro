@@ -601,8 +601,10 @@ import Header from './Header.astro';
 
     function handleLike(e: Event) {
         const button = e.currentTarget as HTMLButtonElement;
-        const discussionId = button.closest('.card')?.dataset.id;
-        const commentId = button.closest('.comment')?.dataset.commentId;
+        const card = button.closest('.card') as HTMLElement;
+        const comment = button.closest('.comment') as HTMLElement;
+        const discussionId = card?.dataset?.id;
+        const commentId = comment?.dataset?.commentId;
 
         if (discussionId) {
             const discussion = discussions.find(d => d.id === discussionId);
@@ -623,7 +625,8 @@ import Header from './Header.astro';
     function handleNewComment(e: Event) {
         e.preventDefault();
         const form = e.currentTarget as HTMLFormElement;
-        const discussionId = form.closest('.card')?.dataset.id;
+        const card = form.closest('.card') as HTMLElement;
+        const discussionId = card?.dataset?.id;
         const input = form.querySelector('input') as HTMLInputElement;
 
         if (discussionId && input?.value.trim()) {

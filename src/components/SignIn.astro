@@ -1,48 +1,32 @@
 ---
-// Remove imports from frontmatter since they're not needed here
+import { getSession } from '@auth/astro'
+import type { Session } from '@auth/core/types'
+
+const session = await getSession(Astro.request) as Session | null
 ---
 
 <div class="auth-container">
 	<section id="sign-in">
 		<h2>Welcome Back</h2>
 		<p class="subtitle">Sign in to access your account</p>
-		
-		<form id="signin-form">
-			<div class="input-group">
-				<label for="email">Email:</label>
-				<input type="email" id="email" name="email" required placeholder="Enter your email" />
+
+		{!session ? (
+			<div class="social-buttons">
+				<a href="/api/auth/signin/github" class="social-button">
+					<img src="/github-icon.svg" alt="GitHub" width="20" height="20" />
+					Sign in with GitHub
+				</a>
+				<a href="/api/auth/signin/google" class="social-button">
+					<img src="/google-icon.svg" alt="Google" width="20" height="20" />
+					Sign in with Google
+				</a>
 			</div>
-			
-			<div class="input-group">
-				<label for="password">Password:</label>
-				<input type="password" id="password" name="password" required placeholder="Enter your password" />
+		) : (
+			<div class="signed-in">
+				<p>Signed in as {session.user?.email}</p>
+				<a href="/api/auth/signout" class="sign-out-button">Sign Out</a>
 			</div>
-			
-			<button type="submit" class="primary-button">Sign In</button>
-		</form>
-
-		<div class="divider">
-			<span>or continue with</span>
-		</div>
-
-		<div class="social-buttons">
-			<button id="google-sign-in" class="social-button">
-				<img src="/google-icon.svg" alt="Google" width="20" height="20" />
-				Sign in with Google
-			</button>
-
-			<button id="apple-sign-in" class="social-button">
-				<img src="/apple-icon.svg" alt="Apple" width="20" height="20" />
-				Sign in with Apple
-			</button>
-		</div>
-
-		<p class="auth-footer">
-			Don't have an account? <a href="/signup">Sign up</a>
-		</p>
-
-		<div id="error-message" class="error-message hidden"></div>
-		<div id="success-message" class="success-message hidden"></div>
+		)}
 	</section>
 </div>
 
@@ -255,214 +239,3 @@
 		cursor: not-allowed;
 	}
 </style>
-
-<script>
-	import { 
-		auth, 
-		GoogleAuthProvider, 
-		signInWithPopup, 
-		OAuthProvider,
-		signInWithEmailAndPassword,
-		onAuthStateChanged,
-		type User 
-	} from '../firebase';
-
-	const form = document.getElementById('signin-form');
-	const errorMessage = document.getElementById('error-message');
-	const successMessage = document.getElementById('success-message');
-
-	// Auth state observer
-	onAuthStateChanged(auth, (user: User | null) => {
-		if (user) {
-			window.location.href = '/dashboard';
-		}
-	});
-
-	function showMessage(element: HTMLElement | null, message: string) {
-		if (!element) return;
-		element.textContent = message;
-		element.classList.remove('hidden');
-		element.style.opacity = '1';
-		setTimeout(() => {
-			element.style.opacity = '0';
-			setTimeout(() => {
-				element.classList.add('hidden');
-			}, 300);
-		}, 5000);
-	}
-
-	function setLoading(isLoading: boolean) {
-		const formElements = document.querySelectorAll<HTMLElement>('button, input');
-		
-		formElements.forEach(element => {
-			if (element instanceof HTMLButtonElement || element instanceof HTMLInputElement) {
-				element.disabled = isLoading;
-				element.classList.toggle('loading', isLoading);
-			}
-		});
-	}
-
-	// Email/Password Sign In
-	form?.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		
-		if (!form || !errorMessage || !successMessage) {
-			console.error('Required DOM elements not found');
-			return;
-		}
-
-		setLoading(true);
-
-		const emailInput = document.getElementById('email') as HTMLInputElement;
-		const passwordInput = document.getElementById('password') as HTMLInputElement;
-
-		if (!emailInput || !passwordInput) {
-			showMessage(errorMessage, 'Form inputs not found');
-			setLoading(false);
-			return;
-		}
-
-		const email = emailInput.value.trim();
-		const password = passwordInput.value;
-
-		// Enhanced validation
-		if (!email || !password) {
-			showMessage(errorMessage, 'Please fill in all fields');
-			setLoading(false);
-			return;
-		}
-
-		// Email format validation
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			showMessage(errorMessage, 'Please enter a valid email address');
-			setLoading(false);
-			return;
-		}
-
-		// Password length check
-		if (password.length < 6) {
-			showMessage(errorMessage, 'Password must be at least 6 characters');
-			setLoading(false);
-			return;
-		}
-
-		try {
-			const currentAuth = auth;
-			if (!currentAuth) {
-				throw new Error('Authentication not initialized');
-			}
-
-			const userCredential = await signInWithEmailAndPassword(currentAuth, email, password);
-			const user = userCredential.user;
-			
-			if (!user) {
-				throw new Error('No user data returned');
-			}
-
-			showMessage(successMessage, 'Successfully signed in!');
-			
-			// Clear form and redirect
-			emailInput.value = passwordInput.value = '';
-			
-			// Ensure redirect only happens if still signed in
-			const redirectTimeout = setTimeout(() => {
-				const unsubscribe = onAuthStateChanged(currentAuth, (currentUser) => {
-					if (currentUser) {
-						window.location.href = '/dashboard';
-					}
-					unsubscribe(); // Clean up listener
-				});
-			}, 1500);
-
-			// Cleanup timeout if component unmounts
-			return () => clearTimeout(redirectTimeout);
-
-		} catch (error: any) {
-			console.error('Email sign in error:', error);
-			const errorMessages: Record<string, string> = {
-				'auth/invalid-credential': 'Invalid email or password',
-				'auth/user-disabled': 'This account has been disabled',
-				'auth/user-not-found': 'No account found with this email',
-				'auth/too-many-requests': 'Too many failed attempts. Please try again later',
-				'auth/network-request-failed': 'Network error. Please check your connection',
-				'auth/invalid-email': 'Invalid email format',
-				'auth/wrong-password': 'Incorrect password'
-			};
-			showMessage(errorMessage, errorMessages[error.code] || 'Failed to sign in');
-		} finally {
-			setLoading(false);
-		}
-	});
-
-	// Handle OAuth sign in (Google & Apple)
-	async function handleOAuthSignIn(providerId: 'google.com' | 'apple.com') {
-		setLoading(true);
-		
-		const currentAuth = auth;
-		if (!currentAuth) {
-			showMessage(errorMessage, 'Authentication not initialized');
-			setLoading(false);
-			return;
-		}
-
-		try {
-			const provider = providerId === 'google.com' 
-				? new GoogleAuthProvider()
-				: new OAuthProvider('apple.com');
-
-			// Add appropriate scopes
-			provider.addScope('email');
-			if (providerId === 'google.com') {
-				provider.addScope('profile');
-				provider.setCustomParameters({
-					prompt: 'select_account'
-				});
-			} else {
-				provider.addScope('name');
-			}
-			
-			const result = await signInWithPopup(currentAuth, provider);
-			const user = result.user;
-			
-			if (!user) {
-				throw new Error('No user data returned');
-			}
-			
-			showMessage(successMessage, `Successfully signed in with ${providerId === 'google.com' ? 'Google' : 'Apple'}!`);
-			
-			const redirectTimeout = setTimeout(() => {
-				const unsubscribe = onAuthStateChanged(currentAuth, (currentUser) => {
-					if (currentUser) {
-						window.location.href = '/dashboard';
-					}
-					unsubscribe(); // Clean up listener
-				});
-			}, 1500);
-
-			return () => clearTimeout(redirectTimeout);
-			
-		} catch (error: any) {
-			console.error(`${providerId} sign in error:`, error);
-			const errorMessages: Record<string, string> = {
-				'auth/popup-closed-by-user': 'Sign in cancelled',
-				'auth/popup-blocked': `Please enable popups to sign in with ${providerId === 'google.com' ? 'Google' : 'Apple'}`,
-				'auth/account-exists-with-different-credential': 'An account already exists with this email',
-				'auth/network-request-failed': 'Network error. Please check your connection',
-				'auth/invalid-oauth-provider': 'OAuth provider is not configured correctly',
-				'auth/operation-not-allowed': 'This sign in method is not enabled',
-				'auth/user-disabled': 'This account has been disabled'
-			};
-			showMessage(errorMessage, errorMessages[error.code] || `Failed to sign in with ${providerId === 'google.com' ? 'Google' : 'Apple'}`);
-		} finally {
-			setLoading(false);
-		}
-	}
-
-	// Add click handlers for OAuth buttons with error boundaries
-	const googleButton = document.getElementById('google-sign-in');
-	const appleButton = document.getElementById('apple-sign-in');
-
-	googleButton?.addEventListener('click', () => handleOAuthSignIn('google.com'));
-	appleButton?.addEventListener('click', () => handleOAuthSignIn('apple.com'));
-</script>

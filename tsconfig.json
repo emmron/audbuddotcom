@@ -8,6 +8,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "baseUrl": ".",
+    "types": ["@auth/core", "@auth/astro"],
     "paths": {
       "@/*": ["src/*"]
     }
