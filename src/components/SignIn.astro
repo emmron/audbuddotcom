@@ -1,8 +1,8 @@
 ---
-import { getSession } from '@auth/astro'
-import type { Session } from '@auth/core/types'
+import { parse } from 'cookie'
 
-const session = await getSession(Astro.request) as Session | null
+const cookies = parse(Astro.request.headers.get('cookie') || '')
+const session = cookies.session ? JSON.parse(cookies.session) : null
 ---
 
 <div class="auth-container">
@@ -12,15 +12,15 @@ const session = await getSession(Astro.request) as Session | null
 
 		{!session ? (
 			<div class="social-buttons">
-				<a href="/api/auth/signin/github" class="social-button">
+				<a href="/auth/signin/github" class="social-button">
 					<span class="icon">🐱</span>
 					<span>Continue with GitHub</span>
 				</a>
-				<a href="/api/auth/signin/google" class="social-button">
+				<a href="/auth/signin/google" class="social-button">
 					<span class="icon">🔍</span>
 					<span>Continue with Google</span>
 				</a>
-				<a href="/api/auth/signin/apple" class="social-button">
+				<a href="/auth/signin/apple" class="social-button">
 					<span class="icon">🍎</span>
 					<span>Continue with Apple</span>
 				</a>
@@ -45,7 +45,7 @@ const session = await getSession(Astro.request) as Session | null
 						<p class="user-email">{session.user?.email || 'No email provided'}</p>
 					</div>
 				</div>
-				<a href="/api/auth/signout" class="sign-out-button">
+				<a href="/auth/signout" class="sign-out-button">
 					<span>↪️ Sign Out</span>
 				</a>
 			</div>

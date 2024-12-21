@@ -47,13 +47,13 @@ function getTimeAgo(date: Date): string {
 }
 ---
 
-<div id="container">
-	<img id="background" src={background.src} alt="Background" fetchpriority="high" />
+<div class="container">
+	<img class="background" src={background.src} alt="Background" fetchpriority="high" />
 	
 	<Header />
 
-	<main>
-		<section id="hero">
+	<main class="main-content">
+		<section class="hero">
 			<div class="hero-content">
 				<div class="hero-text">
 					<h1>
@@ -244,6 +244,8 @@ function getTimeAgo(date: Date): string {
 		transition: var(--transition-smooth);
 		align-items: center;
 		justify-content: center;
+		overflow: hidden;
+		backdrop-filter: blur(10px);
 	}
 
 	main {
@@ -252,9 +254,13 @@ function getTimeAgo(date: Date): string {
 		margin: 0 auto;
 		padding: var(--spacing-base);
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 		gap: var(--spacing-base);
 		align-items: start;
+		justify-items: center;
+		background: rgba(255, 255, 255, 0.8);
+		border-radius: var(--border-radius);
+		box-shadow: var(--hover-shadow);
 	}
 	#hero {
 		padding: clamp(3rem, 8vw, 5rem);
