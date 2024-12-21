@@ -9,7 +9,7 @@ const strains = [
     type: "Hybrid",
     thc: 18,
     cbd: 0.1,
-    description: "A popular strain known for its balanced effects..."
+    description: "A popular strain known for its balanced effects and dreamy euphoria..."
   },
   // Add more mock strains as needed
 ];
@@ -20,7 +20,7 @@ const strains = [
 <main class="strains-page">
   <section class="hero">
     <h1>Cannabis Strains Library</h1>
-    <p>Discover detailed profiles of medicinal cannabis strains, their effects, and therapeutic properties</p>
+    <p>Unveil the secrets of medicinal cannabis strains, their euphoric effects, and therapeutic wonders</p>
   </section>
 
   <div class="strains-grid">
@@ -59,114 +59,117 @@ const strains = [
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
+    background: linear-gradient(to right, #f0f4f8, #d9e2ec);
   }
 
   .hero {
     text-align: center;
     margin-bottom: 4rem;
     padding: 4rem 0;
-    background: linear-gradient(to bottom, var(--color-primary-50), transparent);
+    background: linear-gradient(to bottom, #a0aec0, transparent);
     border-radius: 1rem;
+    color: #2d3748;
   }
 
   .hero h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--color-gray-900);
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #1a202c;
     margin-bottom: 1rem;
   }
 
   .hero p {
-    font-size: 1.25rem;
-    color: var(--color-gray-600);
-    max-width: 600px;
+    font-size: 1.5rem;
+    color: #4a5568;
+    max-width: 700px;
     margin: 0 auto;
   }
 
   .strains-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem;
   }
 
   .strain-card {
-    background: white;
+    background: #edf2f7;
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-    padding: 1.5rem;
+    box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 2rem;
   }
 
   .strain-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 15px -1px rgba(0, 0, 0, 0.2);
   }
 
   .strain-header {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .strain-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-gray-900);
-    margin-bottom: 0.75rem;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 1rem;
   }
 
   .strain-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
   }
 
   .badge {
-    padding: 0.25rem 0.75rem;
+    padding: 0.5rem 1rem;
     border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.9rem;
+    font-weight: 600;
   }
 
   .badge.type {
-    background: var(--color-primary-100);
-    color: var(--color-primary-700);
+    background: #cbd5e0;
+    color: #2d3748;
   }
 
   .badge.thc {
-    background: var(--color-green-100);
-    color: var(--color-green-700);
+    background: #68d391;
+    color: #22543d;
   }
 
   .badge.cbd {
-    background: var(--color-blue-100);
-    color: var(--color-blue-700);
+    background: #63b3ed;
+    color: #2b6cb0;
   }
 
   .strain-description {
-    color: var(--color-gray-600);
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
+    color: #4a5568;
+    margin-bottom: 2rem;
+    line-height: 1.6;
   }
 
   .strain-effects h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-gray-900);
-    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1rem;
   }
 
   .effects-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .effect-tag {
-    padding: 0.25rem 0.75rem;
-    background: var(--color-gray-100);
-    color: var(--color-gray-700);
+    padding: 0.5rem 1rem;
+    background: #e2e8f0;
+    color: #2d3748;
     border-radius: 9999px;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
   }
 
   @media (max-width: 768px) {
@@ -175,15 +178,15 @@ const strains = [
     }
 
     .hero {
-      padding: 2rem 1rem;
+      padding: 2.5rem 1rem;
     }
 
     .hero h1 {
-      font-size: 2rem;
+      font-size: 2.5rem;
     }
 
     .hero p {
-      font-size: 1rem;
+      font-size: 1.2rem;
     }
 
     .strains-grid {

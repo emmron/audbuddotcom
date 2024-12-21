@@ -43,12 +43,12 @@ const currentRoute = Astro.url.pathname;
 
 <style>
 	header {
-		background: #ffffff;
+		background: #fff;
 		padding: 1rem;
 		position: sticky;
 		top: 0;
 		z-index: 1000;
-		box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 		border-bottom: 1px solid rgba(229, 231, 235, 0.8);
 	}
 
@@ -61,12 +61,11 @@ const currentRoute = Astro.url.pathname;
 		height: 4rem;
 	}
 
-	/* Brand */
 	.brand-link {
 		text-decoration: none;
 		padding: 0.75rem 1rem;
 		border-radius: 12px;
-		transition: all 0.3s ease;
+		transition: background 0.3s ease, transform 0.3s ease;
 	}
 
 	.brand-link:hover {
@@ -85,7 +84,6 @@ const currentRoute = Astro.url.pathname;
 		-webkit-text-fill-color: transparent;
 	}
 
-	/* Navigation */
 	nav {
 		display: flex;
 		align-items: center;
@@ -105,7 +103,7 @@ const currentRoute = Astro.url.pathname;
 		font-weight: 500;
 		padding: 0.875rem 1.25rem;
 		border-radius: 12px;
-		transition: all 0.3s ease;
+		transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
 		display: flex;
 		align-items: center;
 		gap: 0.625rem;
@@ -120,7 +118,7 @@ const currentRoute = Astro.url.pathname;
 	.nav-icon {
 		font-size: 1.375rem;
 		opacity: 0.9;
-		transition: all 0.3s ease;
+		transition: opacity 0.3s ease, transform 0.3s ease;
 	}
 
 	nav a:hover .nav-icon {
@@ -134,7 +132,6 @@ const currentRoute = Astro.url.pathname;
 		font-weight: 600;
 	}
 
-	/* Auth Section */
 	.auth-links {
 		display: flex;
 		gap: 1rem;
@@ -148,7 +145,7 @@ const currentRoute = Astro.url.pathname;
 		border-radius: 12px;
 		font-weight: 600;
 		font-size: 1.0625rem;
-		transition: all 0.3s ease;
+		transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
 	}
 
 	.auth-link:not(.highlight) {
@@ -172,7 +169,6 @@ const currentRoute = Astro.url.pathname;
 		box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 	}
 
-	/* Mobile Menu */
 	.menu-toggle {
 		display: none;
 		flex-direction: column;
@@ -182,7 +178,7 @@ const currentRoute = Astro.url.pathname;
 		border: none;
 		cursor: pointer;
 		border-radius: 12px;
-		transition: all 0.3s ease;
+		transition: background 0.3s ease;
 	}
 
 	.menu-toggle:hover {
@@ -197,7 +193,6 @@ const currentRoute = Astro.url.pathname;
 		border-radius: 4px;
 	}
 
-	/* Responsive */
 	@media (max-width: 1200px) {
 		.header-wrapper {
 			padding: 0 2rem;
@@ -212,12 +207,12 @@ const currentRoute = Astro.url.pathname;
 			top: 100%;
 			left: 0;
 			right: 0;
-			background: #ffffff;
+			background: #fff;
 			padding: 1.25rem;
 			flex-direction: column;
 			gap: 0.75rem;
 			border-bottom: 1px solid rgba(229, 231, 235, 0.8);
-			box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 		}
 
 		.navigation-links.show,
@@ -266,7 +261,6 @@ const currentRoute = Astro.url.pathname;
 	}
 </style>
 <script>
-	// Type definitions for better type safety
 	type MenuElements = {
 		button: HTMLButtonElement | null;
 		navLinks: HTMLElement | null;
@@ -280,7 +274,6 @@ const currentRoute = Astro.url.pathname;
 		readonly closed: readonly [string, string, string];
 	};
 
-	// Core animation and transition constants
 	const ANIMATION = {
 		DURATION: 300,
 		TIMING: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -294,7 +287,6 @@ const currentRoute = Astro.url.pathname;
 		} as AnimationConfig
 	} as const;
 
-	// Initialize DOM elements with error handling
 	function initializeMenuElements(): MenuElements {
 		try {
 			const button = document.querySelector('.menu-toggle') as HTMLButtonElement | null;
@@ -302,7 +294,6 @@ const currentRoute = Astro.url.pathname;
 			const authLinks = document.querySelector('.auth-links') as HTMLElement | null;
 			const authButtons = document.querySelector('.auth-links') as HTMLElement | null;
 			
-			// Convert NodeList to Array and ensure HTMLElement type with validation
 			const bars = Array.from(document.querySelectorAll('.toggle-bar')).map((el, index) => {
 				if (!(el instanceof HTMLElement)) {
 					throw new Error(`Bar element at index ${index} is not HTMLElement`);
@@ -321,7 +312,6 @@ const currentRoute = Astro.url.pathname;
 			return { button, navLinks, authLinks, authButtons, bars };
 		} catch (error) {
 			console.error('Failed to initialize menu elements:', error instanceof Error ? error.message : 'Unknown error');
-			// Return safe default state
 			return {
 				button: null,
 				navLinks: null,
@@ -332,7 +322,6 @@ const currentRoute = Astro.url.pathname;
 		}
 	}
 
-	// Enhanced hamburger animation with error boundaries and validation
 	function animateMenuToggle(elements: MenuElements, isOpen: boolean): void {
 		try {
 			if (elements.bars.length !== 3) {
@@ -363,7 +352,6 @@ const currentRoute = Astro.url.pathname;
 		}
 	}
 
-	// Accessibility announcer utility with ARIA live region and validation
 	function announceToScreenReader(message: string): void {
 		if (!message || typeof message !== 'string') {
 			console.warn('Invalid message for screen reader announcement');
@@ -385,7 +373,6 @@ const currentRoute = Astro.url.pathname;
 				}
 			}, ANIMATION.DURATION + 700);
 
-			// Cleanup on navigation
 			window.addEventListener('beforeunload', () => {
 				clearTimeout(timeoutId);
 				if (document.body.contains(ariaLive)) {
@@ -398,7 +385,6 @@ const currentRoute = Astro.url.pathname;
 		}
 	}
 
-	// Core menu state handler
 	function handleMenuState(elements: MenuElements, open: boolean): void {
 		if (!elements?.button || !elements?.navLinks || !elements?.authLinks || typeof open !== 'boolean') {
 			throw new Error('Invalid menu state parameters');
@@ -406,15 +392,12 @@ const currentRoute = Astro.url.pathname;
 
 		const { button, navLinks, authLinks } = elements;
 
-		// Update button state
 		button.setAttribute('aria-expanded', String(open));
 		button.setAttribute('aria-label', `${open ? 'Close' : 'Open'} menu`);
 
-		// Batch all animations in a single frame
 		requestAnimationFrame(() => {
 			const transition = `opacity ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}, transform ${ANIMATION.DURATION}ms ${ANIMATION.TIMING}`;
 			
-			// Update menu elements
 			[navLinks, authLinks].forEach(element => {
 				if (element instanceof HTMLElement) {
 					element.style.transition = transition;
@@ -422,30 +405,24 @@ const currentRoute = Astro.url.pathname;
 				}
 			});
 
-			// Update hamburger icon
 			animateMenuToggle(elements, open);
 
-			// Update body state
 			document.body.style.overflow = open ? 'hidden' : '';
 			document.body.classList.toggle('menu-open', open);
 		});
 
-		// Announce state change
 		announceToScreenReader(open ? 'Menu opened' : 'Menu closed');
 	}
 
-	// Menu initialization and event management
 	function initializeMenu(): void {
 		const elements = initializeMenuElements();
 		if (!elements?.button) {
 			throw new Error('Menu initialization failed: button not found');
 		}
 
-		// State management
 		let isProcessing = false;
 		const DEBOUNCE_TIME = 200;
 
-		// Menu click handler
 		function handleClick(e: Event): void {
 			if (isProcessing) return;
 			
@@ -458,7 +435,6 @@ const currentRoute = Astro.url.pathname;
 			setTimeout(() => { isProcessing = false; }, DEBOUNCE_TIME);
 		}
 
-		// Outside click detection
 		function handleOutsideClick(e: MouseEvent): void {
 			if (isProcessing) return;
 
@@ -472,14 +448,12 @@ const currentRoute = Astro.url.pathname;
 			}
 		}
 
-		// Keyboard navigation
 		function handleKeydown(e: KeyboardEvent): void {
 			if (e.key === 'Escape' && elements.navLinks?.classList.contains('show')) {
 				handleMenuState(elements, false);
 			}
 		}
 
-		// Resource cleanup
 		function cleanup(): void {
 			document.body.style.overflow = '';
 			document.body.classList.remove('menu-open');
@@ -488,20 +462,17 @@ const currentRoute = Astro.url.pathname;
 			document.removeEventListener('keydown', handleKeydown);
 		}
 
-		// Event binding
 		elements.button.addEventListener('click', handleClick);
 		document.addEventListener('click', handleOutsideClick);
 		document.addEventListener('keydown', handleKeydown);
 		window.addEventListener('beforeunload', cleanup, { once: true });
 
-		// Error boundary
 		window.addEventListener('error', (e) => {
 			cleanup();
 			console.error('Menu system error:', e.error);
 		});
 	}
 
-	// Initialize menu system
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', initializeMenu);
 	} else {
