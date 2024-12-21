@@ -4,20 +4,22 @@ import Header from './Header.astro';
 
 // Get latest discussions from localStorage
 let latestDiscussions = [];
-try {
-  const savedDiscussions = localStorage.getItem('discussions');
-  if (savedDiscussions) {
-    const parsed = JSON.parse(savedDiscussions);
-    latestDiscussions = parsed
-      .map((d: any) => ({
-        ...d,
-        createdAt: new Date(d.createdAt)
-      }))
-      .sort((a: any, b: any) => b.createdAt - a.createdAt)
-      .slice(0, 3); // Get 3 most recent
+if (typeof window !== 'undefined') {
+  try {
+    const savedDiscussions = localStorage.getItem('discussions');
+    if (savedDiscussions) {
+      const parsed = JSON.parse(savedDiscussions);
+      latestDiscussions = parsed
+        .map((d: any) => ({
+          ...d,
+          createdAt: new Date(d.createdAt)
+        }))
+        .sort((a: any, b: any) => b.createdAt - a.createdAt)
+        .slice(0, 3); // Get 3 most recent
+    }
+  } catch (error) {
+    console.error('Error loading discussions:', error);
   }
-} catch (error) {
-  console.error('Error loading discussions:', error);
 }
 
 function getTimeAgo(date: Date): string {
