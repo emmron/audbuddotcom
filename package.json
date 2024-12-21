@@ -2,6 +2,7 @@
   "name": "zapping-escape",
   "type": "module",
   "version": "0.0.1",
+  "license": "MIT",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build", 
@@ -17,5 +18,10 @@
   "devDependencies": {
     "@types/node": "^20.10.2",
     "typescript": "^5.3.2"
+  },
+  "resolutions": {
+    "astro": "4.3.2",
+    "auth-astro": "0.3.0",
+    "@astrojs/node": "7.0.0"
   }
 }
