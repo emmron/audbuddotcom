@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build", 
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "dependencies": {
     "astro": "^4.3.2",
@@ -20,7 +21,6 @@
   },
   "resolutions": {
     "astro": "4.3.2",
-    "auth-astro": "0.3.0",
     "@astrojs/node": "7.0.0"
   }
 }
